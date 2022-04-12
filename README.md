@@ -13,6 +13,8 @@ This is a Three.js game with multiplayer feature.
   - Create server (terraform)
   - Provision server (ansible)
 
+![Web Screenshot](images/web.png)
+
 ## Build
 
 Inside the `web` directory to generate a `dist` directory with the static web
