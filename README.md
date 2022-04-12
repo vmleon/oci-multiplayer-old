@@ -8,3 +8,4 @@ This is a Three.js game with multiplayer feature.
   - Three.js viz
   - Backend WebSocket
   - Players "see" each other
+  - Deployment with Terraform and Ansible
