@@ -36,3 +36,6 @@ Inside the `deploy/ansible` directory
 ```
 ansible-playbook -i ../terraform/generated/app.ini web/web.yaml
 ```
+
+> To destroy the infrastructure, inside `deploy/terraform`
+> Run: `terraform destroy`
