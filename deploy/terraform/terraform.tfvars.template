@@ -1,0 +1,7 @@
+region = "eu-frankfurt-1"
+tenancy_id = "xxxxx"
+compartment_id = "xxxxx"
+api_private_key_path = "~/.oci/oci_api_key.pem"
+api_fingerprint = "xxxxx"
+user_id = "xxxxx"
+ssh_public_key= "xxxxx"
