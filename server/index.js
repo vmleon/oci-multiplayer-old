@@ -1,11 +1,13 @@
 import {createServer} from 'http';
 import {Server} from 'socket.io';
 
+const CORS_URL = process.env.CORS_URL || 'http://localhost';
+
 const httpServer = createServer();
 
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://192.168.1.4:8080',
+    origin: CORS_URL,
   },
   serveClient: false,
 });

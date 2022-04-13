@@ -33,8 +33,16 @@ terraform apply
 
 Inside the `deploy/ansible` directory
 
+> TODO: There should be better ways of doing Ansible
+
+Deploy web
 ```
 ansible-playbook -i ../terraform/generated/app.ini web/web.yaml
+```
+
+Deploy Server
+```
+ansible-playbook -i ../terraform/generated/app.ini server/server.yaml
 ```
 
 > To destroy the infrastructure, inside `deploy/terraform`
