@@ -4,16 +4,18 @@
   "description": "Scuba Training Server",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "nodemon index.js | pino-pretty",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",
   "author": "Victor Martin Alvarez",
   "license": "ISC",
   "dependencies": {
+    "pino": "^7.10.0",
     "socket.io": "^4.4.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "pino-pretty": "^7.6.1"
   }
 }

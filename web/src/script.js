@@ -7,14 +7,17 @@ import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as dat from 'dat.gui';
 import {io} from 'socket.io-client';
 import {throttle} from 'throttle-debounce';
+import short from 'short-uuid';
+
+if (!localStorage.getItem('yourPlaneId')) {
+  localStorage.setItem('yourPlaneId', short.generate());
+}
+const yourPlaneId = localStorage.getItem('yourPlaneId');
+console.log(`Own plane ${yourPlaneId}`);
 
 const socket = io('ws://localhost:3000');
 
-socket.on('hello', (arg) => {
-  console.log(arg);
-});
-
-socket.emit('howdy', 'stranger');
+const planeTraceRateInMillis = 1000;
 
 let stats;
 let canvas;
@@ -25,22 +28,28 @@ let sunLight;
 let moonLight;
 let controls;
 let clock;
+let otherPlanesData = {};
+let otherPlanes = {};
 
 let earth;
-let sendSphereRotation;
+let sendPlanePosition;
 
-// Debug
-const gui = new dat.GUI();
-const params = {
-  earthBumpScale: 0.6,
-  sunLightIntensity: 3.5,
-  moonLightIntensity: 0.6,
-  cameraZoom: 200,
-};
+socket.on('planes', (planesFromServer) => {
+  delete planesFromServer[yourPlaneId];
+  otherPlanesData = planesFromServer;
+});
 
 init();
 
 function init() {
+  // Debug
+  const gui = new dat.GUI();
+  const params = {
+    earthBumpScale: 0.7,
+    sunLightIntensity: 3.5,
+    moonLightIntensity: 0.6,
+  };
+
   const sizes = {
     width: window.innerWidth,
     height: window.innerHeight,
@@ -71,21 +80,21 @@ function init() {
 
   // Camera
   camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
-  camera.position.set(0, 0, params.cameraZoom);
+  camera.position.set(200, 80, 80);
   scene.add(camera);
 
   // Lights
   sunLight = new THREE.DirectionalLight(new THREE.Color('#ffffff'), params.sunLightIntensity);
   sunLight.position.set(100, 20, 10);
   sunLight.castShadow = true;
-  sunLight.shadow.mapSize.width = 512;
-  sunLight.shadow.mapSize.height = 512;
-  sunLight.shadow.camera.near = 0.5;
+  sunLight.shadow.mapSize.width = 1024;
+  sunLight.shadow.mapSize.height = 1024;
+  sunLight.shadow.camera.near = 10;
   sunLight.shadow.camera.far = 100;
-  sunLight.shadow.camera.left = -10;
-  sunLight.shadow.camera.bottom = -10;
-  sunLight.shadow.camera.top = 10;
-  sunLight.shadow.camera.right = 10;
+  sunLight.shadow.camera.left = -90;
+  sunLight.shadow.camera.bottom = -90;
+  sunLight.shadow.camera.top = 90;
+  sunLight.shadow.camera.right = 90;
   scene.add(sunLight);
 
   moonLight = new THREE.DirectionalLight(
@@ -94,14 +103,14 @@ function init() {
   );
   moonLight.position.set(-10, -5, -10);
   moonLight.castShadow = true;
-  moonLight.shadow.mapSize.width = 512;
-  moonLight.shadow.mapSize.height = 512;
+  moonLight.shadow.mapSize.width = 1024;
+  moonLight.shadow.mapSize.height = 1024;
   moonLight.shadow.camera.near = 0.5;
   moonLight.shadow.camera.far = 100;
-  moonLight.shadow.camera.left = -10;
-  moonLight.shadow.camera.bottom = -10;
-  moonLight.shadow.camera.top = 10;
-  moonLight.shadow.camera.right = 10;
+  moonLight.shadow.camera.left = -80;
+  moonLight.shadow.camera.bottom = -80;
+  moonLight.shadow.camera.top = 80;
+  moonLight.shadow.camera.right = 80;
   scene.add(moonLight);
 
   window.addEventListener('resize', () => {
@@ -125,8 +134,6 @@ function init() {
   const guiLightFolder = gui.addFolder('Lights');
   guiLightFolder.add(params, 'sunLightIntensity', 2, 6, 0.2);
   guiLightFolder.add(params, 'moonLightIntensity', 0.1, 3, 0.1);
-  const guiCameraFolder = gui.addFolder('Camera');
-  guiCameraFolder.add(params, 'cameraZoom', 100, 300, 10);
   gui.open();
 
   // Controls
@@ -166,23 +173,44 @@ function init() {
       // clearcoat: 0.5,
     });
 
+    socket.on('plane.new', (id) => {
+      if (id !== yourPlaneId) {
+        console.log(`New Plane ${id}`, otherPlanesData[id]);
+        otherPlanes[id] = makePlane(
+          planeMesh,
+          otherPlanesData[id],
+          textures.planeTrailMask,
+          envMap,
+          scene,
+        );
+      }
+    });
+
+    socket.on('plane.delete', (id) => {
+      console.log(`Delete Plane ${id}`, otherPlanes[id]);
+      scene.remove(otherPlanes[id].group);
+      delete otherPlanes[id];
+    });
+
     earth = new THREE.Mesh(earthGeometry, earthMaterial);
     earth.receiveShadow = true;
+    earth.castShadow = true; // FIXME no shadow on planes from Earth
     scene.add(earth);
 
-    let plane = (await new GLTFLoader().loadAsync('assets/plane/scene.glb')).scene.children[0];
-    let planesData = [
-      makePlane(plane, textures.planeTrailMask, envMap, scene),
-      makePlane(plane, textures.planeTrailMask, envMap, scene),
-      makePlane(plane, textures.planeTrailMask, envMap, scene),
-      makePlane(plane, textures.planeTrailMask, envMap, scene),
-      makePlane(plane, textures.planeTrailMask, envMap, scene),
-      makePlane(plane, textures.planeTrailMask, envMap, scene),
-    ];
+    const planeMesh = (await new GLTFLoader().loadAsync('assets/plane/scene.glb')).scene
+      .children[0];
+    const yourPlane = makePlane(planeMesh, null, textures.planeTrailMask, envMap, scene);
 
-    sendSphereRotation = throttle(200, false, () => {
-      const angule = ((earth.rotation.y * 180) / Math.PI) % 360;
-      socket.emit('earth.rotation.y', Math.round(angule));
+    sendPlanePosition = throttle(planeTraceRateInMillis, false, () => {
+      const {x, y, z} = yourPlane.group.position;
+      const trace = {
+        id: yourPlaneId,
+        x: x.toFixed(4),
+        y: y.toFixed(4),
+        z: z.toFixed(4),
+        heading: yourPlane.rot.toFixed(4),
+      };
+      socket.emit('plane.trace', trace);
     });
 
     clock = new THREE.Clock();
@@ -192,44 +220,16 @@ function init() {
     function render() {
       const elapsedTime = clock.getElapsedTime();
 
-      // Update earth
-      earth.rotation.y = 0.1 * elapsedTime;
+      animatePlane(yourPlane, elapsedTime);
+      Object.keys(otherPlanes).forEach((id) => animatePlane(otherPlanes[id], elapsedTime));
 
       // Update params
       earth.material.bumpScale = params.earthBumpScale;
       sunLight.intensity = params.sunLightIntensity;
       moonLight.intensity = params.moonLightIntensity;
-      camera.position.z = params.cameraZoom;
-
-      planesData.forEach((planeData) => {
-        let plane = planeData.group;
-
-        plane.position.set(0, 0, 0);
-        plane.rotation.set(0, 0, 0);
-        plane.updateMatrixWorld();
-        /**
-         * idea: first rotate like that:
-         *
-         *          y-axis
-         *  airplane  ^
-         *      \     |     /
-         *       \    |    /
-         *        \   |   /
-         *         \  |  /
-         *     angle ^
-         *
-         * then at the end apply a rotation on a random axis
-         */
-        planeData.rot = elapsedTime;
-        plane.rotateOnAxis(planeData.randomAxis, planeData.randomAxisRot); // random axis
-        plane.rotateOnAxis(new THREE.Vector3(0, 1, 0), planeData.rot); // y-axis rotation
-        plane.rotateOnAxis(new THREE.Vector3(0, 0, 1), planeData.rad); // this decides the radius
-        plane.translateY(planeData.yOff);
-        plane.rotateOnAxis(new THREE.Vector3(1, 0, 0), +Math.PI * 0.5);
-      });
 
       // traces
-      sendSphereRotation();
+      sendPlanePosition();
 
       // Update Orbital Controls
       controls.update();
@@ -247,9 +247,10 @@ function nr() {
   return Math.random() * 2 - 1;
 }
 
-function makePlane(planeMesh, trailTexture, envMap, scene) {
+function makePlane(planeMesh, planeData, trailTexture, envMap, scene) {
+  console.log('makePlane', planeData);
   let plane = planeMesh.clone();
-  plane.scale.set(0.01, 0.01, 0.01);
+  plane.scale.set(0.015, 0.015, 0.015);
   plane.position.set(0, 0, 0);
   plane.rotation.set(0, 0, 0);
   plane.updateMatrixWorld();
@@ -260,29 +261,28 @@ function makePlane(planeMesh, trailTexture, envMap, scene) {
       object.sunEnvIntensity = 1;
       object.moonEnvIntensity = 0.3;
       object.castShadow = true;
-      object.receiveShadow = true;
+      object.receiveShadow = true; // FIXME no shadow on planes from Earth
     }
   });
 
   let trail = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 2),
+    new THREE.PlaneGeometry(14, 25),
     new THREE.MeshPhysicalMaterial({
       envMap,
-      envMapIntensity: 3,
-
+      envMapIntensity: 10,
       roughness: 0.4,
       metalness: 0,
-      transmission: 1,
+      transmission: 0.9,
 
       transparent: true,
       opacity: 1,
       alphaMap: trailTexture,
     }),
   );
-  trail.sunEnvIntensity = 3;
-  trail.moonEnvIntensity = 0.7;
+  // trail.sunEnvIntensity = 3;
+  // trail.moonEnvIntensity = 0.7;
   trail.rotateX(Math.PI);
-  trail.translateY(1.1);
+  trail.translateY(11);
 
   let group = new THREE.Group();
   group.add(plane);
@@ -292,10 +292,24 @@ function makePlane(planeMesh, trailTexture, envMap, scene) {
 
   return {
     group,
-    yOff: 90 + Math.random() * 1.0,
+    data: planeData,
+    yOff: 85 + Math.random() * 1.0, // 85
     rot: Math.PI * 2, // just to set a random starting point
     rad: Math.random() * Math.PI * 0.45 + Math.PI * 0.05,
     randomAxis: new THREE.Vector3(nr(), nr(), nr()).normalize(),
     randomAxisRot: Math.random() * Math.PI * 2,
   };
+}
+
+function animatePlane(plane, elapsedTime) {
+  plane.group.position.set(0, 0, 0);
+  plane.group.rotation.set(0, 0, 0);
+  plane.group.updateMatrixWorld();
+
+  plane.rot = 0.1 * elapsedTime;
+  plane.group.rotateOnAxis(plane.randomAxis, plane.randomAxisRot);
+  plane.group.rotateOnAxis(new THREE.Vector3(0, 1, 0), plane.rot);
+  plane.group.rotateOnAxis(new THREE.Vector3(0, 0, 1), plane.rad);
+  plane.group.translateY(plane.yOff);
+  plane.group.rotateOnAxis(new THREE.Vector3(1, 0, 0), +Math.PI * 0.5);
 }
