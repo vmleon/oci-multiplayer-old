@@ -14,6 +14,9 @@ module.exports = merge(commonConfiguration, {
     port: portFinderSync.getPort(8080),
     contentBase: './dist',
     watchContentBase: true,
+    proxy: {
+      '/socket.io': {target: 'ws://localhost:3000'},
+    },
     open: true,
     https: false,
     useLocalIp: true,

@@ -3,56 +3,60 @@ import {Server} from 'socket.io';
 import pino from 'pino';
 
 const logger = pino();
+const port = process.env.PORT | 3000;
 const CORS_URL = process.env.CORS_URL || '*';
+
+const broadcastRefreshUpdate = 50;
 
 const httpServer = createServer();
 
-let planes = {};
+let players = {};
 
 const io = new Server(httpServer, {
   cors: {
     origin: CORS_URL,
   },
+  // transports: ['websocket'],
   serveClient: false,
 });
 
 io.on('connection', (socket) => {
   logger.info(socket.id);
-  Object.keys(planes).forEach((id) => {
-    logger.info(`plane.new ${id} to ${socket.id}`);
-    socket.emit('plane.new', id);
+  Object.keys(players).forEach((id) => {
+    logger.info(`player.new ${id} to ${socket.id}`);
+    socket.emit('player.new', id);
   });
 
-  socket.on('plane.trace', (plane) => {
-    const {id, ...others} = plane;
-    if (!planes[id]) {
-      io.emit('plane.new', id);
+  socket.on('player.trace', (player) => {
+    const {id, ...others} = player;
+    if (!players[id]) {
+      io.emit('player.new', id);
     }
-    planes[id] = {...others, updated: new Date()};
+    players[id] = {...others, updated: new Date()};
   });
 });
 
-// send all planes data to all
+// send all players data to all
 setInterval(() => {
-  io.emit('planes', planes);
-}, 1000);
+  io.emit('allPlayers', players);
+}, broadcastRefreshUpdate);
 
-// Clean stale planes, and send delete plane if stale
+// Clean stale players, and send delete player if stale
 setInterval(() => {
   const now = new Date();
-  const elapsedTimesById = Object.entries(planes).map((e) => ({
+  const elapsedTimesById = Object.entries(players).map((e) => ({
     id: e[0],
     elapsed: now - e[1].updated,
   }));
-  const staleIds = elapsedTimesById.filter((e) => e.elapsed > 2000);
+  const staleIds = elapsedTimesById.filter((e) => e.elapsed > 250);
   staleIds.forEach((p) => {
-    logger.info(`Cleaning stale plane ${p.id} last updated ${p.elapsed / 1000}s ago`);
-    io.emit('plane.delete', p.id);
-    planes[p.id] = undefined;
-    delete planes[p.id];
+    logger.info(`Cleaning stale player ${p.id} last updated ${p.elapsed} milliseconds ago`);
+    io.emit('player.delete', p.id);
+    players[p.id] = undefined;
+    delete players[p.id];
   });
 }, 2000);
 
-setInterval(() => logger.info(`Currently, ${Object.keys(planes).length} active planes`), 5000);
+setInterval(() => logger.info(`Currently, ${Object.keys(players).length} active players`), 5000);
 
-httpServer.listen(3000);
+httpServer.listen(port, () => logger.info(`Server listening to port ${port}`));

@@ -1,49 +1,140 @@
 # OCI Multiplayer Game
 
-This is a Three.js game with multiplayer feature.
+This is a Three.js "game" with a multiplayer feature using WebSockets.
 
-## TO-DO
+![Screenshot](images/screenshot.png)
 
-- Phase I
-  - Three.js viz
-  - Backend WebSocket
-  - Players "see" each other
-  - Create web server (terraform)
-  - Provision web (ansible)
-  - Create server (terraform)
-  - Provision server (ansible)
+ARCHITECTURE DIAGRAM GOES HERE
 
-![Web Screenshot](images/web.png)
+## Requirements
+
+- Oracle Cloud Infrastructure account
+- OCI CLI, Terraform and Ansible configured.
+
+## TODO
+
+Improvements:
+- Broadcast names of other players
+- Improve graphics
+- Use private subnets
+
+Scaling:
+- [Redis Adaptor for Socket.io](https://socket.io/docs/v4/redis-adapter/); [Examples](https://github.com/socketio/socket.io/tree/master/examples)
+- Add in-memory Db
+- Measure latency
+- Create a stress test
+- Scale backend
+- WebWorker
+
+## Set Up
+
+Clone this repository in your local machine:
+```
+git clone https://github.com/vmleon/oci-multiplayer.git
+```
+
+Change directory to the `oci-multiplayer`:
+```
+cd oci-multiplayer
+```
+
+Export an environment variable with the base directory:
+```
+export BASE_DIR=$(pwd)
+```
 
 ## Build
 
-Inside the `web` directory to generate a `dist` directory with the static web
+Build the frontend static content.
+
+Change directory to the frontend code:
+```
+cd $BASE_DIR/web
+```
+
+> NOTE: For the next step, make sure you have an up-to-date version of Node.js
+> Use `node -v` to check it, is the version >= 14?
+
+Install dependencies:
+```
+npm install
+```
+
+Build the static content:
 ```
 npm run build
 ```
 
 ## Deployment
 
+Change directory to `deploy/terraform`:
+```
+cd $BASE_DIR/deploy/terraform
+```
+
+Authenticate with OCI, it will open a browser where you can log in:
+```
+oci session authenticate
+```
+
+Input the region, and an a session name. You will use that in the `terraform.tfvars` in the next step.
+
+Copy the template for the terraform variables:
+```
+cp terraform.tfvars.template terraform.tfvars
+```
+
+Edit the variables values:
+```
+vim terraform.tfvars
+```
+
+You have to modify:
+- `config_file_profile` from the `oci session` command
+- `tenancy_ocid` from your OCI tenancy
+- `compartment_ocid` the compartment you want, or root compartment (that is the `tenancy_ocid`)
+- `ssh_public_key` with your public SSH key, usually in `~/.ssh/id_rsa.pub`
+
+Initialize the terraform provider:
+```
+terraform init
+```
+
+Apply the infrastructure, with auto approval:
+```
+terraform apply -auto-approve
+```
+
+
 Inside the `deploy/terraform` directory
 
 ```
 terraform init
-terraform apply
 ```
 
-Inside the `deploy/ansible` directory
-
-> TODO: There should be better ways of doing Ansible
-
-Deploy web
 ```
-ansible-playbook -i ../terraform/generated/app.ini web/web.yaml
+terraform apply -auto-approve
 ```
 
-Deploy Server
+Provision with Ansible:
 ```
-ansible-playbook -i ../terraform/generated/app.ini server/server.yaml
+ansible-playbook -i generated/app.ini ../ansible/site.yaml
 ```
 
-> To destroy the infrastructure, inside `deploy/terraform`
-> Run: `terraform destroy`
+> NOTE: You will be asked a few times:
+> `Are you sure you want to continue connecting (yes/no/[fingerprint])?`
+> Type `yes` and `[ENTER]`.
+
+Print the load balancer IP from the terraform output again:
+```
+terraform output lb_public_ip
+```
+
+Copy and paste the IP on your browser.
+
+## Clean Up
+
+Destroy all the infrastructure:
+```
+terraform destroy -auto-approve
+```

@@ -1,23 +1,31 @@
 import './style.css';
 import * as THREE from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
-import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+// import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 import {io} from 'socket.io-client';
 import {throttle} from 'throttle-debounce';
-import short from 'short-uuid';
+import short from 'shortid';
+import {MathUtils} from 'three';
+import {Text} from 'troika-three-text';
 
-if (!localStorage.getItem('yourPlaneId')) {
-  localStorage.setItem('yourPlaneId', short.generate());
+MathUtils.seededRandom(Date.now);
+
+const startButton = document.getElementById('startButton');
+startButton.addEventListener('click', init);
+
+if (!localStorage.getItem('yourId')) {
+  localStorage.setItem('yourId', short());
 }
-const yourPlaneId = localStorage.getItem('yourPlaneId');
-console.log(`Own plane ${yourPlaneId}`);
+const yourId = localStorage.getItem('yourId');
+const yourColor = randomColorName();
+console.log(`Your id: ${yourId} with color ${yourColor}`);
 
-const socket = io('ws://localhost:3000');
+if (localStorage.getItem('yourName')) {
+  document.getElementsByName('name')[0].value = localStorage.getItem('yourName');
+}
 
-const planeTraceRateInMillis = 1000;
+const traceRateInMillis = 50;
 
 let stats;
 let canvas;
@@ -25,30 +33,37 @@ let renderer;
 let scene;
 let camera;
 let sunLight;
-let moonLight;
-let controls;
+// let controls;
 let clock;
-let otherPlanesData = {};
-let otherPlanes = {};
+let otherPlayers = {};
+let otherPlayersMeshes = {};
+let playerMaterial;
 
-let earth;
-let sendPlanePosition;
+let ground;
+let sendYourPosition;
 
-socket.on('planes', (planesFromServer) => {
-  delete planesFromServer[yourPlaneId];
-  otherPlanesData = planesFromServer;
-});
-
-init();
+const textOffset = new THREE.Vector3(0, 0, 14);
 
 function init() {
+  const inputNameValue = document.getElementsByName('name')[0].value;
+  if (inputNameValue.length) {
+    localStorage.setItem('yourName', inputNameValue);
+  }
+  const yourName = localStorage.getItem('yourName');
+  const socket = io();
+  socket.on('allPlayers', (otherPlayersFromServer) => {
+    delete otherPlayersFromServer[yourId];
+    // IMPROVE ES6 forEach
+    for (const [key, value] of Object.entries(otherPlayersFromServer)) {
+      otherPlayers[key] = value;
+    }
+  });
+  const overlay = document.getElementById('overlay');
+  overlay.remove();
+
   // Debug
   const gui = new dat.GUI();
-  const params = {
-    earthBumpScale: 0.7,
-    sunLightIntensity: 3.5,
-    moonLightIntensity: 0.6,
-  };
+  const params = {sunLightIntensity: 5, camera: {x: 0, y: 180, z: 90, inclination: 70}};
 
   const sizes = {
     width: window.innerWidth,
@@ -79,39 +94,23 @@ function init() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   // Camera
-  camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
-  camera.position.set(200, 80, 80);
+  camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 1, 1000);
+  camera.position.set(0, 350, 260);
   scene.add(camera);
 
   // Lights
   sunLight = new THREE.DirectionalLight(new THREE.Color('#ffffff'), params.sunLightIntensity);
-  sunLight.position.set(100, 20, 10);
+  sunLight.position.set(250, 150, 20);
   sunLight.castShadow = true;
-  sunLight.shadow.mapSize.width = 1024;
-  sunLight.shadow.mapSize.height = 1024;
-  sunLight.shadow.camera.near = 10;
-  sunLight.shadow.camera.far = 100;
-  sunLight.shadow.camera.left = -90;
-  sunLight.shadow.camera.bottom = -90;
-  sunLight.shadow.camera.top = 90;
-  sunLight.shadow.camera.right = 90;
+  sunLight.shadow.mapSize.width = 2048;
+  sunLight.shadow.mapSize.height = 2048;
+  sunLight.shadow.camera.near = 1;
+  sunLight.shadow.camera.far = 600;
+  sunLight.shadow.camera.left = -300;
+  sunLight.shadow.camera.bottom = -300;
+  sunLight.shadow.camera.top = 300;
+  sunLight.shadow.camera.right = 300;
   scene.add(sunLight);
-
-  moonLight = new THREE.DirectionalLight(
-    new THREE.Color('#a2d8fa').convertSRGBToLinear(),
-    params.moonLightIntensity,
-  );
-  moonLight.position.set(-10, -5, -10);
-  moonLight.castShadow = true;
-  moonLight.shadow.mapSize.width = 1024;
-  moonLight.shadow.mapSize.height = 1024;
-  moonLight.shadow.camera.near = 0.5;
-  moonLight.shadow.camera.far = 100;
-  moonLight.shadow.camera.left = -80;
-  moonLight.shadow.camera.bottom = -80;
-  moonLight.shadow.camera.top = 80;
-  moonLight.shadow.camera.right = 80;
-  scene.add(moonLight);
 
   window.addEventListener('resize', () => {
     // Update sizes
@@ -129,88 +128,71 @@ function init() {
 
   // GUI
   gui.width = 300;
-  const guiEarthFolder = gui.addFolder('Earth');
-  guiEarthFolder.add(params, 'earthBumpScale', 0, 1, 0.01);
-  const guiLightFolder = gui.addFolder('Lights');
-  guiLightFolder.add(params, 'sunLightIntensity', 2, 6, 0.2);
-  guiLightFolder.add(params, 'moonLightIntensity', 0.1, 3, 0.1);
+  const lightingFolder = gui.addFolder('Lighting');
+  lightingFolder.add(params, 'sunLightIntensity', 3, 8, 0.1);
+  const cameraFolder = gui.addFolder('Camera');
+  cameraFolder.add(params.camera, 'x', -500, 500, 1);
+  cameraFolder.add(params.camera, 'y', -500, 500, 1);
+  cameraFolder.add(params.camera, 'z', -500, 500, 1);
+  cameraFolder.add(params.camera, 'inclination', 0, 90, 1);
   gui.open();
 
   // Controls
-  controls = new OrbitControls(camera, canvas);
-  // controls.target.set(0, 0, 0);
-  controls.dampingFactor = 0.05;
-  controls.enableDamping = true;
+  // controls = new OrbitControls(camera, canvas);
+  // controls.dampingFactor = 0.05;
+  // controls.enableDamping = true;
 
   (async function () {
-    let pmrem = new THREE.PMREMGenerator(renderer);
-    let envmapTexture = await new RGBELoader()
-      .setDataType(THREE.FloatType)
-      .loadAsync('assets/night_2k.hdr');
-    let envMap = pmrem.fromEquirectangular(envmapTexture).texture;
-
-    let textures = {
-      // thanks to https://free3d.com/user/ali_alkendi
-      earthBump: await new THREE.TextureLoader().loadAsync('assets/earthbump.jpeg'),
-      earthMap: await new THREE.TextureLoader().loadAsync('assets/earthmap.jpeg'),
-      earthSpec: await new THREE.TextureLoader().loadAsync('assets/earthspec.jpeg'),
-      planeTrailMask: await new THREE.TextureLoader().loadAsync('assets/mask.png'),
-    };
-
-    const earthGeometry = new THREE.SphereGeometry(80, 64, 32);
-
-    const earthMaterial = new THREE.MeshPhysicalMaterial({
-      map: textures.earthMap,
-      roughnessMap: textures.earthSpec,
-      bumpMap: textures.earthBump,
-      bumpScale: params.earthBumpScale,
-      envMap: envMap,
-      envMapIntensity: 0.4,
-      // FIXME sheen doesn't work
-      // sheen: 1,
-      // sheenRoughness: 0.75,
-      // sheenColor: new THREE.Color('#ff8a00').convertSRGBToLinear(),
-      // clearcoat: 0.5,
-    });
-
-    socket.on('plane.new', (id) => {
-      if (id !== yourPlaneId) {
-        console.log(`New Plane ${id}`, otherPlanesData[id]);
-        otherPlanes[id] = makePlane(
-          planeMesh,
-          otherPlanesData[id],
-          textures.planeTrailMask,
-          envMap,
-          scene,
-        );
+    socket.on('player.new', (id) => {
+      if (id !== yourId) {
+        console.log(`New Player ${id}`);
+        otherPlayersMeshes[id] = makePlayerMesh(playerMesh, scene);
       }
     });
 
-    socket.on('plane.delete', (id) => {
-      console.log(`Delete Plane ${id}`, otherPlanes[id]);
-      scene.remove(otherPlanes[id].group);
-      delete otherPlanes[id];
+    socket.on('player.delete', (id) => {
+      console.log(`Delete Player ${id}`);
+      scene.remove(otherPlayersMeshes[id]);
+      delete otherPlayersMeshes[id];
     });
 
-    earth = new THREE.Mesh(earthGeometry, earthMaterial);
-    earth.receiveShadow = true;
-    earth.castShadow = true; // FIXME no shadow on planes from Earth
-    scene.add(earth);
+    const groundGeometry = new THREE.PlaneGeometry(500, 500);
+    const groundMaterial = new THREE.MeshStandardMaterial({color: 'green'});
+    ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI * 0.5;
+    ground.receiveShadow = true;
+    scene.add(ground);
 
-    const planeMesh = (await new GLTFLoader().loadAsync('assets/plane/scene.glb')).scene
-      .children[0];
-    const yourPlane = makePlane(planeMesh, null, textures.planeTrailMask, envMap, scene);
+    const playerGeometry = new THREE.SphereGeometry(12, 24, 24);
+    playerMaterial = new THREE.MeshStandardMaterial({color: yourColor});
+    const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial.clone());
 
-    sendPlanePosition = throttle(planeTraceRateInMillis, false, () => {
-      const {x, y, z} = yourPlane.group.position;
+    const mesh = playerMesh.clone();
+    mesh.position.x = randomPosition();
+    mesh.position.z = randomPosition();
+    mesh.position.y = 10;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+
+    const nameTextMesh = new Text();
+    nameTextMesh.text = yourName;
+    nameTextMesh.fontSize = 5;
+    nameTextMesh.textAlign = 'center';
+    nameTextMesh.position.y = 0.01;
+    nameTextMesh.rotation.x = -Math.PI * 0.5;
+    scene.add(nameTextMesh);
+
+    sendYourPosition = throttle(traceRateInMillis, false, () => {
+      const {x, z} = mesh.position;
       const trace = {
-        id: yourPlaneId,
-        x: x.toFixed(4),
-        y: y.toFixed(4),
-        z: z.toFixed(4),
-        heading: yourPlane.rot.toFixed(4),
+        id: yourId,
+        name: yourName,
+        x: x.toFixed(1),
+        z: z.toFixed(1),
+        color: yourColor,
       };
-      socket.emit('plane.trace', trace);
+      socket.emit('player.trace', trace);
     });
 
     clock = new THREE.Clock();
@@ -220,19 +202,28 @@ function init() {
     function render() {
       const elapsedTime = clock.getElapsedTime();
 
-      animatePlane(yourPlane, elapsedTime);
-      Object.keys(otherPlanes).forEach((id) => animatePlane(otherPlanes[id], elapsedTime));
+      animateYourPlayer(mesh);
+      Object.keys(otherPlayersMeshes).forEach((id) => {
+        if (otherPlayers[id]) {
+          otherPlayersMeshes[id].material.color = new THREE.Color(otherPlayers[id].color);
+          otherPlayersMeshes[id].position.x = otherPlayers[id].x;
+          otherPlayersMeshes[id].position.z = otherPlayers[id].z;
+        }
+      });
 
       // Update params
-      earth.material.bumpScale = params.earthBumpScale;
       sunLight.intensity = params.sunLightIntensity;
-      moonLight.intensity = params.moonLightIntensity;
 
       // traces
-      sendPlanePosition();
+      sendYourPosition();
 
       // Update Orbital Controls
-      controls.update();
+      // controls.update();
+      nameTextMesh.position.copy(mesh.position);
+      nameTextMesh.position.add(textOffset);
+      camera.position.copy(mesh.position);
+      camera.position.add(new THREE.Vector3(params.camera.x, params.camera.y, params.camera.z));
+      camera.rotation.x = MathUtils.degToRad(-params.camera.inclination);
 
       // Update Stats
       stats.update();
@@ -243,73 +234,85 @@ function init() {
   })();
 }
 
-function nr() {
-  return Math.random() * 2 - 1;
+function randomColorName() {
+  const colors = Object.keys(THREE.Color.NAMES);
+  return colors[MathUtils.randInt(0, colors.length - 1)];
 }
 
-function makePlane(planeMesh, planeData, trailTexture, envMap, scene) {
-  console.log('makePlane', planeData);
-  let plane = planeMesh.clone();
-  plane.scale.set(0.015, 0.015, 0.015);
-  plane.position.set(0, 0, 0);
-  plane.rotation.set(0, 0, 0);
-  plane.updateMatrixWorld();
+function randomPosition() {
+  return Math.random() * 500 - 250;
+}
 
-  plane.traverse((object) => {
+function makePlayerMesh(playerMesh, scene) {
+  const mesh = playerMesh.clone();
+  mesh.material = playerMaterial.clone();
+  mesh.position.y = 10;
+
+  mesh.traverse((object) => {
     if (object instanceof THREE.Mesh) {
-      object.material.envMap = envMap;
-      object.sunEnvIntensity = 1;
-      object.moonEnvIntensity = 0.3;
       object.castShadow = true;
-      object.receiveShadow = true; // FIXME no shadow on planes from Earth
+      object.receiveShadow = true;
     }
   });
 
-  let trail = new THREE.Mesh(
-    new THREE.PlaneGeometry(14, 25),
-    new THREE.MeshPhysicalMaterial({
-      envMap,
-      envMapIntensity: 10,
-      roughness: 0.4,
-      metalness: 0,
-      transmission: 0.9,
+  scene.add(mesh);
 
-      transparent: true,
-      opacity: 1,
-      alphaMap: trailTexture,
-    }),
-  );
-  // trail.sunEnvIntensity = 3;
-  // trail.moonEnvIntensity = 0.7;
-  trail.rotateX(Math.PI);
-  trail.translateY(11);
+  return mesh;
+}
+let dx = 0;
+let dz = 0;
 
-  let group = new THREE.Group();
-  group.add(plane);
-  group.add(trail);
+function animateYourPlayer(mesh) {
+  const {x, z} = mesh.position;
 
-  scene.add(group);
-
-  return {
-    group,
-    data: planeData,
-    yOff: 85 + Math.random() * 1.0, // 85
-    rot: Math.PI * 2, // just to set a random starting point
-    rad: Math.random() * Math.PI * 0.45 + Math.PI * 0.05,
-    randomAxis: new THREE.Vector3(nr(), nr(), nr()).normalize(),
-    randomAxisRot: Math.random() * Math.PI * 2,
-  };
+  if ((x + dx < 250) & (x + dx > -250)) {
+    mesh.position.x = x + dx;
+  }
+  if ((z + dz < 250) & (z + dz > -250)) {
+    mesh.position.z = z + dz;
+  }
 }
 
-function animatePlane(plane, elapsedTime) {
-  plane.group.position.set(0, 0, 0);
-  plane.group.rotation.set(0, 0, 0);
-  plane.group.updateMatrixWorld();
+addEventListener('keydown', (e) => {
+  switch (e.key) {
+    case 'ArrowUp':
+    case 'w':
+      dz = -1;
+      break;
+    case 'ArrowDown':
+    case 's':
+      dz = 1;
+      break;
+    case 'ArrowRight':
+    case 'd':
+      dx = 1;
+      break;
+    case 'ArrowLeft':
+    case 'a':
+      dx = -1;
+      break;
+  }
+});
 
-  plane.rot = 0.1 * elapsedTime;
-  plane.group.rotateOnAxis(plane.randomAxis, plane.randomAxisRot);
-  plane.group.rotateOnAxis(new THREE.Vector3(0, 1, 0), plane.rot);
-  plane.group.rotateOnAxis(new THREE.Vector3(0, 0, 1), plane.rad);
-  plane.group.translateY(plane.yOff);
-  plane.group.rotateOnAxis(new THREE.Vector3(1, 0, 0), +Math.PI * 0.5);
-}
+addEventListener('keyup', (e) => {
+  switch (e.key) {
+    case 'ArrowUp':
+    case 'w':
+      dz = 0;
+      break;
+    case 'ArrowDown':
+    case 's':
+      dz = 0;
+      break;
+    case 'ArrowRight':
+    case 'd':
+      dx = 0;
+      break;
+    case 'ArrowLeft':
+    case 'a':
+      dx = 0;
+      break;
+  }
+});
+
+const trace = throttle(1000, false, console.log);

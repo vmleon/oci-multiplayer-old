@@ -1,0 +1,12 @@
+---
+- name: Server
+  hosts: servers
+  become: true
+  roles:
+    - server
+
+- name: Web
+  hosts: webs
+  become: true
+  roles:
+    - web
