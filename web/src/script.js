@@ -33,6 +33,7 @@ let scene;
 let camera;
 let sunLight;
 let hemiLight;
+let audio;
 let clock;
 let otherPlayers = {};
 let otherPlayersMeshes = {};
@@ -115,6 +116,10 @@ function init() {
   sunLight.shadow.camera.right = 300;
   scene.add(sunLight);
 
+  const audioLoader = new THREE.AudioLoader();
+  const listener = new THREE.AudioListener();
+  camera.add(listener);
+
   window.addEventListener('resize', () => {
     // Update sizes
     sizes.width = window.innerWidth;
@@ -168,6 +173,14 @@ function init() {
         'assets/hardwood2_roughness.jpeg',
       ),
     };
+
+    let sounds = {
+      rolling: await audioLoader.loadAsync('assets/rolling.wav'),
+    };
+    audio = new THREE.PositionalAudio(listener);
+    audio.setLoop(true);
+    audio.setVolume(1);
+    audio.setBuffer(sounds.rolling);
 
     const groundGeometry = new THREE.PlaneGeometry(500, 500);
     const groundMaterial = new THREE.MeshStandardMaterial({
@@ -308,6 +321,7 @@ function animateYourPlayer(mesh) {
 }
 
 addEventListener('keydown', (e) => {
+  audio.play();
   switch (e.key) {
     case 'ArrowUp':
     case 'w':
@@ -329,6 +343,7 @@ addEventListener('keydown', (e) => {
 });
 
 addEventListener('keyup', (e) => {
+  audio.stop();
   switch (e.key) {
     case 'ArrowUp':
     case 'w':
