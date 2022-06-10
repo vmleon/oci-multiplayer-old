@@ -15,13 +15,13 @@ ARCHITECTURE DIAGRAM GOES HERE
 
 Improvements:
 - Broadcast names of other players
-- Improve graphics
 - Use private subnets
 
 Scaling:
 - [Redis Adaptor for Socket.io](https://socket.io/docs/v4/redis-adapter/); [Examples](https://github.com/socketio/socket.io/tree/master/examples)
 - Add in-memory Db
 - Measure latency
+- Create OCI Dashboard
 - Create a stress test
 - Scale backend
 - WebWorker
