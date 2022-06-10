@@ -1,7 +1,6 @@
 import './style.css';
 import * as THREE from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
-// import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 import {io} from 'socket.io-client';
 import {throttle} from 'throttle-debounce';
@@ -33,7 +32,7 @@ let renderer;
 let scene;
 let camera;
 let sunLight;
-// let controls;
+let hemiLight;
 let clock;
 let otherPlayers = {};
 let otherPlayersMeshes = {};
@@ -63,7 +62,7 @@ function init() {
 
   // Debug
   const gui = new dat.GUI();
-  const params = {sunLightIntensity: 5, camera: {x: 0, y: 180, z: 90, inclination: 70}};
+  const params = {sunLightIntensity: 4, camera: {x: 0, y: 180, z: 90, inclination: 70}};
 
   const sizes = {
     width: window.innerWidth,
@@ -78,7 +77,6 @@ function init() {
 
   // Scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x000000);
 
   // Renderer
   renderer = new THREE.WebGLRenderer({
@@ -89,7 +87,6 @@ function init() {
   renderer.physicallyCorrectLights = true;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
-  // renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -99,6 +96,12 @@ function init() {
   scene.add(camera);
 
   // Lights
+  hemiLight = new THREE.HemisphereLight(0xddeeff, 0x0f0e0d, 0.2);
+  scene.add(hemiLight);
+
+  const ambientLight = new THREE.AmbientLight(0xcccccc, 0.6);
+  scene.add(ambientLight);
+
   sunLight = new THREE.DirectionalLight(new THREE.Color('#ffffff'), params.sunLightIntensity);
   sunLight.position.set(250, 150, 20);
   sunLight.castShadow = true;
@@ -156,8 +159,39 @@ function init() {
       delete otherPlayersMeshes[id];
     });
 
+    let textures = {
+      floorTextureDiffuse: await new THREE.TextureLoader().loadAsync(
+        'assets/hardwood2_diffuse.jpeg',
+      ),
+      floorTextureBump: await new THREE.TextureLoader().loadAsync('assets/hardwood2_bump.jpeg'),
+      floorTextureRoughness: await new THREE.TextureLoader().loadAsync(
+        'assets/hardwood2_roughness.jpeg',
+      ),
+    };
+
     const groundGeometry = new THREE.PlaneGeometry(500, 500);
-    const groundMaterial = new THREE.MeshStandardMaterial({color: 'green'});
+    const groundMaterial = new THREE.MeshStandardMaterial({
+      roughness: 0.8,
+      color: 0xffffff,
+      metalness: 0.2,
+      bumpScale: 0.02,
+      map: textures.floorTextureDiffuse,
+      bumpMap: textures.floorTextureBump,
+      roughnessMap: textures.floorTextureRoughness,
+    });
+    groundMaterial.map.wrapS = THREE.RepeatWrapping;
+    groundMaterial.map.wrapT = THREE.RepeatWrapping;
+    groundMaterial.map.anisotropy = 4;
+    groundMaterial.map.repeat.set(2, 4);
+    groundMaterial.bumpMap.wrapS = THREE.RepeatWrapping;
+    groundMaterial.bumpMap.wrapT = THREE.RepeatWrapping;
+    groundMaterial.bumpMap.anisotropy = 4;
+    groundMaterial.bumpMap.repeat.set(2, 4);
+    groundMaterial.roughnessMap.wrapS = THREE.RepeatWrapping;
+    groundMaterial.roughnessMap.wrapT = THREE.RepeatWrapping;
+    groundMaterial.roughnessMap.anisotropy = 4;
+    groundMaterial.roughnessMap.repeat.set(2, 4);
+    groundMaterial.needsUpdate = true;
     ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI * 0.5;
     ground.receiveShadow = true;
