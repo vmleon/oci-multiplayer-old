@@ -14,7 +14,6 @@ ARCHITECTURE DIAGRAM GOES HERE
 ## TODO
 
 Improvements:
-- Broadcast names of other players
 - Use private subnets
 
 Scaling:

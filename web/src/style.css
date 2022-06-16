@@ -13,6 +13,13 @@ body
     background-color: #ffffff;
 }
 
+.label {
+    color: rgb(255, 255, 255);
+    font-family: sans-serif;
+    padding: 2px;
+    /* background: rgba( 0, 0, 0, .6 ); */
+}
+
 #info {
 	position: absolute;
 	top: 0px;

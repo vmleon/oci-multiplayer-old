@@ -1,12 +1,12 @@
 import './style.css';
 import * as THREE from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
+import {CSS2DRenderer, CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import * as dat from 'dat.gui';
 import {io} from 'socket.io-client';
 import {throttle} from 'throttle-debounce';
 import short from 'shortid';
 import {MathUtils} from 'three';
-import {Text} from 'troika-three-text';
 
 MathUtils.seededRandom(Date.now);
 
@@ -18,7 +18,6 @@ if (!localStorage.getItem('yourId')) {
 }
 const yourId = localStorage.getItem('yourId');
 const yourColor = randomColorName();
-console.log(`Your id: ${yourId} with color ${yourColor}`);
 
 if (localStorage.getItem('yourName')) {
   document.getElementsByName('name')[0].value = localStorage.getItem('yourName');
@@ -26,14 +25,15 @@ if (localStorage.getItem('yourName')) {
 
 const traceRateInMillis = 50;
 
+const logTrace = throttle(1000, false, console.log);
+
 let stats;
 let canvas;
 let renderer;
+let labelRenderer;
 let scene;
 let camera;
 let sunLight;
-let hemiLight;
-let clock;
 let otherPlayers = {};
 let otherPlayersMeshes = {};
 let playerMaterial;
@@ -41,28 +41,28 @@ let playerMaterial;
 let ground;
 let sendYourPosition;
 
-const textOffset = new THREE.Vector3(0, 0, 14);
-
 function init() {
   const inputNameValue = document.getElementsByName('name')[0].value;
   if (inputNameValue.length) {
     localStorage.setItem('yourName', inputNameValue);
   }
   const yourName = localStorage.getItem('yourName');
+  console.log(`You are ${yourName} (${yourId}) with color ${yourColor}`);
+
   const socket = io();
   socket.on('allPlayers', (otherPlayersFromServer) => {
     delete otherPlayersFromServer[yourId];
-    // IMPROVE ES6 forEach
     for (const [key, value] of Object.entries(otherPlayersFromServer)) {
       otherPlayers[key] = value;
     }
   });
+
   const overlay = document.getElementById('overlay');
   overlay.remove();
 
   // Debug
   const gui = new dat.GUI();
-  const params = {sunLightIntensity: 4, camera: {x: 0, y: 180, z: 90, inclination: 70}};
+  const params = {sunLightIntensity: 4, camera: {x: 0, y: 200, z: 100, inclination: 60}, offset: 0};
 
   const sizes = {
     width: window.innerWidth,
@@ -90,15 +90,18 @@ function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+  labelRenderer = new CSS2DRenderer();
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.domElement.style.position = 'absolute';
+  labelRenderer.domElement.style.top = '0px';
+  document.body.appendChild(labelRenderer.domElement);
+
   // Camera
-  camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 1, 1000);
+  camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 1, 1000);
   camera.position.set(0, 350, 260);
   scene.add(camera);
 
   // Lights
-  hemiLight = new THREE.HemisphereLight(0xddeeff, 0x0f0e0d, 0.2);
-  scene.add(hemiLight);
-
   const ambientLight = new THREE.AmbientLight(0xcccccc, 0.6);
   scene.add(ambientLight);
 
@@ -127,10 +130,14 @@ function init() {
     // Update renderer
     renderer.setSize(sizes.width, sizes.height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
   });
 
   // GUI
   gui.width = 300;
+  const offsetFolder = gui.addFolder('Offset');
+  offsetFolder.add(params, 'offset', -200, 200, 1);
   const lightingFolder = gui.addFolder('Lighting');
   lightingFolder.add(params, 'sunLightIntensity', 3, 8, 0.1);
   const cameraFolder = gui.addFolder('Camera');
@@ -140,23 +147,33 @@ function init() {
   cameraFolder.add(params.camera, 'inclination', 0, 90, 1);
   gui.open();
 
-  // Controls
-  // controls = new OrbitControls(camera, canvas);
-  // controls.dampingFactor = 0.05;
-  // controls.enableDamping = true;
-
   (async function () {
-    socket.on('player.new', (id) => {
+    const playerGeometry = new THREE.SphereGeometry(12, 24, 24);
+    playerMaterial = new THREE.MeshStandardMaterial({color: yourColor});
+    const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial.clone());
+
+    socket.on('player.new', ({id, name}) => {
       if (id !== yourId) {
-        console.log(`New Player ${id}`);
-        otherPlayersMeshes[id] = makePlayerMesh(playerMesh, scene);
+        console.log(`New Player ${name} (${id})`);
+        otherPlayersMeshes[id] = makePlayerMesh(playerMesh, scene, name);
       }
     });
 
     socket.on('player.delete', (id) => {
       console.log(`Delete Player ${id}`);
-      scene.remove(otherPlayersMeshes[id]);
+      otherPlayersMeshes[id].children
+        .filter((e) => e instanceof CSS2DObject)
+        .forEach((o) => {
+          o.element.remove();
+          console.log(scene.remove(o));
+        }),
+        scene.remove(otherPlayersMeshes[id]);
       delete otherPlayersMeshes[id];
+    });
+
+    socket.io.on('error', () => {
+      Object.keys(otherPlayersMeshes).forEach((id) => scene.remove(otherPlayersMeshes[id]));
+      Object.keys(otherPlayers).forEach((id) => delete otherPlayers[id]);
     });
 
     let textures = {
@@ -197,10 +214,6 @@ function init() {
     ground.receiveShadow = true;
     scene.add(ground);
 
-    const playerGeometry = new THREE.SphereGeometry(12, 24, 24);
-    playerMaterial = new THREE.MeshStandardMaterial({color: yourColor});
-    const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial.clone());
-
     const mesh = playerMesh.clone();
     mesh.position.x = randomPosition();
     mesh.position.z = randomPosition();
@@ -208,14 +221,6 @@ function init() {
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     scene.add(mesh);
-
-    const nameTextMesh = new Text();
-    nameTextMesh.text = yourName;
-    nameTextMesh.fontSize = 5;
-    nameTextMesh.textAlign = 'center';
-    nameTextMesh.position.y = 0.01;
-    nameTextMesh.rotation.x = -Math.PI * 0.5;
-    scene.add(nameTextMesh);
 
     sendYourPosition = throttle(traceRateInMillis, false, () => {
       const {x, z} = mesh.position;
@@ -225,63 +230,44 @@ function init() {
         x: x.toFixed(1),
         z: z.toFixed(1),
         color: yourColor,
+        name: yourName,
       };
       socket.emit('player.trace', trace);
     });
 
-    clock = new THREE.Clock();
-
     renderer.setAnimationLoop(render);
 
     function render() {
-      const elapsedTime = clock.getElapsedTime();
-
       animateYourPlayer(mesh);
-      Object.keys(otherPlayersMeshes).forEach((id) => {
-        if (otherPlayers[id]) {
-          otherPlayersMeshes[id].material.color = new THREE.Color(otherPlayers[id].color);
-          otherPlayersMeshes[id].position.x = otherPlayers[id].x;
-          otherPlayersMeshes[id].position.z = otherPlayers[id].z;
-        }
-      });
+
+      animateOtherPlayers(otherPlayersMeshes);
 
       // Update params
       sunLight.intensity = params.sunLightIntensity;
+      camera.rotation.x = MathUtils.degToRad(-params.camera.inclination);
 
       // traces
       sendYourPosition();
 
-      // Update Orbital Controls
-      // controls.update();
-      nameTextMesh.position.copy(mesh.position);
-      nameTextMesh.position.add(textOffset);
       camera.position.copy(mesh.position);
       camera.position.add(new THREE.Vector3(params.camera.x, params.camera.y, params.camera.z));
-      camera.rotation.x = MathUtils.degToRad(-params.camera.inclination);
 
       // Update Stats
       stats.update();
 
       // Render
       renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
     }
   })();
 }
 
-function randomColorName() {
-  const colors = Object.keys(THREE.Color.NAMES);
-  return colors[MathUtils.randInt(0, colors.length - 1)];
-}
+function makePlayerMesh(playerMesh, scene, name) {
+  const group = new THREE.Group();
 
-function randomPosition() {
-  return Math.random() * 500 - 250;
-}
-
-function makePlayerMesh(playerMesh, scene) {
   const mesh = playerMesh.clone();
   mesh.material = playerMaterial.clone();
   mesh.position.y = 10;
-
   mesh.traverse((object) => {
     if (object instanceof THREE.Mesh) {
       object.castShadow = true;
@@ -289,10 +275,21 @@ function makePlayerMesh(playerMesh, scene) {
     }
   });
 
-  scene.add(mesh);
+  const nameDiv = document.createElement('div');
+  nameDiv.className = 'label';
+  nameDiv.textContent = name;
+  nameDiv.style.marginTop = '-1em';
+  const nameLabel = new CSS2DObject(nameDiv);
+  nameLabel.position.set(0, 12, 0);
+  nameLabel.layers.set(0);
 
-  return mesh;
+  group.add(mesh);
+  group.add(nameLabel);
+  scene.add(group);
+
+  return group;
 }
+
 let dx = 0;
 let dz = 0;
 
@@ -305,6 +302,18 @@ function animateYourPlayer(mesh) {
   if ((z + dz < 250) & (z + dz > -250)) {
     mesh.position.z = z + dz;
   }
+}
+
+function animateOtherPlayers(playerMeshes) {
+  Object.keys(playerMeshes).forEach((id) => {
+    if (otherPlayers[id]) {
+      const group = playerMeshes[id];
+      const ballMesh = group.children[0];
+      ballMesh.material.color = new THREE.Color(otherPlayers[id].color);
+      group.position.x = otherPlayers[id].x;
+      group.position.z = otherPlayers[id].z;
+    }
+  });
 }
 
 addEventListener('keydown', (e) => {
@@ -349,4 +358,11 @@ addEventListener('keyup', (e) => {
   }
 });
 
-const trace = throttle(1000, false, console.log);
+function randomColorName() {
+  const colors = Object.keys(THREE.Color.NAMES);
+  return colors[MathUtils.randInt(0, colors.length - 1)];
+}
+
+function randomPosition() {
+  return Math.random() * 500 - 250;
+}

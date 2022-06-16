@@ -21,22 +21,20 @@ const io = new Server(httpServer, {
 });
 
 io.on('connection', (socket) => {
-  logger.info(socket.id);
   Object.keys(players).forEach((id) => {
-    logger.info(`player.new ${id} to ${socket.id}`);
-    socket.emit('player.new', id);
+    socket.emit('player.new', {id, name: players[id].name});
   });
 
   socket.on('player.trace', (player) => {
     const {id, ...others} = player;
     if (!players[id]) {
-      io.emit('player.new', id);
+      io.emit('player.new', {id, name: others.name});
     }
     players[id] = {...others, updated: new Date()};
   });
 });
 
-// send all players data to all
+// broadcast all players data
 setInterval(() => {
   io.emit('allPlayers', players);
 }, broadcastRefreshUpdate);
@@ -50,13 +48,13 @@ setInterval(() => {
   }));
   const staleIds = elapsedTimesById.filter((e) => e.elapsed > 250);
   staleIds.forEach((p) => {
-    logger.info(`Cleaning stale player ${p.id} last updated ${p.elapsed} milliseconds ago`);
+    logger.info(`Stale player ${p.id} by ${p.elapsed}ms`);
     io.emit('player.delete', p.id);
     players[p.id] = undefined;
     delete players[p.id];
   });
 }, 2000);
 
-setInterval(() => logger.info(`Currently, ${Object.keys(players).length} active players`), 5000);
+setInterval(() => logger.info(`${Object.keys(players).length} active players`), 5000);
 
 httpServer.listen(port, () => logger.info(`Server listening to port ${port}`));
