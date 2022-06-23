@@ -20,6 +20,9 @@ Improvements:
 - Rewards (achivements for x)
 - auth/authz
 - Analytics (data points, latency, etc)
+- Migrate to Kubernetes
+- Add LogAnalytics
+- GraalVM
 
 Scaling:
 - [Redis Adaptor for Socket.io](https://socket.io/docs/v4/redis-adapter/); [Examples](https://github.com/socketio/socket.io/tree/master/examples)
