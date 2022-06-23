@@ -15,6 +15,11 @@ ARCHITECTURE DIAGRAM GOES HERE
 
 Improvements:
 - Use private subnets
+- Save state
+- Score board
+- Rewards (achivements for x)
+- auth/authz
+- Analytics (data points, latency, etc)
 
 Scaling:
 - [Redis Adaptor for Socket.io](https://socket.io/docs/v4/redis-adapter/); [Examples](https://github.com/socketio/socket.io/tree/master/examples)
