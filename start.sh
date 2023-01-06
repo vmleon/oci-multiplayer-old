@@ -23,17 +23,22 @@ npm run build
 
 banner "Terraform Init"
 cd $BASE_DIR/deploy/terraform
-terraform init
+terraform init -upgrade
 
 banner "Terraform Apply"
 terraform apply -auto-approve
 
-sleep 2
+sleep 25
+
+cd $BASE_DIR/deploy/ansible
 
 banner "Ansible Provisioning"
-ansible-playbook -i generated/app.ini ../ansible/site.yaml
+ANSIBLE_HOST_KEY_CHECKING=False \
+ANSIBLE_NOCOWS=1 \
+ansible-playbook -i ../terraform/generated/app.ini ./site.yaml
 
 banner "Output"
+cd $BASE_DIR/deploy/terraform
 terraform output
 
 cd $BASE_DIR

@@ -1,12 +1,12 @@
 resource "oci_core_virtual_network" "multiplayervcn" {
-  compartment_id = var.compartment_id
+  compartment_id = var.compartment_ocid
   cidr_blocks    = ["10.0.0.0/16"]
   display_name   = "multiplayer vcn"
   dns_label      = "multiplayervcn"
 }
 
 resource "oci_core_internet_gateway" "multiplayervcn_internet_gateway" {
-  compartment_id = var.compartment_id
+  compartment_id = var.compartment_ocid
   display_name   = "multiplayerInternetGateway"
   vcn_id         = oci_core_virtual_network.multiplayervcn.id
 }
@@ -24,7 +24,7 @@ resource "oci_core_default_route_table" "default_route_table" {
 
 resource "oci_core_subnet" "publicsubnet" {
   cidr_block        = "10.0.0.0/24"
-  compartment_id    = var.compartment_id
+  compartment_id    = var.compartment_ocid
   vcn_id            = oci_core_virtual_network.multiplayervcn.id
   display_name      = "multiplayer public subnet"
   dns_label         = "public"
@@ -34,7 +34,7 @@ resource "oci_core_subnet" "publicsubnet" {
 }
 
 resource "oci_core_security_list" "http_security_list" {
-  compartment_id = var.compartment_id
+  compartment_id = var.compartment_ocid
   vcn_id         = oci_core_virtual_network.multiplayervcn.id
   display_name   = "HTTP Security List"
 

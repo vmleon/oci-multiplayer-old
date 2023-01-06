@@ -20,6 +20,11 @@ banner "Terraform Destroy"
 cd $BASE_DIR/deploy/terraform
 terraform destroy -auto-approve
 
+banner "Clean"
+cd $BASE_DIR/deploy/terraform
+rm -rf generated
+
+cd $BASE_DIR
 end_time=$(date +%s)
 elapsed=$(( end_time - start_time ))
 echo "Time: $elapsed sec"

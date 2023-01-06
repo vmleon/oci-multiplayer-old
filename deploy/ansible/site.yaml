@@ -4,7 +4,6 @@
   become: true
   roles:
     - server
-
 - name: Web
   hosts: webs
   become: true

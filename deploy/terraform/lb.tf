@@ -1,5 +1,5 @@
 resource "oci_core_public_ip" "public_reserved_ip" {
-  compartment_id = var.compartment_id
+  compartment_id = var.compartment_ocid
   lifetime       = "RESERVED"
 
   lifecycle {
@@ -17,7 +17,7 @@ variable "load_balancer_shape_details_minimum_bandwidth_in_mbps" {
 
 resource "oci_load_balancer" "lb" {
   shape          = "flexible"
-  compartment_id = var.compartment_id
+  compartment_id = var.compartment_ocid
 
   subnet_ids = [oci_core_subnet.publicsubnet.id]
 
@@ -72,7 +72,7 @@ resource "oci_load_balancer_listener" "lb-listener" {
 resource "oci_load_balancer_backend" "lb-backend-web" {
   load_balancer_id = oci_load_balancer.lb.id
   backendset_name  = oci_load_balancer_backend_set.lb-backend-set-web.name
-  ip_address       = oci_core_instance.compute_web[0].public_ip
+  ip_address       = oci_core_instance.compute_web[0].private_ip
   port             = 80
   backup           = false
   drain            = false
@@ -82,7 +82,7 @@ resource "oci_load_balancer_backend" "lb-backend-web" {
 resource "oci_load_balancer_backend" "lb-backend-server" {
   load_balancer_id = oci_load_balancer.lb.id
   backendset_name  = oci_load_balancer_backend_set.lb-backend-set-server.name
-  ip_address       = oci_core_instance.compute_server[0].public_ip
+  ip_address       = oci_core_instance.compute_server[0].private_ip
   port             = 3000
   backup           = false
   drain            = false

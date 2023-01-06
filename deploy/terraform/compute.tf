@@ -18,7 +18,7 @@ variable "instance_shape_config_memory_in_gbs" {
 }
 
 data "oci_core_images" "ol8_images" {
-    compartment_id = var.compartment_id
+    compartment_id = var.compartment_ocid
     shape = var.instance_shape
     operating_system = "Oracle Linux"
     operating_system_version = "8"
@@ -27,14 +27,14 @@ data "oci_core_images" "ol8_images" {
 }
 
 data "oci_identity_availability_domain" "ad" {
-  compartment_id = var.tenancy_id
+  compartment_id = var.tenancy_ocid
   ad_number      = 1
 }
 
 resource "oci_core_instance" "compute_web" {
   count               = var.num_instances
   availability_domain = data.oci_identity_availability_domain.ad.name
-  compartment_id      = var.compartment_id
+  compartment_id      = var.compartment_ocid
   display_name        = "${var.instance_name}_web_${count.index}"
   shape               = var.instance_shape
 
@@ -68,7 +68,7 @@ resource "oci_core_instance" "compute_web" {
 resource "oci_core_instance" "compute_server" {
   count               = var.num_instances
   availability_domain = data.oci_identity_availability_domain.ad.name
-  compartment_id      = var.compartment_id
+  compartment_id      = var.compartment_ocid
   display_name        = "${var.instance_name}_server_${count.index}"
   shape               = var.instance_shape
 

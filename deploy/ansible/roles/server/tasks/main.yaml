@@ -1,7 +1,7 @@
 ---
 - name: Install Node
   dnf:
-    name: "@nodejs:16"
+    name: "@nodejs:18"
     update_cache: yes
 - name: Copy server files
   copy:
@@ -9,9 +9,9 @@
     dest: /home/opc/server/
     owner: opc
   with_items:
-  - "index.js"
-  - "package.json"
-  - "package-lock.json"
+    - "index.js"
+    - "package.json"
+    - "package-lock.json"
 - name: Install dependencies
   command: npm install
   become: true
