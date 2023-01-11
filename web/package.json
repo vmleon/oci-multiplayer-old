@@ -1,6 +1,10 @@
 {
+  "name": "web",
+  "version": "0.0.2-1",
+  "description": "OCI Multiplayer Web",
   "repository": "https://github.com/vmleon/oci-multiplayer",
-  "license": "UNLICENSED",
+  "author": "Victor Martin Alvarez",
+  "license": "ISC",
   "scripts": {
     "build": "webpack --config ./bundler/webpack.prod.js",
     "dev": "webpack serve --config ./bundler/webpack.dev.js"

@@ -1,7 +1,8 @@
 {
   "name": "server",
-  "version": "0.0.2-4",
-  "description": "Scuba Training Server",
+  "version": "0.0.2-9",
+  "description": "OCI Multiplayer Server",
+  "repository": "https://github.com/vmleon/oci-multiplayer",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js | pino-pretty"
