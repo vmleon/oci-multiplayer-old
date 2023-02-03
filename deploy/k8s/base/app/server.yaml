@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: server
+  name: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+      - image: fra.ocir.io/fruktknlrefu/multiplayer/server:0.0.2-11
+        name: server
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 250m
+            memory: 521Mi
+      imagePullSecrets:
+      - name: ocirsecret

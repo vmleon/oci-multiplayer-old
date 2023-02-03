@@ -16,3 +16,11 @@ export async function getRegionByKey(code = "fra") {
   const { data } = JSON.parse(output);
   return data.find((r) => code.toUpperCase() === r.key);
 }
+
+export async function exportVariable(key, value) {
+  key = key.toUpperCase();
+  while (!value || !value.length) {
+    value = await question(`Value for ${key}: `);
+  }
+  await $`export ${key}=${value}`;
+}

@@ -1,17 +1,25 @@
 #!/usr/bin/env zx
 
-export async function container_login(namespace, user, token, url) {
-  console.log(`podman login -u ${namespace}/${user} -p ${token} ${url}`);
+export async function containerLogin(namespace, user, token, url) {
   try {
-    await $`podman login -u ${namespace}/${user} -p ${token} ${url}`;
+    const { stdout, stderr, exitCode } =
+      await $`podman login -u ${namespace}/${user} -p ${token} ${url}`;
+    if (exitCode == 0) {
+      console.log(chalk.green(stdout.trim()));
+    } else {
+      console.error(chalk.red(stderr.trim()));
+    }
   } catch (error) {
-    console.error(chalk.red(error.stderr));
-    console.log("Review email and token, and try again.");
+    console.error(chalk.red(error.stderr.trim()));
+    const yellowUserString = chalk.yellow(user);
+    console.log(
+      `Review the user ${yellowUserString} and token pair, and try again.`
+    );
     process.exit(1);
   }
 }
 
-export async function tag_image(local, remote) {
+export async function tagImage(local, remote) {
   console.log(`podman tag ${local} ${remote}`);
   try {
     await $`podman tag ${local} ${remote}`;
@@ -21,7 +29,7 @@ export async function tag_image(local, remote) {
   }
 }
 
-export async function push_image(remote) {
+export async function pushImage(remote) {
   console.log(`podman push ${remote}`);
   try {
     await $`podman push ${remote}`;

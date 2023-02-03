@@ -1,60 +1,59 @@
-import {createServer} from 'http';
-import {Server} from 'socket.io';
-import pino from 'pino';
+import { createServer } from "http";
+import express from "express";
+import { createClient } from "redis";
+import { createTerminus } from "@godaddy/terminus";
+import pino from "pino";
+import * as dotenv from "dotenv";
+import { start } from "./server.js";
+
+dotenv.config({ path: "./config/.env" });
 
 const logger = pino();
 const port = process.env.PORT | 3000;
-const CORS_URL = process.env.CORS_URL || '*';
+const environment = process.env.NODE_ENV || "development";
+logger.info(`Environment: ${environment}`);
 
-const broadcastRefreshUpdate = 50;
+const app = express();
+const httpServer = createServer(app);
 
-const httpServer = createServer();
+const REDIS_HOST = process.env.REDIS_SERVICE_HOST
+  ? process.env.REDIS_SERVICE_HOST
+  : "localhost";
 
-let players = {};
+const REDIS_SERVICE_PORT = process.env.REDIS_SERVICE_PORT;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+if (!REDIS_PASSWORD) {
+  logger.error(`REDIS_PASSWORD is not declared`);
+  process.exit(1);
+}
 
-const io = new Server(httpServer, {
-  cors: {
-    origin: CORS_URL,
-  },
-  // transports: ['websocket'],
-  serveClient: false,
+const REDIS_URL = `redis://default:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_SERVICE_PORT}`;
+const REDIS_URL_OBFUSCATED = `redis://default:*******@${REDIS_HOST}:${REDIS_SERVICE_PORT}`;
+logger.info(`Redis URL: ${REDIS_URL_OBFUSCATED}`);
+
+const pubClient = createClient({
+  url: REDIS_URL,
+});
+const subClient = pubClient.duplicate();
+pubClient.on("error", (err) => logger.error(`Redis Pub Client Error: ${err}`));
+subClient.on("error", (err) => logger.error(`Redis Sub Client Error: ${err}`));
+
+function onSignal() {
+  console.log("server is starting cleanup");
+  // TODO clean redis connections
+}
+
+async function onHealthCheck() {
+  // TODO redis connection status
+  return;
+}
+
+createTerminus(httpServer, {
+  signal: "SIGINT",
+  healthChecks: { "/healthz": onHealthCheck },
+  onSignal,
 });
 
-io.on('connection', (socket) => {
-  Object.keys(players).forEach((id) => {
-    socket.emit('player.new', {id, name: players[id].name});
-  });
-
-  socket.on('player.trace', (player) => {
-    const {id, ...others} = player;
-    if (!players[id]) {
-      io.emit('player.new', {id, name: others.name});
-    }
-    players[id] = {...others, updated: new Date()};
-  });
+Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+  start(httpServer, port, pubClient, subClient);
 });
-
-// broadcast all players data
-setInterval(() => {
-  io.emit('allPlayers', players);
-}, broadcastRefreshUpdate);
-
-// Clean stale players, and send delete player if stale
-setInterval(() => {
-  const now = new Date();
-  const elapsedTimesById = Object.entries(players).map((e) => ({
-    id: e[0],
-    elapsed: now - e[1].updated,
-  }));
-  const staleIds = elapsedTimesById.filter((e) => e.elapsed > 250);
-  staleIds.forEach((p) => {
-    logger.info(`Stale player ${p.id} by ${p.elapsed}ms`);
-    io.emit('player.delete', p.id);
-    players[p.id] = undefined;
-    delete players[p.id];
-  });
-}, 2000);
-
-setInterval(() => logger.info(`${Object.keys(players).length} active players`), 5000);
-
-httpServer.listen(port, () => logger.info(`Server listening to port ${port}`));

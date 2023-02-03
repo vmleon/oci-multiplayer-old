@@ -23,3 +23,8 @@ logs
 *.lock
 
 *.retry
+
+*.key
+*.crt
+
+.env*
