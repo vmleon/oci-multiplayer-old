@@ -9,7 +9,7 @@ export async function dockerAliasWhenNoPodman() {
     podmanBinaryExists = false;
   }
   if (!podmanBinaryExists) {
-    await $`alias podman=docker`;
+    $.prefix += `alias podman=docker; `;
   }
 }
 
