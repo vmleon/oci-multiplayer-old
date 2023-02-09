@@ -1,5 +1,14 @@
 #!/usr/bin/env zx
 
+export async function dockerAliasWhenNoPodman() {
+  const { exitCode } = await $`command -v podman`;
+  const podmanBinaryExists = exitCode === 0;
+  console.log(podmanBinaryExists ? "podman" : "docker");
+  if (!podmanBinaryExists) {
+    await $`alias podman=docker`;
+  }
+}
+
 export async function containerLogin(namespace, user, token, url) {
   try {
     const { stdout, stderr, exitCode } =

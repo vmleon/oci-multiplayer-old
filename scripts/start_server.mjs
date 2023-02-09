@@ -1,10 +1,13 @@
 #!/usr/bin/env zx
 
+import { dockerAliasWhenNoPodman } from "./lib/container.mjs";
 import { getVersion, getNamespace } from "./lib/utils.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
 $.verbose = false;
+
+await dockerAliasWhenNoPodman();
 
 const project = "oci_oke_websocket";
 const namespace = await getNamespace();

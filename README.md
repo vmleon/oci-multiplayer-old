@@ -35,10 +35,19 @@ Scaling:
 
 ## Set Up
 
+
+### Kubernetes Cluster
+
+Create a Kubernetes cluster through the OCI web console.
+
+Follow [Creating a Kubernetes Cluster](https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contengcreatingclusterusingoke.htm).
+
+Configure kubectl on Cloud Shell. Follow steps on Quick start on your Kubernetes Cluster.
+
 Clone this repository in your local machine:
 
 ```
-git clone https://github.com/vmleon/oci-multiplayer.git
+git clone --branch k8s https://github.com/vmleon/oci-multiplayer.git
 ```
 
 Change directory to the `oci-multiplayer`:
@@ -54,6 +63,17 @@ Create certs:
 npx zx scripts/gen_certs.mjs
 ```
 
+Make sure you login with Oracle Cloud Container Registry.
+
+You will need an Auth Token from OCI.
+
+Run the following script and have the token ready, alternatively you can set it up defining the environment variable `OCI_OCIR_TOKEN`. Otherwise the script will ask for the token.
+
+```bash
+zx scripts/ocir_login.mjs
+```
+
+Then 
 Deploy server:
 ```bash
 npx zx scripts/release.mjs

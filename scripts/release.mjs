@@ -1,11 +1,18 @@
 #!/usr/bin/env zx
 import { getVersion, getNamespace } from "./lib/utils.mjs";
-import { build_image, tagImage, pushImage } from "./lib/container.mjs";
+import {
+  build_image,
+  tagImage,
+  pushImage,
+  dockerAliasWhenNoPodman,
+} from "./lib/container.mjs";
 import { bump, validateBumpLevel, build_web } from "./lib/npm.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
 $.verbose = false;
+
+await dockerAliasWhenNoPodman();
 
 const project = "oci_multiplayer";
 const namespace = await getNamespace();

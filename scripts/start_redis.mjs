@@ -1,10 +1,13 @@
 #!/usr/bin/env zx
 
+import { dockerAliasWhenNoPodman } from "./lib/container.mjs";
 import { exportVariable } from "./lib/utils.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
 $.verbose = false;
+
+await dockerAliasWhenNoPodman();
 
 if (!process.env.REDIS_PASSWORD) {
   await exportVariable("REDIS_PASSWORD");
