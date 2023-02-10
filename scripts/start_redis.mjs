@@ -1,13 +1,15 @@
 #!/usr/bin/env zx
 
-import { dockerAliasWhenNoPodman } from "./lib/container.mjs";
-import { exportVariable } from "./lib/utils.mjs";
+import { exportVariable, exitWithError } from "./lib/utils.mjs";
+import { whichContainerEngine } from "./lib/container.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
 $.verbose = false;
 
-await dockerAliasWhenNoPodman();
+const containerName = "redis_multiplayer";
+
+const ce = await whichContainerEngine();
 
 if (!process.env.REDIS_PASSWORD) {
   await exportVariable("REDIS_PASSWORD");
@@ -15,20 +17,19 @@ if (!process.env.REDIS_PASSWORD) {
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 
 try {
-  const { stdout, stderr, exitCode } = await $`podman \
+  const { stdout, stderr, exitCode } = await $`${ce} \
     run --name redis \
     -d \
     --rm \
     -p 6379:6379 \
     -e REDIS_PASSWORD="${REDIS_PASSWORD}" \
-    redis_multiplayer \
+    ${containerName} \
     /bin/sh -c 'redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}'`;
   if (exitCode == 0) {
     console.log(chalk.green(stdout.trim()));
   } else {
-    console.error(chalk.red(stderr.trim()));
+    exitWithError(stderr);
   }
 } catch (error) {
-  console.error(chalk.red(error.toString().trim()));
-  process.exit(1);
+  exitWithError(error.stderr);
 }

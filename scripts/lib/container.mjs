@@ -1,63 +1,74 @@
 #!/usr/bin/env zx
+import { exitWithError } from "./utils.mjs";
 
-export async function dockerAliasWhenNoPodman() {
-  let podmanBinaryExists;
+export async function whichContainerEngine() {
   try {
-    const { exitCode } = await $`command -v podman`;
-    podmanBinaryExists = exitCode === 0;
-  } catch (error) {
-    podmanBinaryExists = false;
+    const dockerPath = await which("docker");
+    return !dockerPath ? "podman" : "docker";
+  } catch (err) {
+    return "podman";
   }
-  if (!podmanBinaryExists) {
-    $.prefix += `alias podman=docker; `;
+}
+
+const ce = await whichContainerEngine();
+
+export async function checkPodmanMachineRunning() {
+  if (ce === "podman") {
+    const isMachineRunning = (
+      await $`podman machine info --format {{.Host.MachineState}}`
+    ).stdout.trim();
+    if (isMachineRunning === "Stopped") {
+      console.log(
+        `Run ${chalk.yellow("podman machine start")} before continue`
+      );
+      exitWithError("Podman machine stopped");
+    } else {
+      console.log(`${chalk.green("[ok]")} podman machine running`);
+    }
   }
 }
 
 export async function containerLogin(namespace, user, token, url) {
   try {
     const { stdout, stderr, exitCode } =
-      await $`podman login -u ${namespace}/${user} -p ${token} ${url}`;
+      await $`${ce} login -u ${namespace}/${user} -p ${token} ${url}`;
     if (exitCode == 0) {
-      console.log(chalk.green(stdout.trim()));
+      console.log(`${chalk.yellow(url)}: ${chalk.green(stdout.trim())}`);
     } else {
       console.error(chalk.red(stderr.trim()));
     }
   } catch (error) {
     console.error(chalk.red(error.stderr.trim()));
     const yellowUserString = chalk.yellow(user);
-    console.log(
+    exitWithError(
       `Review the user ${yellowUserString} and token pair, and try again.`
     );
-    process.exit(1);
   }
 }
 
 export async function tagImage(local, remote) {
-  console.log(`podman tag ${local} ${remote}`);
+  console.log(`${ce} tag ${local} ${remote}`);
   try {
-    await $`podman tag ${local} ${remote}`;
+    await $`${ce} tag ${local} ${remote}`;
   } catch (error) {
-    console.error(chalk.red(error.stderr));
-    process.exit(1);
+    exitWithError(error.stderr);
   }
 }
 
 export async function pushImage(remote) {
-  console.log(`podman push ${remote}`);
+  console.log(`${ce} push ${remote}`);
   try {
-    await $`podman push ${remote}`;
+    await $`${ce} push ${remote}`;
   } catch (error) {
-    console.error(chalk.red(error.stderr));
-    process.exit(1);
+    exitWithError(error.stderr);
   }
 }
 
 export async function build_image(name, version) {
-  console.log(`podman build . -t ${name}:${version}`);
+  console.log(`${ce} build . -t ${name}:${version}`);
   try {
-    await $`podman build . -t ${name}:${version}`;
+    await $`${ce} build . -t ${name}:${version}`;
   } catch (error) {
-    console.error(chalk.red(error.stderr));
-    process.exit(1);
+    exitWithError(error.stderr);
   }
 }

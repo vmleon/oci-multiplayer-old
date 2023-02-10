@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+import { exitWithError } from "./utils.mjs";
 
 export async function bump(level = "patch") {
   try {
@@ -23,17 +24,13 @@ export async function bump(level = "patch") {
     }
     return newVersion;
   } catch (error) {
-    console.error(chalk.red(error.stderr));
-    process.exit(1);
+    exitWithError(error.stderr);
   }
 }
 
 export async function validateBumpLevel(level) {
   if (!["major", "minor", "patch"].includes(level)) {
-    console.log(
-      chalk.red("Error: release version must be 'major', 'minor' or 'patch'")
-    );
-    process.exit(1);
+    exitWithError("Error: release version must be 'major', 'minor' or 'patch'");
   }
   return level;
 }
@@ -46,7 +43,6 @@ export async function build_web() {
     const output = (await $`npm run build`).stdout.trim();
     console.log(output);
   } catch (error) {
-    console.error(chalk.red(error.stderr));
-    process.exit(1);
+    exitWithError(error.stderr);
   }
 }

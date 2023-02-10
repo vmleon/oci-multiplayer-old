@@ -24,3 +24,19 @@ export async function exportVariable(key, value) {
   }
   await $`export ${key}=${value}`;
 }
+
+export async function exitWithError(errorMessage = "") {
+  console.error(chalk.red(errorMessage.trim()));
+  process.exit(1);
+}
+
+export async function checkRequiredProgramsExist(programs) {
+  try {
+    for (let program of programs) {
+      await which(program);
+      console.log(`${chalk.green("[ok]")} ${program}`);
+    }
+  } catch (error) {
+    exitWithError(`Error: Required command ${error.message}`);
+  }
+}

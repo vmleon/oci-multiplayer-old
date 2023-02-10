@@ -16,24 +16,27 @@ let serviceAnswer = await question("What service you want to release: ", {
 
 switch (serviceAnswer) {
   case "web":
-    await release("web");
+    await bumpVersion("web");
     break;
   case "server":
-    await release("server");
+    await bumpVersion("server");
     break;
   default:
     exitWithError("Invalid service. Options: web, service");
 }
 
-async function release(service) {
+async function bumpVersion(service) {
   await cd(service);
   const currentVersion = await getVersion();
-  const image_name = `${project}/${service}`;
-  await build_image(`localhost/${image_name}`, currentVersion);
-  const local_image = `localhost/${image_name}:${currentVersion}`;
-  const remote_image = `fra.ocir.io/${namespace}/${image_name}:${currentVersion}`;
-  await tagImage(local_image, remote_image);
-  await pushImage(remote_image);
-  console.log(`Released: ${chalk.yellow(remote_image)}`);
+  let levelAnswer = await question(
+    "Release level [major,minor,patch] (patch default): "
+  );
+  const level = await validateBumpLevel(levelAnswer || "patch");
+  const newVersion = await bump(level);
+  console.log(
+    `${chalk.yellow(service)} bumped from ${currentVersion} to ${chalk.yellow(
+      newVersion
+    )}`
+  );
   await cd("..");
 }

@@ -35,7 +35,6 @@ Scaling:
 
 ## Set Up
 
-
 ### Kubernetes Cluster
 
 Create a Kubernetes cluster through the OCI web console.
@@ -60,20 +59,22 @@ cd oci-multiplayer
 
 ## Build and Deployment
 
-Create certs:
+To complete the environment setup you need an Auth Token from OCI.
+
+Export the variable `OCI_OCIR_TOKEN` for best practices. Otherwise the script will ask for the token.
+
+You can also export `OCI_OCIR_USER` to the user (email) to login to the OCI container registry.
+
+Set environment:
 ```bash
-npx zx scripts/gen_certs.mjs
+npx zx scripts/setenv.mjs
 ```
 
-Make sure you login with Oracle Cloud Container Registry.
-
-You will need an Auth Token from OCI.
-
-Run the following script and have the token ready, alternatively you can set it up defining the environment variable `OCI_OCIR_TOKEN`. Otherwise the script will ask for the token.
-
-```bash
-npx zx scripts/ocir_login.mjs
-```
+> This script will:
+> - check dependencies
+> - create self-signed certs, if needed
+> - login to container registry
+> - print components versions
 
 Then 
 Deploy server:
@@ -82,7 +83,6 @@ npx zx scripts/release.mjs
 ```
 
 Answer: `server`
-Answer: `patch`
 
 Deploy web:
 ```bash
@@ -90,7 +90,6 @@ npx zx scripts/release.mjs
 ```
 
 Answer: `web`
-Answer: `patch`
 
 Apply deployment:
 ```bash
@@ -108,5 +107,7 @@ kubectl -n ingress-nginx get svc
 Destroy all the infrastructure:
 
 ```
-./stop.sh
+kubectl delete -k deploy/k8s/overlays/prod
 ```
+
+> TODO delete container images on OCI registry
