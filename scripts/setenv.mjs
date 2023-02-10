@@ -30,7 +30,7 @@ await printVersions();
 
 async function checkDependencies() {
   console.log("Check dependencies...");
-  const dependencies = ["git", "node", "oci", "kubectl", ce];
+  const dependencies = ["git", "node", "openssl", "oci", "kubectl", ce];
   await checkRequiredProgramsExist(dependencies);
   ce === "podman" && (await checkPodmanMachineRunning());
   console.log();

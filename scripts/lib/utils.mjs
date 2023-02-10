@@ -5,10 +5,28 @@ export async function getVersion() {
   return version;
 }
 
+// TODO move to oci.mjs
 export async function getNamespace() {
   const output = (await $`oci os ns get`).stdout.trim();
   const { data } = JSON.parse(output);
   return data;
+}
+
+export async function generateRandomString() {
+  try {
+    const output = (await $`openssl rand -base64 ${22}`).stdout.trim();
+    if (output.length) {
+      const cleanPassword = output
+        .replaceAll("/", "")
+        .replaceAll("\\", "")
+        .replaceAll("=", "");
+      return cleanPassword;
+    } else {
+      exitWithError("random string generation failed");
+    }
+  } catch (error) {
+    exitWithError(error.stderr);
+  }
 }
 
 export async function getRegionByKey(code = "fra") {

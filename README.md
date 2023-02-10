@@ -76,20 +76,24 @@ npx zx scripts/setenv.mjs
 > - login to container registry
 > - print components versions
 
-Then 
-Deploy server:
+Release the server:
 ```bash
 npx zx scripts/release.mjs
 ```
 
 Answer: `server`
 
-Deploy web:
+Release the web:
 ```bash
 npx zx scripts/release.mjs
 ```
 
 Answer: `web`
+
+Prepare deployment to Kubernetes:
+```bash
+npx zx scripts/deploy.mjs
+```
 
 Apply deployment:
 ```bash
