@@ -1,6 +1,10 @@
 #!/usr/bin/env zx
 
-import { exitWithError, generateRandomString } from "./lib/utils.mjs";
+import {
+  exitWithError,
+  generateRandomString,
+  getNamespace,
+} from "./lib/utils.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
@@ -8,6 +12,8 @@ $.verbose = false;
 
 // TODO check kubectl is configured with a kubernetes cluster
 await checkKubectlConfigured();
+
+await createRegistrySecret();
 
 await createConfigFiles();
 
@@ -31,6 +37,25 @@ async function checkKubectlConfigured() {
   }
   console.log();
 }
+async function createRegistrySecret() {
+  console.log("Create registry secret on Kubernetes cluster...");
+  try {
+    const namespace = await getNamespace();
+    const ocirUser = process.env.OCI_OCIR_USER;
+    const ocirToken = process.env.OCI_OCIR_TOKEN;
+    const regionKey = process.env.OCI_REGION;
+    const { exitCode } =
+      await $`kubectl create secret docker-registry ocirsecret --docker-server=${regionKey}.ocir.io --docker-username=${namespace}/${ocirUser} --docker-password='${ocirToken}' --docker-email=${ocirUser}`;
+    if (exitCode !== 0) {
+      exitWithError("docker-registry secret not created");
+    } else {
+      console.log(`${chalk.green("[ok]")} docker-registry secret created`);
+    }
+  } catch (error) {
+    exitWithError(error.stderr);
+  }
+  console.log();
+}
 
 async function createConfigFiles() {
   console.log("Create config files...");
@@ -40,7 +65,6 @@ async function createConfigFiles() {
 }
 
 async function createRedisConfig(password) {
-  console.log(password);
   const pwdOutput = (await $`pwd`).stdout.trim();
   await cd("./deploy/k8s/base/app");
   try {

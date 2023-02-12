@@ -4,7 +4,10 @@ import {
   checkRequiredProgramsExist,
   getVersion,
   getNamespace,
+  getRegionByKey,
+  exitWithError,
 } from "./lib/utils.mjs";
+import { getRegions } from "./lib/oci.mjs";
 import { createSelfSignedCert } from "./lib/tls.mjs";
 import {
   containerLogin,
@@ -60,6 +63,7 @@ async function createCerts() {
 async function loginContainerRegistry() {
   console.log("Login to container registry login...");
   const namespace = await getNamespace();
+
   const userEnv = process.env.OCI_OCIR_USER;
   const user = userEnv
     ? userEnv
@@ -69,11 +73,38 @@ async function loginContainerRegistry() {
     ? tokenEnv
     : await question("OCI Auth Token for OCIR: ");
 
-  const regionAnswer = await question("What region are you using? (fra,lhr): ");
-  const url = `${regionAnswer.toLowerCase()}.ocir.io`;
+  const regionEnv = process.env.OCI_REGION;
+  const regions = await getRegions();
+  if (!regionEnv) {
+    await printRegionNames(regions);
+  }
+  const regionName = regionEnv
+    ? regionEnv
+    : await question("OCI Region (eu-frankfurt-1): ", {
+        choices: regions.map((r) => r.name),
+      });
+  const { key } = regions.find((r) => r.name === regionName);
+  const url = `${key}.ocir.io`;
 
   await containerLogin(namespace, user, token, url);
   console.log();
+}
+
+async function printRegionNames(regions) {
+  const regionNames = regions.map((r) => r.name);
+  const zones = [...new Set(regionNames.map((name) => name.split("-")[0]))];
+  const regionsByZone = regions.reduce((acc, cur) => {
+    const zone = cur.name.split("-")[0];
+    if (acc[zone]) {
+      acc[zone].push(cur.name);
+    } else {
+      acc[zone] = [cur.name];
+    }
+    return acc;
+  }, {});
+  Object.keys(regionsByZone).forEach((zone) =>
+    console.log(`\t${chalk.yellow(zone)}: ${regionsByZone[zone].join(", ")}`)
+  );
 }
 
 async function printVersions() {
