@@ -20,7 +20,7 @@ spec:
         app: web
     spec:
       containers:
-      - image: fra.ocir.io/fruktknlrefu/multiplayer/web:0.0.2-4
+      - image: fra.ocir.io/fruktknlrefu/multiplayer/web:0.0.2
         name: web
         readinessProbe:
           httpGet:

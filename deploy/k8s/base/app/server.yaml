@@ -20,7 +20,7 @@ spec:
         app: server
     spec:
       containers:
-      - image: fra.ocir.io/fruktknlrefu/multiplayer/server:0.0.2-11
+      - image: fra.ocir.io/fruktknlrefu/multiplayer/server:0.0.2
         name: server
         readinessProbe:
           tcpSocket:

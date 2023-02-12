@@ -5,8 +5,6 @@ bases:
 patchesStrategicMerge:
   - "patch_server_replicas.yaml"
 
-# create secret ocirsecret
-
 images:
 - name: fra.ocir.io/fruktknlrefu/oci_multiplayer/server
   newName: fra.ocir.io/fruktknlrefu/oci_multiplayer/server
