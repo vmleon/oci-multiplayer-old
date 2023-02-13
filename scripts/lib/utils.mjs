@@ -44,7 +44,9 @@ export async function setVariableFromEnvOrPrompt(
   if (envValue) {
     return envValue;
   } else {
-    printChoices && (await printChoices());
+    if (printChoices) {
+      printChoices();
+    }
     const answer = await question(`${questionText}: `);
     return answer;
   }

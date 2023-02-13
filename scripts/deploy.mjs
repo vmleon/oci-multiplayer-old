@@ -4,13 +4,14 @@ import {
   exitWithError,
   generateRandomString,
   getNamespace,
+  setVariableFromEnvOrPrompt,
 } from "./lib/utils.mjs";
+import { getRegions } from "./lib/oci.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
 $.verbose = false;
 
-// TODO check kubectl is configured with a kubernetes cluster
 await checkKubectlConfigured();
 
 await createRegistrySecret();
@@ -56,16 +57,17 @@ async function createRegistrySecret() {
     const regionName = await setVariableFromEnvOrPrompt(
       "OCI_REGION",
       "OCI Region name",
-      async () => printRegionNames(regions)
+      () => printRegionNames(regions)
     );
     const { key } = regions.find((r) => r.name === regionName);
     const url = `${key}.ocir.io`;
-    const { exitCode } =
-      await $`kubectl create secret docker-registry ocir-secret --docker-server=${url} --docker-username=${namespace}/${user} --docker-password='${token}' --docker-email=${user}`;
+    await cleanRegisterSecret();
+    const { exitCode, stdout } =
+      await $`kubectl create secret docker-registry ocir-secret --docker-server="${url}" --docker-username="${namespace}/${user}" --docker-password="${token}" --docker-email="${user}"`;
     if (exitCode !== 0) {
       exitWithError("docker-registry secret not created");
     } else {
-      console.log(`${chalk.green("[ok]")} docker-registry secret created`);
+      console.log(`${chalk.green("[ok]")} ${stdout}`);
     }
   } catch (error) {
     exitWithError(error.stderr);
@@ -107,4 +109,29 @@ async function createRedisConfig(password) {
   } finally {
     await cd(pwdOutput);
   }
+}
+
+async function cleanRegisterSecret() {
+  try {
+    let { exitCode } = await $`kubectl get secret ocir-secret`;
+    if (exitCode === 0) {
+      await $`kubectl delete secret ocir-secret`;
+    }
+  } catch (error) {}
+}
+
+function printRegionNames(regions) {
+  console.log("printRegionNames");
+  const regionsByZone = regions.reduce((acc, cur) => {
+    const zone = cur.name.split("-")[0];
+    if (acc[zone]) {
+      acc[zone].push(cur.name);
+    } else {
+      acc[zone] = [cur.name];
+    }
+    return acc;
+  }, {});
+  Object.keys(regionsByZone).forEach((zone) =>
+    console.log(`\t${chalk.yellow(zone)}: ${regionsByZone[zone].join(", ")}`)
+  );
 }

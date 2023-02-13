@@ -26,6 +26,6 @@ logs
 
 *.key
 *.crt
-*.config
+*.conf
 
 .env*
