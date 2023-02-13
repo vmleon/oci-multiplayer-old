@@ -10,7 +10,7 @@ const project = "oci_multiplayer";
 const namespace = await getNamespace();
 
 const releaseChoices = ["web", "server"];
-console.log(`Release ${releaseChoices.map((c) => chalk.yellow(c).join(", "))}`);
+console.log(`Release ${releaseChoices.map((c) => chalk.yellow(c)).join(", ")}`);
 let serviceAnswer = await question("What service you want to release: ", {
   choices: ["web", "server"],
 });
