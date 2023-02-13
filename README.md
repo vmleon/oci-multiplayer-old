@@ -11,6 +11,7 @@ ARCHITECTURE DIAGRAM GOES HERE
 - Oracle Cloud Infrastructure account
 - OCI Kubernetes Cluster
 - `kubectl` configured
+- OCI user with Auth Token
 - Node.js
 
 ## TODO
@@ -18,20 +19,15 @@ ARCHITECTURE DIAGRAM GOES HERE
 Improvements:
 
 - Scale number of backend
-- Save state
+- WebWorker
+- Create a stress test
+- Water and boats with heading
+- Waste Generator
+- Winning logic
 - Score board
-- Rewards (achivements for x)
-- auth/authz
 - Analytics (data points, latency, etc)
 - Add LogAnalytics
-
-Scaling:
-
-- Measure latency
-- Create OCI Dashboard
-- Create a stress test
-- Scale backend
-- WebWorker
+- Authentication?
 
 ## Set Up
 
@@ -63,7 +59,17 @@ To complete the environment setup you need an Auth Token from OCI.
 
 Export the variable `OCI_OCIR_TOKEN` for best practices. Otherwise the script will ask for the token.
 
+> Keep the double quotes to escape the token
+
+```bash
+export OCI_OCIR_TOKEN="<your_auth_token>"
+```
+
 You can also export `OCI_OCIR_USER` to the user (email) to login to the OCI container registry.
+
+```bash
+export OCI_OCIR_USER=<your_email>
+```
 
 Set environment:
 ```bash
