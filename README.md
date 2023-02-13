@@ -4,6 +4,21 @@ This is a Three.js "game" with a multiplayer backend using WebSockets ([socket.i
 
 ![Screenshot](images/screenshot.png)
 
+## LiveLabs
+
+LiveLabs [Preview](https://vmleon.github.io/oci-multiplayer/livelabs/workshops/freetier/index.html)
+
+## Collaborators
+
+[Victor Martin](https://www.linkedin.com/in/victormartindeveloper/)
+> Technology Product Strategy Director - EMEA
+
+[Eli Schilling](https://www.linkedin.com/in/eli-schilling-509ba01/)
+> Developer Advocate for all things Cloud Native and Devops
+
+[Wojciech (Vojtech) Pluta](https://www.linkedin.com/in/wojciechpluta/)
+> Developer Relations - Immersive Technology Lead
+
 ## Requirements
 
 - Oracle Cloud Infrastructure account
