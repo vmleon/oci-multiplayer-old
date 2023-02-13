@@ -36,5 +36,15 @@ spec:
             limits:
               cpu: 250m
               memory: 521Mi
+          env:
+          - name: NODE_ENV
+            value: "production"
+          volumeMounts:
+          - name: config-volume
+            mountPath: /usr/src/app/config
+      volumes:
+      - name: config-volume
+        configMap:
+          name: server-env
       imagePullSecrets:
         - name: ocir-secret
