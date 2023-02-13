@@ -41,11 +41,27 @@ async function createRegistrySecret() {
   console.log("Create registry secret on Kubernetes cluster...");
   try {
     const namespace = await getNamespace();
-    const ocirUser = process.env.OCI_OCIR_USER;
-    const ocirToken = process.env.OCI_OCIR_TOKEN;
-    const regionKey = process.env.OCI_REGION;
+
+    const user = await setVariableFromEnvOrPrompt(
+      "OCI_OCIR_USER",
+      "OCI Username (usually an email)"
+    );
+
+    const token = await setVariableFromEnvOrPrompt(
+      "OCI_OCIR_TOKEN",
+      "OCI Auth Token for OCI Registry"
+    );
+
+    const regions = await getRegions();
+    const regionName = await setVariableFromEnvOrPrompt(
+      "OCI_REGION",
+      "OCI Region name",
+      async () => printRegionNames(regions)
+    );
+    const { key } = regions.find((r) => r.name === regionName);
+    const url = `${key}.ocir.io`;
     const { exitCode } =
-      await $`kubectl create secret docker-registry ocirsecret --docker-server=${regionKey}.ocir.io --docker-username=${namespace}/${ocirUser} --docker-password='${ocirToken}' --docker-email=${ocirUser}`;
+      await $`kubectl create secret docker-registry ocir-secret --docker-server=${url} --docker-username=${namespace}/${user} --docker-password='${token}' --docker-email=${user}`;
     if (exitCode !== 0) {
       exitWithError("docker-registry secret not created");
     } else {

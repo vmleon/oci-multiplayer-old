@@ -39,4 +39,4 @@ spec:
             cpu: 250m
             memory: 521Mi
       imagePullSecrets:
-      - name: ocirsecret
+      - name: ocir-secret

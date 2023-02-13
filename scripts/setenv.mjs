@@ -4,8 +4,7 @@ import {
   checkRequiredProgramsExist,
   getVersion,
   getNamespace,
-  getRegionByKey,
-  exitWithError,
+  setVariableFromEnvOrPrompt,
 } from "./lib/utils.mjs";
 import { getRegions } from "./lib/oci.mjs";
 import { createSelfSignedCert } from "./lib/tls.mjs";
@@ -64,25 +63,22 @@ async function loginContainerRegistry() {
   console.log("Login to container registry login...");
   const namespace = await getNamespace();
 
-  const userEnv = process.env.OCI_OCIR_USER;
-  const user = userEnv
-    ? userEnv
-    : await question("OCI Username (usually an email): ");
-  const tokenEnv = process.env.OCI_OCIR_TOKEN;
-  const token = tokenEnv
-    ? tokenEnv
-    : await question("OCI Auth Token for OCIR: ");
+  const user = await setVariableFromEnvOrPrompt(
+    "OCI_OCIR_USER",
+    "OCI Username (usually an email)"
+  );
 
-  const regionEnv = process.env.OCI_REGION;
+  const token = await setVariableFromEnvOrPrompt(
+    "OCI_OCIR_TOKEN",
+    "OCI Auth Token for OCI Registry"
+  );
+
   const regions = await getRegions();
-  if (!regionEnv) {
-    await printRegionNames(regions);
-  }
-  const regionName = regionEnv
-    ? regionEnv
-    : await question("OCI Region (eu-frankfurt-1): ", {
-        choices: regions.map((r) => r.name),
-      });
+  const regionName = await setVariableFromEnvOrPrompt(
+    "OCI_REGION",
+    "OCI Region name",
+    async () => printRegionNames(regions)
+  );
   const { key } = regions.find((r) => r.name === regionName);
   const url = `${key}.ocir.io`;
 

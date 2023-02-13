@@ -35,12 +35,19 @@ export async function getRegionByKey(code = "fra") {
   return data.find((r) => code.toUpperCase() === r.key);
 }
 
-export async function exportVariable(key, value) {
-  key = key.toUpperCase();
-  while (!value || !value.length) {
-    value = await question(`Value for ${key}: `);
+export async function setVariableFromEnvOrPrompt(
+  envKey,
+  questionText,
+  printChoices
+) {
+  const envValue = process.env[envKey];
+  if (envValue) {
+    return envValue;
+  } else {
+    printChoices && (await printChoices());
+    const answer = await question(`${questionText}: `);
+    return answer;
   }
-  await $`export ${key}=${value}`;
 }
 
 export async function exitWithError(errorMessage = "") {

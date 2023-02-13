@@ -1,7 +1,6 @@
 #!/usr/bin/env zx
 import { getVersion, getNamespace, exitWithError } from "./lib/utils.mjs";
 import { build_image, tagImage, pushImage } from "./lib/container.mjs";
-import { bump, validateBumpLevel, build_web } from "./lib/npm.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
@@ -10,6 +9,8 @@ $.verbose = false;
 const project = "oci_multiplayer";
 const namespace = await getNamespace();
 
+const releaseChoices = ["web", "server"];
+console.log(`Release ${releaseChoices.map((c) => chalk.yellow(c).join(", "))}`);
 let serviceAnswer = await question("What service you want to release: ", {
   choices: ["web", "server"],
 });

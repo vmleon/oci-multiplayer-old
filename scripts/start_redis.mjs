@@ -1,6 +1,6 @@
 #!/usr/bin/env zx
 
-import { exportVariable, exitWithError } from "./lib/utils.mjs";
+import { exitWithError } from "./lib/utils.mjs";
 import { whichContainerEngine } from "./lib/container.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
@@ -12,7 +12,7 @@ const containerName = "redis_multiplayer";
 const ce = await whichContainerEngine();
 
 if (!process.env.REDIS_PASSWORD) {
-  await exportVariable("REDIS_PASSWORD");
+  await question("REDIS_PASSWORD: ");
 }
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 
