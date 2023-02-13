@@ -15,7 +15,7 @@ Configure kubectl on Cloud Shell. Follow steps on Quick start on your Kubernetes
 Clone this repository in your local machine:
 
 ```
-git clone --branch k8s https://github.com/vmleon/oci-multiplayer.git
+git clone https://github.com/vmleon/oci-multiplayer.git
 ```
 
 Change directory to the `oci-multiplayer`:
