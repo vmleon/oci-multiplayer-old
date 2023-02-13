@@ -18,10 +18,9 @@ await createRegistrySecret();
 
 await createConfigFiles();
 
+console.log(`Ready to deploy.`);
 console.log(
-  `Ready to deploy. Run ${chalk.yellow(
-    "kubectl apply -k deploy/k8s/overlays/prod"
-  )}`
+  `Run: ${chalk.yellow("kubectl apply -k deploy/k8s/overlays/prod")}`
 );
 
 async function checkKubectlConfigured() {
@@ -63,7 +62,7 @@ async function createRegistrySecret() {
     const url = `${key}.ocir.io`;
     await cleanRegisterSecret();
     const { exitCode, stdout } =
-      await $`kubectl create secret docker-registry ocir-secret --docker-server="${url}" --docker-username="${namespace}/${user}" --docker-password="${token}" --docker-email="${user}"`;
+      await $`kubectl create secret docker-registry ocir-secret --docker-server=${url} --docker-username=${namespace}/${user} --docker-password=${token} --docker-email=${user}`;
     if (exitCode !== 0) {
       exitWithError("docker-registry secret not created");
     } else {
@@ -115,6 +114,7 @@ async function cleanRegisterSecret() {
   try {
     let { exitCode } = await $`kubectl get secret ocir-secret`;
     if (exitCode === 0) {
+      console.log("Deleting exiting ocir-secret secret");
       await $`kubectl delete secret ocir-secret`;
     }
   } catch (error) {}

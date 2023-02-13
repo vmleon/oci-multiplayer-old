@@ -18,12 +18,12 @@ const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 
 try {
   const { stdout, stderr, exitCode } = await $`${ce} \
-    run --name redis \
+    run --name ${containerName} \
     -d \
     --rm \
     -p 6379:6379 \
     -e REDIS_PASSWORD="${REDIS_PASSWORD}" \
-    ${containerName} \
+    redis \
     /bin/sh -c 'redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}'`;
   if (exitCode == 0) {
     console.log(chalk.green(stdout.trim()));
