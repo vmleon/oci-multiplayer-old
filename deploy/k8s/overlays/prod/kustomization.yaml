@@ -8,7 +8,7 @@ patchesStrategicMerge:
 images:
 - name: fra.ocir.io/fruktknlrefu/oci_multiplayer/server
   newName: fra.ocir.io/fruktknlrefu/oci_multiplayer/server
-  newTag: 0.0.4
+  newTag: 0.0.5
 - name: fra.ocir.io/fruktknlrefu/oci_multiplayer/web
   newName: fra.ocir.io/fruktknlrefu/oci_multiplayer/web
   newTag: 0.0.3

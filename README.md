@@ -105,6 +105,26 @@ Get the Public IP of the load balancer
 kubectl -n ingress-nginx get svc
 ```
 
+## Develop
+
+Change the code, and bump the version of the component:
+```bash
+npx zx scripts/bump.mjs
+```
+
+Answer `server` or `web`.
+
+Run release script for the component to push the new image.
+```bash
+npx zx scripts/release.mjs
+```
+
+Update `deploy/k8s/overlays/prod/kustomization.yaml` to the new version for the component.
+
+Redeploy with:
+```bash
+kubectl apply -k deploy/k8s/overlays/prod
+```
 
 ## Clean Up
 

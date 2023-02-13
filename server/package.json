@@ -1,6 +1,6 @@
 {
   "name": "server",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "OCI Multiplayer Server",
   "repository": "https://github.com/vmleon/oci-multiplayer",
   "main": "index.js",
