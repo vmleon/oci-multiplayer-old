@@ -5,6 +5,20 @@
 }
 
 html,
+table {
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid #aaa;
+    padding: 5px;
+    text-align: left;
+}
+
+canvas {
+    background: #CC6;
+    }
 body
 {
     height: 100vh;

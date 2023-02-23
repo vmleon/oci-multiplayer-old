@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OCI Multiplayer</title>
   </head>
-  <body>
+  <body onload="run();">
+    <canvas id="nb" width="512" height="128"></canvas>
+    <table>
+      <thead>
+        <th>Player</th><th>Score</th>
+      </thead>
+      <tbody id="thingy"></tbody>
+  </table>
     <canvas class="webgl"></canvas>
     <div id="overlay">
       <h3>Your Name:</h3>
