@@ -53,7 +53,11 @@ function init() {
   const yourName = localStorage.getItem("yourName");
   console.log(`You are ${yourName} (${yourId}) with color ${yourColor}`);
 
-  const socket = io("ws://", { transports: ["websocket"] });
+  const hostname = window.location.hostname;
+  const isDevelopment = hostname === "localhost";
+  const wsURL = isDevelopment ? "ws://localhost:3000" : "ws://";
+
+  const socket = io(wsURL, { transports: ["websocket"] });
 
   socket.on("connect_error", () => {
     console.log("ERROR connect_error");
