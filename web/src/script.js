@@ -9,6 +9,7 @@ import * as dat from "dat.gui";
 import { throttle } from "throttle-debounce";
 import short from "shortid";
 import { MathUtils } from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 MathUtils.seededRandom(Date.now);
 
@@ -211,6 +212,14 @@ function init() {
     playerMaterial = new THREE.MeshStandardMaterial({ color: yourColor });
     const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial.clone());
 
+    // TODO add 3D models
+    // const playerModel = new GLTFLoader();
+    // loader.load( 'assets/boat.gltf', function ( gltf ) {
+    //   scene.add( gltf.scene );
+    // }, undefined, function ( error ) {
+    //   console.error( error );
+    // } );
+
     let textures = {
       floorTextureDiffuse: await new THREE.TextureLoader().loadAsync(
         "assets/hardwood2_diffuse.jpeg"
@@ -223,29 +232,38 @@ function init() {
       ),
     };
 
-    const groundGeometry = new THREE.PlaneGeometry(500, 500);
-    const groundMaterial = new THREE.MeshStandardMaterial({
-      roughness: 0.8,
-      color: 0xffffff,
-      metalness: 0.2,
-      bumpScale: 0.02,
-      map: textures.floorTextureDiffuse,
-      bumpMap: textures.floorTextureBump,
-      roughnessMap: textures.floorTextureRoughness,
+    const vsh = await fetch("shaders/vertex-shader.glsl");
+    const fsh = await fetch("shaders/fragment-shader.glsl");
+
+    const groundMaterial = new THREE.ShaderMaterial({
+      uniforms: {},
+      vertexShader: await vsh.text(),
+      fragmentShader: await fsh.text(),
     });
-    groundMaterial.map.wrapS = THREE.RepeatWrapping;
-    groundMaterial.map.wrapT = THREE.RepeatWrapping;
-    groundMaterial.map.anisotropy = 4;
-    groundMaterial.map.repeat.set(2, 4);
-    groundMaterial.bumpMap.wrapS = THREE.RepeatWrapping;
-    groundMaterial.bumpMap.wrapT = THREE.RepeatWrapping;
-    groundMaterial.bumpMap.anisotropy = 4;
-    groundMaterial.bumpMap.repeat.set(2, 4);
-    groundMaterial.roughnessMap.wrapS = THREE.RepeatWrapping;
-    groundMaterial.roughnessMap.wrapT = THREE.RepeatWrapping;
-    groundMaterial.roughnessMap.anisotropy = 4;
-    groundMaterial.roughnessMap.repeat.set(2, 4);
-    groundMaterial.needsUpdate = true;
+
+    const groundGeometry = new THREE.PlaneGeometry(500, 500);
+    // const groundMaterial = new THREE.MeshStandardMaterial({
+    //   roughness: 0.8,
+    //   color: 0xffffff,
+    //   metalness: 0.2,
+    //   bumpScale: 0.02,
+    //   map: textures.floorTextureDiffuse,
+    //   bumpMap: textures.floorTextureBump,
+    //   roughnessMap: textures.floorTextureRoughness,
+    // });
+    // groundMaterial.map.wrapS = THREE.RepeatWrapping;
+    // groundMaterial.map.wrapT = THREE.RepeatWrapping;
+    // groundMaterial.map.anisotropy = 4;
+    // groundMaterial.map.repeat.set(2, 4);
+    // groundMaterial.bumpMap.wrapS = THREE.RepeatWrapping;
+    // groundMaterial.bumpMap.wrapT = THREE.RepeatWrapping;
+    // groundMaterial.bumpMap.anisotropy = 4;
+    // groundMaterial.bumpMap.repeat.set(2, 4);
+    // groundMaterial.roughnessMap.wrapS = THREE.RepeatWrapping;
+    // groundMaterial.roughnessMap.wrapT = THREE.RepeatWrapping;
+    // groundMaterial.roughnessMap.anisotropy = 4;
+    // groundMaterial.roughnessMap.repeat.set(2, 4);
+    // groundMaterial.needsUpdate = true;
     ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI * 0.5;
     ground.receiveShadow = true;
@@ -258,6 +276,14 @@ function init() {
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     scene.add(mesh);
+
+    // const model = playerModel.clone();
+    // model.position.x = randomPosition();
+    // model.position.z = randomPosition();
+    // model.position.y = 10;
+    // model.castShadow = true;
+    // model.receiveShadow = true;
+    // scene.add(model);
 
     sendYourPosition = throttle(traceRateInMillis, false, () => {
       const { x, z } = mesh.position;
@@ -314,6 +340,20 @@ function makePlayerMesh(playerMesh, scene, name) {
     }
   });
 
+  // Adapt for 3d Models
+  // function makePlayerModel(playerModel, scene, name) {
+  //   const group = new THREE.Group();
+
+  //   const model = playerModel.clone();
+  //   // model.material = playerMaterial.clone();
+  //   model.position.y = 10;
+  //   model.traverse((object) => {
+  //     if (object instanceof THREE.Mesh) {
+  //       object.castShadow = true;
+  //       object.receiveShadow = true;
+  //     }
+  //   });
+
   const nameDiv = document.createElement("div");
   nameDiv.className = "label";
   nameDiv.textContent = name;
@@ -354,6 +394,17 @@ function animateOtherPlayers(playerMeshes) {
     }
   });
 }
+
+// TO DO and change to boats
+// function animateOtherPlayers(playerModels) {
+//   Object.keys(playerModels).forEach((id) => {
+//     if (otherPlayers[id]) {
+//       const group = playerModels[id];
+//       group.position.x = otherPlayers[id].x;
+//       group.position.z = otherPlayers[id].z;
+//     }
+//   });
+// }
 
 addEventListener("keydown", (e) => {
   switch (e.key) {
@@ -405,3 +456,74 @@ function randomColorName() {
 function randomPosition() {
   return Math.random() * 500 - 250;
 }
+
+function drawString(
+  ctx,
+  text,
+  posX,
+  posY,
+  textColor,
+  rotation,
+  font,
+  fontSize
+) {
+  var lines = text.split("\n");
+  if (!rotation) rotation = 0;
+  if (!font) font = "'serif'";
+  if (!fontSize) fontSize = 16;
+  if (!textColor) textColor = "#000000";
+  ctx.save();
+  ctx.font = fontSize + "px " + font;
+  ctx.fillStyle = textColor;
+  ctx.translate(posX, posY);
+  ctx.rotate((rotation * Math.PI) / 180);
+  for (i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], 0, i * fontSize);
+  }
+  ctx.restore();
+}
+
+function run() {
+  var nbc = document.getElementById("nb").getContext("2d");
+  drawString(nbc, "SCORE:01278765454", 60, 60, "#EE4", 0, "Verdana", 36);
+  drawString(
+    nbc,
+    "__________________________________Allianos Illegados__",
+    63,
+    20,
+    "#F63",
+    0,
+    "verdana",
+    12
+  );
+  drawString(
+    nbc,
+    "best lap: 20.2 s -  time: 20.2 sec ",
+    85,
+    85,
+    "#a66",
+    0,
+    "Trebuchet MS",
+    22
+  );
+  drawString(nbc, "DOWN ->", 10, 10, "#66a", 90, "Trebuchet MS", 24);
+  drawString(nbc, "UP ->", 500, 72, "#66a", -90, "Trebuchet MS", 24);
+}
+
+function Player(myName, myDate, myScore) {
+  this.name = myName;
+  this.date = myDate;
+  this.score = myScore;
+}
+
+// Create new players
+Players = [player1, player2, player3];
+
+// function displayLeaderboard() {
+//   let theExport = "";
+//   Players.sort((aPlayer, bPlayer) => aPlayer.score - bPlayer.score);
+//   Players.forEach((player) => theExport += '<tr><td>' + player.name + '</td><td>' + player.score + '</td></tr>');
+//   document.getElementById("thingy").innerHTML = theExport; //Why have good ID's when you can have bad ones? | Who needs children when we can use innerHTML?
+// }
+
+// displayLeaderboard(Players);
