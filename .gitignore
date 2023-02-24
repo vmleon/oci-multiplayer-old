@@ -2,6 +2,7 @@ node_modules/
 build/
 dist/
 generated/
+.vscode/
 
 .DS_Store
 Thumbs.db

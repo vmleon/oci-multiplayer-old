@@ -13,3 +13,6 @@ variable "compartment_ocid" {
 variable "ssh_public_key" {
   type = string
 }
+variable "private_key_path" {}
+variable "fingerprint" {}
+variable "user_ocid" {}
