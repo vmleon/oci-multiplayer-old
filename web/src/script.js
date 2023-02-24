@@ -6,7 +6,6 @@ import {
   CSS2DObject,
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import * as dat from "dat.gui";
-import { io } from "socket.io-client";
 import { throttle } from "throttle-debounce";
 import short from "shortid";
 import { MathUtils } from "three";
@@ -52,23 +51,6 @@ function init() {
   }
   const yourName = localStorage.getItem("yourName");
   console.log(`You are ${yourName} (${yourId}) with color ${yourColor}`);
-
-  const hostname = window.location.hostname;
-  const isDevelopment = hostname === "localhost";
-  const wsURL = isDevelopment ? "ws://localhost:3000" : "ws://";
-
-  const socket = io(wsURL, { transports: ["websocket"] });
-
-  socket.on("connect_error", () => {
-    console.log("ERROR connect_error");
-  });
-
-  socket.on("allPlayers", (otherPlayersFromServer) => {
-    delete otherPlayersFromServer[yourId];
-    for (const [key, value] of Object.entries(otherPlayersFromServer)) {
-      otherPlayers[key] = value;
-    }
-  });
 
   const overlay = document.getElementById("overlay");
   overlay.remove();
@@ -168,35 +150,66 @@ function init() {
   gui.open();
 
   (async function () {
+    const hostname = window.location.hostname;
+    const isDevelopment = hostname === "localhost";
+    const wsURL = isDevelopment ? "ws://localhost:3000" : "ws://";
+
+    const worker = new Worker(new URL("./commsWorker.js", import.meta.url));
+    worker.postMessage({ type: "start", body: wsURL });
+
+    worker.onmessage = ({ data }) => {
+      const { type, body, error } = data;
+      if (error) {
+        console.error(error);
+        Object.keys(otherPlayersMeshes).forEach((id) =>
+          scene.remove(otherPlayersMeshes[id])
+        );
+        Object.keys(otherPlayers).forEach((id) => delete otherPlayers[id]);
+      }
+      switch (type) {
+        case "connect":
+          console.log("Web Socket connection");
+          break;
+        case "disconnect":
+          console.log("Web Socket disconnection");
+          break;
+        case "log":
+          console.log(body);
+          break;
+        case "allPlayers":
+          // FIXME this delete can and should happen on the web worker
+          delete body[yourId];
+          for (const [key, value] of Object.entries(body)) {
+            otherPlayers[key] = value;
+          }
+          break;
+        case "player.new":
+          const { id, name } = body;
+          if (id !== yourId) {
+            console.log(`New Player ${name} (${id})`);
+            otherPlayersMeshes[id] = makePlayerMesh(playerMesh, scene, name);
+          }
+          break;
+        case "player.delete":
+          console.log(`Delete Player ${body}`);
+          if (body !== yourId) {
+            otherPlayersMeshes[body].children
+              .filter((e) => e instanceof CSS2DObject)
+              .forEach((o) => {
+                o.element.remove();
+                scene.remove(o);
+              }),
+              scene.remove(otherPlayersMeshes[body]);
+            delete otherPlayersMeshes[body];
+          }
+          break;
+        default:
+          break;
+      }
+    };
     const playerGeometry = new THREE.SphereGeometry(12, 24, 24);
     playerMaterial = new THREE.MeshStandardMaterial({ color: yourColor });
     const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial.clone());
-
-    socket.on("player.new", ({ id, name }) => {
-      if (id !== yourId) {
-        console.log(`New Player ${name} (${id})`);
-        otherPlayersMeshes[id] = makePlayerMesh(playerMesh, scene, name);
-      }
-    });
-
-    socket.on("player.delete", (id) => {
-      console.log(`Delete Player ${id}`);
-      otherPlayersMeshes[id].children
-        .filter((e) => e instanceof CSS2DObject)
-        .forEach((o) => {
-          o.element.remove();
-          console.log(scene.remove(o));
-        }),
-        scene.remove(otherPlayersMeshes[id]);
-      delete otherPlayersMeshes[id];
-    });
-
-    socket.io.on("error", () => {
-      Object.keys(otherPlayersMeshes).forEach((id) =>
-        scene.remove(otherPlayersMeshes[id])
-      );
-      Object.keys(otherPlayers).forEach((id) => delete otherPlayers[id]);
-    });
 
     let textures = {
       floorTextureDiffuse: await new THREE.TextureLoader().loadAsync(
@@ -256,7 +269,7 @@ function init() {
         color: yourColor,
         name: yourName,
       };
-      socket.emit("player.trace", trace);
+      worker.postMessage({ type: "player.trace", body: trace });
     });
 
     renderer.setAnimationLoop(render);
