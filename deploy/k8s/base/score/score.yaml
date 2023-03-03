@@ -21,7 +21,7 @@ spec:
         app: score
     spec:
       containers:
-        - image: fra.ocir.io/fruktknlrefu/oci_multiplayer/score:0.0.1
+        - image: REGION_TEMPLATE_KEY.ocir.io/TENANCY_TEMPLATE_NAMESPACE/oci_multiplayer/score:0.0.1
           name: score
           livenessProbe:
             httpGet:

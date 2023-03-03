@@ -1,11 +1,17 @@
 #!/usr/bin/env zx
-import { getVersion, getNamespace, exitWithError } from "./lib/utils.mjs";
+import {
+  getVersion,
+  getNamespace,
+  printRegionNames,
+  setVariableFromEnvOrPrompt,
+} from "./lib/utils.mjs";
 import { build_image, tagImage, pushImage } from "./lib/container.mjs";
 import {
   buildJarGradle,
   cleanGradle,
   getVersionGradle,
 } from "./lib/gradle.mjs";
+import { getRegions } from "./lib/oci.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
@@ -16,6 +22,15 @@ const [action] = _;
 
 const project = "oci_multiplayer";
 const namespace = await getNamespace();
+
+const regions = await getRegions();
+const regionName = await setVariableFromEnvOrPrompt(
+  "OCI_REGION",
+  "OCI Region name",
+  () => printRegionNames(regions)
+);
+const { key } = regions.find((r) => r.name === regionName);
+const ocirUrl = `${key}.ocir.io`;
 
 if (action === "web") {
   await release("web");
@@ -52,7 +67,7 @@ async function releaseNpm(service) {
   const image_name = `${project}/${service}`;
   await build_image(`localhost/${image_name}`, currentVersion);
   const local_image = `localhost/${image_name}:${currentVersion}`;
-  const remote_image = `fra.ocir.io/${namespace}/${image_name}:${currentVersion}`;
+  const remote_image = `${ocirUrl}/${namespace}/${image_name}:${currentVersion}`;
   await tagImage(local_image, remote_image);
   await pushImage(remote_image);
   console.log(`Released: ${chalk.yellow(remote_image)}`);
@@ -66,7 +81,7 @@ async function releaseGradle(service) {
   const image_name = `${project}/${service}`;
   await build_image(`localhost/${image_name}`, currentVersion);
   const local_image = `localhost/${image_name}:${currentVersion}`;
-  const remote_image = `fra.ocir.io/${namespace}/${image_name}:${currentVersion}`;
+  const remote_image = `${ocirUrl}/${namespace}/${image_name}:${currentVersion}`;
   await tagImage(local_image, remote_image);
   await pushImage(remote_image);
   console.log(`Released: ${chalk.yellow(remote_image)}`);

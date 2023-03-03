@@ -20,7 +20,7 @@ spec:
         app: ws-server
     spec:
       containers:
-        - image: fra.ocir.io/fruktknlrefu/oci_multiplayer/server:0.0.2
+        - image: REGION_TEMPLATE_KEY.ocir.io/TENANCY_TEMPLATE_NAMESPACE/oci_multiplayer/server:0.0.2
           name: ws-server
           readinessProbe:
             tcpSocket:

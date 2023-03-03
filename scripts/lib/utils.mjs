@@ -20,6 +20,22 @@ export async function getNamespace() {
   return data;
 }
 
+export async function printRegionNames(regions) {
+  console.log("printRegionNames");
+  const regionsByZone = regions.reduce((acc, cur) => {
+    const zone = cur.name.split("-")[0];
+    if (acc[zone]) {
+      acc[zone].push(cur.name);
+    } else {
+      acc[zone] = [cur.name];
+    }
+    return acc;
+  }, {});
+  Object.keys(regionsByZone).forEach((zone) =>
+    console.log(`\t${chalk.yellow(zone)}: ${regionsByZone[zone].join(", ")}`)
+  );
+}
+
 export async function generateRandomString() {
   try {
     const output = (await $`openssl rand -base64 ${22}`).stdout.trim();
