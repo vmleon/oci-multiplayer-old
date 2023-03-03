@@ -16,13 +16,13 @@ spec:
             name: server
             port:
               number: 3000
-      # - path: /healthz
-      #   pathType: Prefix
-      #   backend:
-      #     service:
-      #       name: server
-      #       port:
-      #         number: 3000
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: score
+            port:
+              number: 8080
       - path: /
         pathType: Prefix
         backend:

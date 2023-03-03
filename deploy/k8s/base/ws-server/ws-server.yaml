@@ -2,13 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: server
-  name: server
+    app: ws-server
+  name: ws-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: server
+      app: ws-server
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,11 +17,11 @@ spec:
   template:
     metadata:
       labels:
-        app: server
+        app: ws-server
     spec:
       containers:
         - image: fra.ocir.io/fruktknlrefu/oci_multiplayer/server:0.0.2
-          name: server
+          name: ws-server
           readinessProbe:
             tcpSocket:
               port: 3000
@@ -45,6 +45,6 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: server-env
+          name: ws-server-env
       imagePullSecrets:
         - name: ocir-secret

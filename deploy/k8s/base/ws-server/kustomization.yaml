@@ -2,12 +2,10 @@ resources:
   - redis-storage.yaml
   - redis-svc.yaml
   - redis.yaml
-  - server.yaml
-  - server-svc.yaml
-  - web.yaml
-  - web-svc.yaml
+  - ws-server.yaml
+  - ws-server-svc.yaml
 configMapGenerator:
-  - name: server-env
+  - name: ws-server-env
     files:
       - .env=.env_server
   - name: redis-config

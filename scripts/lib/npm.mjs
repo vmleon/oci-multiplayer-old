@@ -28,13 +28,6 @@ export async function bump(level = "patch") {
   }
 }
 
-export async function validateBumpLevel(level) {
-  if (!["major", "minor", "patch"].includes(level)) {
-    exitWithError("Error: release version must be 'major', 'minor' or 'patch'");
-  }
-  return level;
-}
-
 export async function build_web() {
   try {
     console.log(`Install dependencies`);

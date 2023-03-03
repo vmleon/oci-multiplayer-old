@@ -83,7 +83,7 @@ async function createConfigFiles() {
 
 async function createRedisConfig(password) {
   const pwdOutput = (await $`pwd`).stdout.trim();
-  await cd("./deploy/k8s/base/app");
+  await cd("./deploy/k8s/base/server");
   try {
     let { exitCode: exitCodeConfig, stderr: stderrConfig } =
       await $`sed 's/MASTERPASSWORD/${quote(

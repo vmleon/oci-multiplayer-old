@@ -53,26 +53,21 @@ npx zx scripts/setenv.mjs
 > - login to container registry
 > - print components versions
 
-Release the server:
+Release all components:
 ```bash
-npx zx scripts/release.mjs
+npx zx scripts/release.mjs -a
 ```
 
-Answer: `server`
-
-Release the web:
-```bash
-npx zx scripts/release.mjs
-```
-
-Answer: `web`
-
-Prepare deployment to Kubernetes:
+Run the setup for the deployment:
 ```bash
 npx zx scripts/deploy.mjs
 ```
 
-Apply deployment:
+When the output says:
+> Ready to deploy.
+> Run: kubectl apply -k deploy/k8s/overlays/prod
+
+You can run the kubectl apply:
 ```bash
 kubectl apply -k deploy/k8s/overlays/prod
 ```
@@ -85,11 +80,21 @@ kubectl -n ingress-nginx get svc
 ## Develop
 
 Change the code, and bump the version of the component:
+
+Web:
 ```bash
-npx zx scripts/bump.mjs
+npx zx scripts/bump.mjs web
 ```
 
-Answer `server` or `web`.
+Web Socket Server:
+```bash
+npx zx scripts/bump.mjs server
+```
+
+Score Backend:
+```bash
+npx zx scripts/bump.mjs score
+```
 
 Run release script for the component to push the new image.
 ```bash

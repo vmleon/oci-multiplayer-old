@@ -1,6 +1,6 @@
-FROM eclipse-temurin:19
+FROM --platform=linux/amd64 eclipse-temurin:19
 
 VOLUME /tmp
-COPY build/libs/*.jar app.jar
+COPY build/libs/*.jar score.jar
 
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java","-jar","/score.jar"]
