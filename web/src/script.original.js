@@ -1,0 +1,529 @@
+import "./style.css";
+import * as THREE from "three";
+import Stats from "three/examples/jsm/libs/stats.module.js";
+import {
+  CSS2DRenderer,
+  CSS2DObject,
+} from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import * as dat from "dat.gui";
+import { throttle } from "throttle-debounce";
+import short from "shortid";
+import { MathUtils } from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+
+MathUtils.seededRandom(Date.now);
+
+const startButton = document.getElementById("startButton");
+startButton.addEventListener("click", init);
+
+if (!localStorage.getItem("yourId")) {
+  localStorage.setItem("yourId", short());
+}
+const yourId = localStorage.getItem("yourId");
+const yourColor = randomColorName();
+
+if (localStorage.getItem("yourName")) {
+  document.getElementsByName("name")[0].value =
+    localStorage.getItem("yourName");
+}
+
+const traceRateInMillis = 50;
+
+const logTrace = throttle(1000, false, console.log);
+
+let stats;
+let canvas;
+let renderer;
+let labelRenderer;
+let scene;
+let camera;
+let sunLight;
+let otherPlayers = {};
+let otherPlayersMeshes = {};
+let playerMaterial;
+
+let ground;
+let sendYourPosition;
+
+function init() {
+  const inputNameValue = document.getElementsByName("name")[0].value;
+  if (inputNameValue.length) {
+    localStorage.setItem("yourName", inputNameValue);
+  }
+  const yourName = localStorage.getItem("yourName");
+  console.log(`You are ${yourName} (${yourId}) with color ${yourColor}`);
+
+  const overlay = document.getElementById("overlay");
+  overlay.remove();
+
+  // Debug
+  const gui = new dat.GUI();
+  const params = {
+    sunLightIntensity: 4,
+    camera: { x: 0, y: 200, z: 100, inclination: 60 },
+    offset: 0,
+  };
+
+  const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
+
+  stats = new Stats();
+
+  // Canvas
+  canvas = document.querySelector("canvas.webgl");
+  document.body.appendChild(stats.dom);
+
+  // Scene
+  scene = new THREE.Scene();
+
+  // Renderer
+  renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+  });
+  renderer.setSize(sizes.width, sizes.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.physicallyCorrectLights = true;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  labelRenderer = new CSS2DRenderer();
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.domElement.style.position = "absolute";
+  labelRenderer.domElement.style.top = "0px";
+  document.body.appendChild(labelRenderer.domElement);
+
+  // Camera
+  camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 1, 1000);
+  camera.position.set(0, 350, 260);
+  scene.add(camera);
+
+  // Lights
+  const ambientLight = new THREE.AmbientLight(0xcccccc, 0.6);
+  scene.add(ambientLight);
+
+  sunLight = new THREE.DirectionalLight(
+    new THREE.Color("#ffffff"),
+    params.sunLightIntensity
+  );
+  sunLight.position.set(250, 150, 20);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.width = 2048;
+  sunLight.shadow.mapSize.height = 2048;
+  sunLight.shadow.camera.near = 1;
+  sunLight.shadow.camera.far = 600;
+  sunLight.shadow.camera.left = -300;
+  sunLight.shadow.camera.bottom = -300;
+  sunLight.shadow.camera.top = 300;
+  sunLight.shadow.camera.right = 300;
+  scene.add(sunLight);
+
+  window.addEventListener("resize", () => {
+    // Update sizes
+    sizes.width = window.innerWidth;
+    sizes.height = window.innerHeight;
+
+    // Update camera
+    camera.aspect = sizes.width / sizes.height;
+    camera.updateProjectionMatrix();
+
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // GUI
+  gui.width = 300;
+  const offsetFolder = gui.addFolder("Offset");
+  offsetFolder.add(params, "offset", -200, 200, 1);
+  const lightingFolder = gui.addFolder("Lighting");
+  lightingFolder.add(params, "sunLightIntensity", 3, 8, 0.1);
+  const cameraFolder = gui.addFolder("Camera");
+  cameraFolder.add(params.camera, "x", -500, 500, 1);
+  cameraFolder.add(params.camera, "y", -500, 500, 1);
+  cameraFolder.add(params.camera, "z", -500, 500, 1);
+  cameraFolder.add(params.camera, "inclination", 0, 90, 1);
+  gui.open();
+
+  (async function () {
+    const hostname = window.location.hostname;
+    const isDevelopment = hostname === "localhost";
+    const wsURL = isDevelopment ? "ws://localhost:3000" : "ws://";
+
+    const worker = new Worker(new URL("./commsWorker.js", import.meta.url));
+    worker.postMessage({ type: "start", body: wsURL });
+
+    worker.onmessage = ({ data }) => {
+      const { type, body, error } = data;
+      if (error) {
+        console.error(error);
+        Object.keys(otherPlayersMeshes).forEach((id) =>
+          scene.remove(otherPlayersMeshes[id])
+        );
+        Object.keys(otherPlayers).forEach((id) => delete otherPlayers[id]);
+      }
+      switch (type) {
+        case "connect":
+          console.log("Web Socket connection");
+          break;
+        case "disconnect":
+          console.log("Web Socket disconnection");
+          break;
+        case "log":
+          console.log(body);
+          break;
+        case "allPlayers":
+          // FIXME this delete can and should happen on the web worker
+          delete body[yourId];
+          for (const [key, value] of Object.entries(body)) {
+            otherPlayers[key] = value;
+          }
+          break;
+        case "player.new":
+          const { id, name } = body;
+          if (id !== yourId) {
+            console.log(`New Player ${name} (${id})`);
+            otherPlayersMeshes[id] = makePlayerMesh(playerMesh, scene, name);
+          }
+          break;
+        case "player.delete":
+          console.log(`Delete Player ${body}`);
+          if (body !== yourId) {
+            otherPlayersMeshes[body].children
+              .filter((e) => e instanceof CSS2DObject)
+              .forEach((o) => {
+                o.element.remove();
+                scene.remove(o);
+              }),
+              scene.remove(otherPlayersMeshes[body]);
+            delete otherPlayersMeshes[body];
+          }
+          break;
+        default:
+          break;
+      }
+    };
+    const playerGeometry = new THREE.SphereGeometry(12, 24, 24);
+    playerMaterial = new THREE.MeshStandardMaterial({ color: yourColor });
+    const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial.clone());
+
+    // TODO add 3D models
+    // const playerModel = new GLTFLoader();
+    // loader.load( 'assets/boat.gltf', function ( gltf ) {
+    //   scene.add( gltf.scene );
+    // }, undefined, function ( error ) {
+    //   console.error( error );
+    // } );
+
+    let textures = {
+      floorTextureDiffuse: await new THREE.TextureLoader().loadAsync(
+        "assets/hardwood2_diffuse.jpeg"
+      ),
+      floorTextureBump: await new THREE.TextureLoader().loadAsync(
+        "assets/hardwood2_bump.jpeg"
+      ),
+      floorTextureRoughness: await new THREE.TextureLoader().loadAsync(
+        "assets/hardwood2_roughness.jpeg"
+      ),
+    };
+
+    const vsh = await fetch("shaders/vertex-shader.glsl");
+    const fsh = await fetch("shaders/fragment-shader.glsl");
+
+    const groundMaterial = new THREE.ShaderMaterial({
+      uniforms: {},
+      vertexShader: await vsh.text(),
+      fragmentShader: await fsh.text(),
+    });
+
+    const groundGeometry = new THREE.PlaneGeometry(500, 500);
+    // const groundMaterial = new THREE.MeshStandardMaterial({
+    //   roughness: 0.8,
+    //   color: 0xffffff,
+    //   metalness: 0.2,
+    //   bumpScale: 0.02,
+    //   map: textures.floorTextureDiffuse,
+    //   bumpMap: textures.floorTextureBump,
+    //   roughnessMap: textures.floorTextureRoughness,
+    // });
+    // groundMaterial.map.wrapS = THREE.RepeatWrapping;
+    // groundMaterial.map.wrapT = THREE.RepeatWrapping;
+    // groundMaterial.map.anisotropy = 4;
+    // groundMaterial.map.repeat.set(2, 4);
+    // groundMaterial.bumpMap.wrapS = THREE.RepeatWrapping;
+    // groundMaterial.bumpMap.wrapT = THREE.RepeatWrapping;
+    // groundMaterial.bumpMap.anisotropy = 4;
+    // groundMaterial.bumpMap.repeat.set(2, 4);
+    // groundMaterial.roughnessMap.wrapS = THREE.RepeatWrapping;
+    // groundMaterial.roughnessMap.wrapT = THREE.RepeatWrapping;
+    // groundMaterial.roughnessMap.anisotropy = 4;
+    // groundMaterial.roughnessMap.repeat.set(2, 4);
+    // groundMaterial.needsUpdate = true;
+    ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI * 0.5;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const mesh = playerMesh.clone();
+    mesh.position.x = randomPosition();
+    mesh.position.z = randomPosition();
+    mesh.position.y = 10;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+
+    // const model = playerModel.clone();
+    // model.position.x = randomPosition();
+    // model.position.z = randomPosition();
+    // model.position.y = 10;
+    // model.castShadow = true;
+    // model.receiveShadow = true;
+    // scene.add(model);
+
+    sendYourPosition = throttle(traceRateInMillis, false, () => {
+      const { x, z } = mesh.position;
+      const trace = {
+        id: yourId,
+        name: yourName,
+        x: x.toFixed(1),
+        z: z.toFixed(1),
+        color: yourColor,
+        name: yourName,
+      };
+      worker.postMessage({ type: "player.trace", body: trace });
+    });
+
+    renderer.setAnimationLoop(render);
+
+    function render() {
+      animateYourPlayer(mesh);
+
+      animateOtherPlayers(otherPlayersMeshes);
+
+      // Update params
+      sunLight.intensity = params.sunLightIntensity;
+      camera.rotation.x = MathUtils.degToRad(-params.camera.inclination);
+
+      // traces
+      sendYourPosition();
+
+      camera.position.copy(mesh.position);
+      camera.position.add(
+        new THREE.Vector3(params.camera.x, params.camera.y, params.camera.z)
+      );
+
+      // Update Stats
+      stats.update();
+
+      // Render
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+  })();
+}
+
+function makePlayerMesh(playerMesh, scene, name) {
+  const group = new THREE.Group();
+
+  const mesh = playerMesh.clone();
+  mesh.material = playerMaterial.clone();
+  mesh.position.y = 10;
+  mesh.traverse((object) => {
+    if (object instanceof THREE.Mesh) {
+      object.castShadow = true;
+      object.receiveShadow = true;
+    }
+  });
+
+  // Adapt for 3d Models
+  // function makePlayerModel(playerModel, scene, name) {
+  //   const group = new THREE.Group();
+
+  //   const model = playerModel.clone();
+  //   // model.material = playerMaterial.clone();
+  //   model.position.y = 10;
+  //   model.traverse((object) => {
+  //     if (object instanceof THREE.Mesh) {
+  //       object.castShadow = true;
+  //       object.receiveShadow = true;
+  //     }
+  //   });
+
+  const nameDiv = document.createElement("div");
+  nameDiv.className = "label";
+  nameDiv.textContent = name;
+  nameDiv.style.marginTop = "-1em";
+  const nameLabel = new CSS2DObject(nameDiv);
+  nameLabel.position.set(0, 12, 0);
+  nameLabel.layers.set(0);
+
+  group.add(mesh);
+  group.add(nameLabel);
+  scene.add(group);
+
+  return group;
+}
+
+let dx = 0;
+let dz = 0;
+
+function animateYourPlayer(mesh) {
+  const { x, z } = mesh.position;
+
+  if ((x + dx < 250) & (x + dx > -250)) {
+    mesh.position.x = x + dx;
+  }
+  if ((z + dz < 250) & (z + dz > -250)) {
+    mesh.position.z = z + dz;
+  }
+}
+
+function animateOtherPlayers(playerMeshes) {
+  Object.keys(playerMeshes).forEach((id) => {
+    if (otherPlayers[id]) {
+      const group = playerMeshes[id];
+      const ballMesh = group.children[0];
+      ballMesh.material.color = new THREE.Color(otherPlayers[id].color);
+      group.position.x = otherPlayers[id].x;
+      group.position.z = otherPlayers[id].z;
+    }
+  });
+}
+
+// TO DO and change to boats
+// function animateOtherPlayers(playerModels) {
+//   Object.keys(playerModels).forEach((id) => {
+//     if (otherPlayers[id]) {
+//       const group = playerModels[id];
+//       group.position.x = otherPlayers[id].x;
+//       group.position.z = otherPlayers[id].z;
+//     }
+//   });
+// }
+
+addEventListener("keydown", (e) => {
+  switch (e.key) {
+    case "ArrowUp":
+    case "w":
+      dz = -1;
+      break;
+    case "ArrowDown":
+    case "s":
+      dz = 1;
+      break;
+    case "ArrowRight":
+    case "d":
+      dx = 1;
+      break;
+    case "ArrowLeft":
+    case "a":
+      dx = -1;
+      break;
+  }
+});
+
+addEventListener("keyup", (e) => {
+  switch (e.key) {
+    case "ArrowUp":
+    case "w":
+      dz = 0;
+      break;
+    case "ArrowDown":
+    case "s":
+      dz = 0;
+      break;
+    case "ArrowRight":
+    case "d":
+      dx = 0;
+      break;
+    case "ArrowLeft":
+    case "a":
+      dx = 0;
+      break;
+  }
+});
+
+function randomColorName() {
+  const colors = Object.keys(THREE.Color.NAMES);
+  return colors[MathUtils.randInt(0, colors.length - 1)];
+}
+
+function randomPosition() {
+  return Math.random() * 500 - 250;
+}
+
+function drawString(
+  ctx,
+  text,
+  posX,
+  posY,
+  textColor,
+  rotation,
+  font,
+  fontSize
+) {
+  var lines = text.split("\n");
+  if (!rotation) rotation = 0;
+  if (!font) font = "'serif'";
+  if (!fontSize) fontSize = 16;
+  if (!textColor) textColor = "#000000";
+  ctx.save();
+  ctx.font = fontSize + "px " + font;
+  ctx.fillStyle = textColor;
+  ctx.translate(posX, posY);
+  ctx.rotate((rotation * Math.PI) / 180);
+  for (i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], 0, i * fontSize);
+  }
+  ctx.restore();
+}
+
+function run() {
+  var nbc = document.getElementById("nb").getContext("2d");
+  drawString(nbc, "SCORE:01278765454", 60, 60, "#EE4", 0, "Verdana", 36);
+  drawString(
+    nbc,
+    "__________________________________Allianos Illegados__",
+    63,
+    20,
+    "#F63",
+    0,
+    "verdana",
+    12
+  );
+  drawString(
+    nbc,
+    "best lap: 20.2 s -  time: 20.2 sec ",
+    85,
+    85,
+    "#a66",
+    0,
+    "Trebuchet MS",
+    22
+  );
+  drawString(nbc, "DOWN ->", 10, 10, "#66a", 90, "Trebuchet MS", 24);
+  drawString(nbc, "UP ->", 500, 72, "#66a", -90, "Trebuchet MS", 24);
+}
+
+function Player(myName, myDate, myScore) {
+  this.name = myName;
+  this.date = myDate;
+  this.score = myScore;
+}
+
+// Create new players
+Players = [player1, player2, player3];
+
+// function displayLeaderboard() {
+//   let theExport = "";
+//   Players.sort((aPlayer, bPlayer) => aPlayer.score - bPlayer.score);
+//   Players.forEach((player) => theExport += '<tr><td>' + player.name + '</td><td>' + player.score + '</td></tr>');
+//   document.getElementById("thingy").innerHTML = theExport; //Why have good ID's when you can have bad ones? | Who needs children when we can use innerHTML?
+// }
+
+// displayLeaderboard(Players);

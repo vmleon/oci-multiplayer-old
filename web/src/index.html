@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OCI Multiplayer</title>
   </head>
-  <body onload="run();">
+  <body>
     <canvas id="nb" width="512" height="128"></canvas>
     <table>
       <thead>
@@ -13,12 +13,13 @@
       </thead>
       <tbody id="thingy"></tbody>
   </table>
-    <canvas class="webgl"></canvas>
+    <canvas class="Game"></canvas>
     <div id="overlay">
       <h3>Your Name:</h3>
       <input name="name" autofocus />
       <button id="startButton">Play</button>
     </div>
+    <button id="restart-btn" style="display: none;">Restart</button>
     <!-- <div id="blocker">
       <div id="instructions">
         <span style="font-size: 40px">Click to play</span>
