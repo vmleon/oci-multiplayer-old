@@ -117,3 +117,21 @@ kubectl delete -k deploy/k8s/overlays/prod
 ```
 
 > TODO delete container images on OCI registry
+
+To run in dev mode:
+Server:
+```
+export REDIS_PASSWORD=fk3ampeHq
+zx script/start_redis.msj
+cd server && npm start
+```
+
+Client:
+```
+cd web
+npm run dev
+```
+
+Make sure you change the local ip for localhost on the browser.
+
+Can you add the steps to run on dev in the README?
