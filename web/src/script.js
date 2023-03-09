@@ -33,8 +33,6 @@ let timerId;
 let objectIntervalId;
 let gameOverFlag = false;
 
-var console = window.console;
-
 const startButton = document.getElementById("startButton");
 startButton.addEventListener("click", init);
 
@@ -413,7 +411,6 @@ function init() {
         object.receiveShadow = true;
       }
     });
-
 
     const nameDiv = document.createElement("div");
     nameDiv.className = "label";
