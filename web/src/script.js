@@ -1,6 +1,9 @@
 import "./style.css";
 import * as THREE from "three";
-import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import {
+  CSS2DRenderer,
+  CSS2DObject,
+} from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { throttle } from "throttle-debounce";
 import short from "shortid";
 import { MathUtils } from "three";
@@ -469,7 +472,6 @@ function init() {
 
     // Save the player's name and score to a local JSON file
     const playerData = {
-      id: yourId,
       name: playerName,
       score: score,
       date: new Date(),
