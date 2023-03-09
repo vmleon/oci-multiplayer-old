@@ -30,6 +30,11 @@ let timerId;
 let objectIntervalId;
 let gameOverFlag = false;
 
+<<<<<<< Updated upstream
+=======
+// var console = window.console;
+
+>>>>>>> Stashed changes
 const startButton = document.getElementById("startButton");
 startButton.addEventListener("click", init);
 
@@ -397,15 +402,38 @@ function init() {
 
   function makePlayerMesh(playerMesh, scene, name) {
     const group = new THREE.Group();
-
-    const mesh = playerMesh.clone();
-    // mesh.material = playerMaterial.clone();
-    mesh.position.y = 10;
-    mesh.traverse((object) => {
-      if (object instanceof THREE.Mesh) {
-        object.castShadow = true;
-        object.receiveShadow = true;
+  
+    const loader = new GLTFLoader();
+  
+    loader.load(
+      'assets/boat.gltf',
+      (gltf) => {
+        const mesh = gltf.scene;
+        mesh.position.y = 10;
+        mesh.traverse((object) => {
+          if (object instanceof THREE.Mesh) {
+            object.castShadow = true;
+            object.receiveShadow = true;
+          }
+        });
+  
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "label";
+        nameDiv.textContent = name;
+        nameDiv.style.marginTop = "-1em";
+        const nameLabel = new CSS2DObject(nameDiv);
+        nameLabel.position.set(0, 12, 0);
+        nameLabel.layers.set(0);
+  
+        group.add(mesh);
+        group.add(nameLabel);
+        scene.add(group);
+      },
+      undefined,
+      (error) => {
+        console.error('Failed to load glTF model:', error);
       }
+<<<<<<< Updated upstream
     });
 
     const nameDiv = document.createElement("div");
@@ -420,8 +448,12 @@ function init() {
     group.add(nameLabel);
     scene.add(group);
 
+=======
+    );
+  
+>>>>>>> Stashed changes
     return group;
-  }
+  };
 
   function gameOver() {
     console.log("Game over!");
