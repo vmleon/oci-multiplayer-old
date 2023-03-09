@@ -16,9 +16,7 @@ logger.info(`Environment: ${environment}`);
 const app = express();
 const httpServer = createServer(app);
 
-const REDIS_HOST = process.env.REDIS_SERVICE_HOST
-  ? process.env.REDIS_SERVICE_HOST
-  : "localhost";
+const REDIS_HOST = "localhost";
 
 const REDIS_SERVICE_PORT = process.env.REDIS_SERVICE_PORT
   ? process.env.REDIS_SERVICE_PORT

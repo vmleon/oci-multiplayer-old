@@ -82,6 +82,7 @@ function init() {
         for (const [key, value] of Object.entries(body)) {
           otherPlayers[key] = value;
         }
+        console.log(otherPlayers);
         break;
       case "player.new":
         const { id, name } = body;
@@ -137,25 +138,25 @@ function init() {
     camera.updateProjectionMatrix();
   });
 
-  const planeGeometry = new THREE.PlaneGeometry(24, 9);
-  const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x00008b });
-  const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-  plane.position.set(0, 0, -0.3);
-  scene.add(plane);
+  // const planeGeometry = new THREE.PlaneGeometry(89, 23);
+  // const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x00008b });
+  // const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  // plane.position.set(0, 0, -0.3);
+  // scene.add(plane);
 
-  const sandGeometry = new THREE.PlaneGeometry(25, 10);
+  const sandGeometry = new THREE.PlaneGeometry(90, 24);
   const sandMaterial = new THREE.MeshPhongMaterial({ color: 0xf4a460 });
   const sand = new THREE.Mesh(sandGeometry, sandMaterial);
   sand.position.set(0, 0, -0.2);
   scene.add(sand);
 
-  const grassGeometry = new THREE.PlaneGeometry(89, 23);
+  const grassGeometry = new THREE.PlaneGeometry(113, 55);
   const grassMaterial = new THREE.MeshPhongMaterial({ color: 0x228b22 });
   const grass = new THREE.Mesh(grassGeometry, grassMaterial);
   grass.position.set(0, 0, -0.3);
   scene.add(grass);
 
-  const waterGeometry = new THREE.PlaneGeometry(23, 8);
+  const waterGeometry = new THREE.PlaneGeometry(89, 23);
 
   // Define the shader uniforms
   const uniforms = {
@@ -208,14 +209,25 @@ function init() {
   let startTime = null;
 
   sendYourPosition = throttle(traceRateInMillis, false, () => {
-    const { x, z } = player.position;
+    const { x, y, z } = player.position;
+    const { x: rotX, y: rotY, z: rotZ } = player.rotation;
     const trace = {
       id: yourId,
       name: playerName,
       x: x.toFixed(1),
+      y: y.toFixed(1),
       z: z.toFixed(1),
+      rotation: { x: rotX.toFixed(2), y: rotY.toFixed(2), z: rotZ.toFixed(2) },
+      score,
+      time: remainingTime,
+      // objType: geometry.type,
+      // objColor: material.color.getHexString(),
+      // objPosition: object.position.toArray().join(", "),
+      // objScale: object.scale.toArray().join(", "),
+      // objObjectType: object.type
     };
     worker.postMessage({ type: "player.trace", body: trace });
+    console.log('dataSent');
   });
 
   function animateSun(time) {
@@ -238,7 +250,7 @@ function init() {
   scene.add(ambient);
 
   // Create the navmesh object
-  const navmeshGeometry = new THREE.PlaneGeometry(23, 8);
+  const navmeshGeometry = new THREE.PlaneGeometry(89, 23);
   const navmeshMaterial = new THREE.MeshBasicMaterial({
     color: 0x0000ff,
     wireframe: false,
@@ -399,19 +411,6 @@ function init() {
       }
     });
 
-    // Adapt for 3d Models
-    // function makePlayerModel(playerModel, scene, name) {
-    //   const group = new THREE.Group();
-
-    //   const model = playerModel.clone();
-    //   // model.material = playerMaterial.clone();
-    //   model.position.y = 10;
-    //   model.traverse((object) => {
-    //     if (object instanceof THREE.Mesh) {
-    //       object.castShadow = true;
-    //       object.receiveShadow = true;
-    //     }
-    //   });
 
     const nameDiv = document.createElement("div");
     nameDiv.className = "label";
@@ -545,8 +544,8 @@ function init() {
     const material = isWildlife ? materials[0] : materials[1];
     const object = new THREE.Mesh(geometry, material);
     object.position.set(
-      Math.random() * 22 - 11, // set random position within the plane width
-      Math.random() * 7 - 3.5, // set random position within the plane height
+      Math.random() * 88 - 44, // set random position within the plane width
+      Math.random() * 22 - 11, // set random position within the plane height
       0
     );
     const scale = Math.random() * 1; // Random scale value between 1 and 15
@@ -570,13 +569,13 @@ function init() {
 
     scene.add(object);
     objects.push(object);
-    // console.table({
-    //   Type: geometry.type,
-    //   Color: material.color.getHexString(),
-    //   Position: object.position.toArray().join(", "),
-    //   Scale: object.scale.toArray().join(", "),
-    //   ObjectType: object.type,
-    // });
+    console.table({
+      Type: geometry.type,
+      Color: material.color.getHexString(),
+      Position: object.position.toArray().join(", "),
+      Scale: object.scale.toArray().join(", "),
+      ObjectType: object.type,
+    });
   }
 
   const floatAmplitude = 0.1;
