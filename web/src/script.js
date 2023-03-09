@@ -1,9 +1,6 @@
 import "./style.css";
 import * as THREE from "three";
-import {
-  CSS2DRenderer,
-  CSS2DObject,
-} from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { throttle } from "throttle-debounce";
 import short from "shortid";
 import { MathUtils } from "three";
@@ -13,7 +10,7 @@ MathUtils.seededRandom(Date.now);
 
 const traceRateInMillis = 50;
 
-// const logTrace = throttle(1000, false, console.log);
+const logTrace = throttle(1000, false, console.log);
 
 let otherPlayers = {};
 let otherPlayersMeshes = {};
@@ -83,7 +80,6 @@ function init() {
         for (const [key, value] of Object.entries(body)) {
           otherPlayers[key] = value;
         }
-        console.log(otherPlayers);
         break;
       case "player.new":
         const { id, name } = body;
@@ -218,7 +214,7 @@ function init() {
       x: x.toFixed(1),
       y: y.toFixed(1),
       z: z.toFixed(1),
-      rotation: { x: rotX.toFixed(2), y: rotY.toFixed(2), z: rotZ.toFixed(2) },
+      rotation: Math.round(MathUtils.radToDeg(rotZ) % 360),
       score,
       time: remainingTime,
       // objType: geometry.type,
@@ -228,7 +224,6 @@ function init() {
       // objObjectType: object.type
     };
     worker.postMessage({ type: "player.trace", body: trace });
-    console.log('dataSent');
   });
 
   function animateSun(time) {
@@ -340,7 +335,6 @@ function init() {
   timerDiv.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
   timerDiv.innerHTML = "Time: " + timer;
   document.body.appendChild(timerDiv);
-  console.log(timer);
 
   // Create a function to update the timer
   function updateTimer() {
@@ -469,6 +463,7 @@ function init() {
 
     // Save the player's name and score to a local JSON file
     const playerData = {
+      id: yourId,
       name: playerName,
       score: score,
       date: new Date(),
@@ -713,8 +708,6 @@ function init() {
     checkCollisions();
   }
 
-  console.log(playerName);
-
   // Check if an object is within the camera range
   function isObjectWithinCameraRange(object) {
     const distance = camera.position.distanceTo(object.position);
@@ -733,6 +726,7 @@ function init() {
     animateObjects();
     // traces
     sendYourPosition();
+    // logTrace(otherPlayers);
   }
   animate();
 
