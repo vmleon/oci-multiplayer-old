@@ -20,7 +20,9 @@ const REDIS_HOST = process.env.REDIS_SERVICE_HOST
   ? process.env.REDIS_SERVICE_HOST
   : "localhost";
 
-const REDIS_SERVICE_PORT = process.env.REDIS_SERVICE_PORT;
+const REDIS_SERVICE_PORT = process.env.REDIS_SERVICE_PORT
+  ? process.env.REDIS_SERVICE_PORT
+  : 6379;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 if (!REDIS_PASSWORD) {
   logger.error(`REDIS_PASSWORD is not declared`);
