@@ -10,7 +10,7 @@ MathUtils.seededRandom(Date.now);
 
 const traceRateInMillis = 50;
 
-const logTrace = throttle(1000, false, console.log);
+// const logTrace = throttle(1000, false, console.log);
 
 let otherPlayers = {};
 let otherPlayersMeshes = {};
@@ -29,6 +29,8 @@ let timerId;
 // Declare objectIntervalId in the global scope
 let objectIntervalId;
 let gameOverFlag = false;
+
+var console = window.console;
 
 const startButton = document.getElementById("startButton");
 startButton.addEventListener("click", init);
@@ -80,6 +82,7 @@ function init() {
         for (const [key, value] of Object.entries(body)) {
           otherPlayers[key] = value;
         }
+        console.log(otherPlayers);
         break;
       case "player.new":
         const { id, name } = body;
@@ -214,7 +217,7 @@ function init() {
       x: x.toFixed(1),
       y: y.toFixed(1),
       z: z.toFixed(1),
-      rotation: Math.round(MathUtils.radToDeg(rotZ) % 360),
+      rotation: { x: rotX.toFixed(2), y: rotY.toFixed(2), z: rotZ.toFixed(2) },
       score,
       time: remainingTime,
       // objType: geometry.type,
@@ -224,7 +227,7 @@ function init() {
       // objObjectType: object.type
     };
     worker.postMessage({ type: "player.trace", body: trace });
-    // console.log("dataSent");
+    console.log('dataSent');
   });
 
   function animateSun(time) {
@@ -407,6 +410,7 @@ function init() {
         object.receiveShadow = true;
       }
     });
+
 
     const nameDiv = document.createElement("div");
     nameDiv.className = "label";
@@ -730,7 +734,6 @@ function init() {
     animateObjects();
     // traces
     sendYourPosition();
-    logTrace(otherPlayers);
   }
   animate();
 
