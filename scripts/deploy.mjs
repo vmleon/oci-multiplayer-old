@@ -7,7 +7,12 @@ import {
   setVariableFromEnvOrPrompt,
   printRegionNames,
 } from "./lib/utils.mjs";
-import { getRegions } from "./lib/oci.mjs";
+import {
+  downloadAdbWallet,
+  getRegions,
+  listAdbDatabases,
+  searchCompartmentIdByName,
+} from "./lib/oci.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
@@ -21,6 +26,21 @@ const regionName = await setVariableFromEnvOrPrompt(
 );
 const { key } = regions.find((r) => r.name === regionName);
 const url = `${key}.ocir.io`;
+
+const adbCompartmentName = await setVariableFromEnvOrPrompt(
+  "ADB_COMPARTMENT",
+  "Autonomous Database Compartment Name"
+);
+const adbCompartmentId = await searchCompartmentIdByName(adbCompartmentName);
+
+const adbName = await setVariableFromEnvOrPrompt(
+  "ADB_NAME",
+  "Autonomous Database name"
+);
+const adbPassword = await setVariableFromEnvOrPrompt(
+  "ADB_PASSWORD",
+  "Autonomous Database password"
+);
 
 const namespace = await getNamespace();
 
@@ -87,7 +107,53 @@ async function createConfigFiles() {
   await createRedisConfig(redis_password);
   const regionKey = await getRegions();
   await createKustomizationYaml(key, namespace);
+  await createDBConfigFiles(
+    adbCompartmentId,
+    adbName,
+    adbPassword,
+    "./wallet.zip"
+  );
   console.log();
+}
+
+async function createDBConfigFiles(
+  adbCompartmentId,
+  adbName,
+  adbPassword,
+  walletFilePath
+) {
+  await downloadWallet(adbCompartmentId, adbName, adbPassword, walletFilePath);
+  await setScoreApplicationProperties(adbName, adbPassword);
+  await $`mv wallet.zip deploy/k8s/base/score`;
+}
+
+async function setScoreApplicationProperties(adbName, adbPassword) {
+  const pwdOutput = (await $`pwd`).stdout.trim();
+  await cd(`${pwdOutput}/deploy/k8s/base/score`);
+  try {
+    let { stdout, exitCode, stderr } =
+      await $`sed s/TEMPLATE_ADB_SERVICE/${adbName}_high/ application.properties.template | sed s/TEMPLATE_ADB_PASSWORD/${adbPassword}/ > application.properties`;
+    if (exitCode !== 0) {
+      exitWithError(`Error creating application.properties: ${stderr}`);
+    }
+    console.log(stdout);
+    console.log(`${chalk.green("application.properties")} created.`);
+  } catch (error) {
+    exitWithError(error.stderr);
+  } finally {
+    await cd(pwdOutput);
+  }
+}
+
+async function downloadWallet(
+  compartmentId,
+  name,
+  walletPassword,
+  walletFilePath
+) {
+  const adbs = await listAdbDatabases(compartmentId);
+  const adb = adbs.find((db) => db["display-name"] === name);
+  await downloadAdbWallet(adb.id, walletFilePath, walletPassword);
 }
 
 async function createRedisConfig(password) {
@@ -118,6 +184,7 @@ async function createRedisConfig(password) {
     await cd(pwdOutput);
   }
 }
+
 async function createKustomizationYaml(regionKey, namespace) {
   const pwdOutput = (await $`pwd`).stdout.trim();
   await cd("./deploy/k8s/overlays/prod");

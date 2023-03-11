@@ -5,3 +5,6 @@ configMapGenerator:
   - name: score-properties
     files:
       - application.properties
+  - name: wallet-zip
+    files:
+      - wallet.zip

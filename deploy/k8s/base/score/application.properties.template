@@ -1,17 +1,15 @@
 spring.main.banner-mode=off
 server.port=8080
 
-#logging.level.root=DEBUG
-
 management.endpoint.health.probes.enabled=true
 management.health.livenessState.enabled=true
 management.health.readinessState.enabled=true
 
 # Oracle DB
 spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
-spring.datasource.url=jdbc:oracle:thin:@SERVICE_NAME_high?TNS_ADMIN=PATH_TO_WALLET
+spring.datasource.url=jdbc:oracle:thin:@TEMPLATE_ADB_SERVICE?TNS_ADMIN=/wallet
 spring.datasource.username=ADMIN
-spring.datasource.password=PASSWORD
+spring.datasource.password=TEMPLATE_ADB_PASSWORD
 
 # JPA
 spring.jpa.database-platform=org.hibernate.dialect.OracleDialect

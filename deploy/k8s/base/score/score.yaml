@@ -6,7 +6,7 @@ metadata:
   name: score
 spec:
   replicas: 1
-  minReadySeconds: 5
+  minReadySeconds: 180
   selector:
     matchLabels:
       app: score
@@ -20,20 +20,30 @@ spec:
       labels:
         app: score
     spec:
+      initContainers:
+      - name: unzip
+        image: busybox
+        command: ["unzip", "/walletzip/wallet.zip", "-d", "/wallet"]
+        volumeMounts:
+          - name: wallet-config
+            mountPath: /walletzip
+          - name: wallet-volume
+            mountPath: /wallet
       containers:
         - image: REGION_TEMPLATE_KEY.ocir.io/TENANCY_TEMPLATE_NAMESPACE/oci_multiplayer/score:0.0.1
+          imagePullPolicy: "Always"
           name: score
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 5
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 5
           ports:
             - containerPort: 8080
@@ -47,9 +57,17 @@ spec:
           volumeMounts:
           - name: config-volume
             mountPath: /config
+          - name: wallet-volume
+            mountPath: /wallet
       volumes:
       - name: config-volume
         configMap:
           name: score-properties
+      - name: wallet-config
+        configMap:
+          name: wallet-zip
+      - name: wallet-volume
+        emptyDir:
+          sizeLimit: 50Mi
       imagePullSecrets:
         - name: ocir-secret

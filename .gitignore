@@ -39,6 +39,9 @@ build/
 !**/src/test/**/build/
 build.gradle-e
 
+wallet.zip
+deploy/**/application.properties
+
 ### STS ###
 .apt_generated
 .classpath

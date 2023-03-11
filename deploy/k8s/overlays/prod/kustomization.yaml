@@ -16,4 +16,4 @@ images:
   newTag: 0.0.3
 - name: REGION_TEMPLATE_KEY.ocir.io/TENANCY_TEMPLATE_NAMESPACE/oci_multiplayer/score
   newName: fra.ocir.io/fruktknlrefu/oci_multiplayer/score
-  newTag: 0.0.3
+  newTag: 0.0.4
