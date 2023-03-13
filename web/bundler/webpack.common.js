@@ -66,6 +66,20 @@ module.exports = {
           },
         ],
       },
+
+      // Videos
+      {
+        test: /\.m4v$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'assets/menu/'
+            }
+          }
+        ]
+      }  
     ],
   },
 };

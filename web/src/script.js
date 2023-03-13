@@ -289,12 +289,12 @@ void main() {
     const trace = {
       id: yourId,
       name: playerName,
-      x: x.toFixed(1),
-      y: y.toFixed(1),
-      z: z.toFixed(1),
-      rotX: rotX.toFixed(1), // add rotation X value
-      rotY: rotY.toFixed(1), // add rotation Y value
-      rotZ: rotZ.toFixed(1), // add rotation Z value
+      x: x.toFixed(5),
+      y: y.toFixed(5),
+      z: z.toFixed(5),
+      rotX: rotX.toFixed(5), // add rotation X value
+      rotY: rotY.toFixed(5), // add rotation Y value
+      rotZ: rotZ.toFixed(5), // add rotation Z value
       score,
       time: remainingTime,
     };
