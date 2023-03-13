@@ -5,7 +5,7 @@ ${hostname} ansible_host=${web_public_ips[index]}
 
 [webs:vars]
 ansible_user=opc
-ansible_private_key_file=~/.ssh/oci.key
+ansible_private_key_file=~/.ssh/id_rsa
 
 [servers]
 %{ for index, hostname in server_hostnames ~}
@@ -14,4 +14,4 @@ ${hostname} ansible_host=${server_public_ips[index]}
 
 [servers:vars]
 ansible_user=opc
-ansible_private_key_file=~/.ssh/oci.key
+ansible_private_key_file=~/.ssh/id_rsa
