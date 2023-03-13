@@ -43,7 +43,8 @@ subClient.on("error", (err) => logger.error(`Redis Sub Client Error: ${err}`));
 
 function onSignal() {
   console.log("server is starting cleanup");
-  // TODO clean redis connections
+  pubClient.quit();
+  subClient.quit();
 }
 
 async function onHealthCheck() {
