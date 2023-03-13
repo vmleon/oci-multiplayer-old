@@ -9,20 +9,35 @@
   <video id="video-background" autoplay muted loop>
     <!-- <source src="assets/menu/videoBack.m4v" type="video/mp4" /> -->
   </video>
-  <canvas class="Game"></canvas>
   <div id="overlay">
     <div id="logo">
       <!-- <img src="web/static/assets/menu/logoPlusOCI.png"> -->
     </div>
-    <div id="input" >
+    <div id="input">
       <p>Your Name:</p>
       <input name="name" autofocus>
       <button id="startButton">Play</button>
     </div>
+    <div id="lobby">
+      <h1>Game Lobby</h1>
+      <div id="games-container">
+        <table id="playerTable">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>      
+      <button id="create-game-button">Create New Game</button>
+    </div>
     <div id="instructions">
       <p style="font-size: 24px; font-weight: bold; text-align: center;">Instructions:</p>
       <ul>
-        <li>Collect trash, avoid animals</li>
+        <li>Collect <span style="color:red">trash</span>, avoid <span style="color:green">animals</span></li>
         <li><br></li>
         <p>Controls:</p>
         <li><b>Arrow Up </b>- Accelerate</li>
@@ -31,6 +46,8 @@
       </ul>
     </div>
   </div>
+  <canvas class="Game"></canvas>
   <button id="restart-btn" style="display: none;">Restart</button>
+  <script src="lobby.js"></script>
 </body>
 </html>

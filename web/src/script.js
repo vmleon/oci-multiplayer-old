@@ -31,16 +31,22 @@ let timerId;
 let objectIntervalId;
 let gameOverFlag = false;
 
-const startButton = document.getElementById("startButton");
-startButton.addEventListener("click", init);
+// const startButton = document.getElementById("startButton");
+// startButton.addEventListener("click", init);
+
+const createGameButton = document.getElementById("create-game-button");
+createGameButton.addEventListener("click", init);
 
 function init() {
-  const inputNameValue = document.getElementsByName("name")[0].value;
-  if (inputNameValue.length) {
-    localStorage.setItem("yourName", inputNameValue);
-  }
+  // const inputNameValue = document.getElementsByName("name")[0].value;
+  // if (inputNameValue.length) {
+  //   localStorage.setItem("yourName", inputNameValue);
+  // }
   const overlay = document.getElementById("overlay");
   overlay.remove();
+
+
+
   playerName = localStorage.getItem("yourName") || "Player";
   // Set up the timer
   var timer = 180; // 3 minutes in seconds
