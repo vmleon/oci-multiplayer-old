@@ -10,6 +10,10 @@ Follow [Creating a Kubernetes Cluster](https://docs.oracle.com/en-us/iaas/Conten
 
 Configure kubectl on Cloud Shell. Follow steps on Quick start on your Kubernetes Cluster.
 
+### Autonomous Database
+
+Create an Autonomous database. Write down db name, and password.
+
 ### Clone repo
 
 Clone this repository in your local machine:
@@ -33,13 +37,27 @@ Export the variable `OCI_OCIR_TOKEN` for best practices. Otherwise the script wi
 > Keep the double quotes to escape the token
 
 ```bash
-export OCI_OCIR_TOKEN="<your_auth_token>"
+export OCI_OCIR_TOKEN="[your_auth_token]"
 ```
 
 You can also export `OCI_OCIR_USER` to the user (email) to login to the OCI container registry.
 
 ```bash
-export OCI_OCIR_USER=<your_email>
+export OCI_OCIR_USER=[your_email]
+```
+
+Score backend use Oracle Autonomous Database, to find it we need compartment, name and the password you set at creation time.
+
+```bash
+export ADB_COMPARTMENT_NAME=[comapartmentName]
+```
+
+```bash
+export ADB_NAME=[Autonomous DB name]
+```
+
+```bash
+export ADB_PASSWORD="[Autonomous DB name]"
 ```
 
 Set environment:
@@ -98,7 +116,7 @@ npx zx scripts/bump.mjs score
 
 Run release script for the component to push the new image.
 ```bash
-npx zx scripts/release.mjs
+npx zx scripts/release.mjs [component]
 ```
 
 Update `deploy/k8s/overlays/prod/kustomization.yaml` to the new version for the component.

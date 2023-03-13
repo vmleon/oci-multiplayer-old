@@ -28,13 +28,15 @@ export async function bump(level = "patch") {
   }
 }
 
-export async function build_web() {
+export async function buildWeb() {
   try {
+    console.log(`Clean dist folder`);
+    await $`rm -rf ./dist`;
     console.log(`Install dependencies`);
     await $`npm install`;
     console.log(`Build static content`);
     const output = (await $`npm run build`).stdout.trim();
-    console.log(output);
+    console.log(`${chalk.green("Web")} built successfully`);
   } catch (error) {
     exitWithError(error.stderr);
   }

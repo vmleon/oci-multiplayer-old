@@ -6,6 +6,7 @@ import {
   setVariableFromEnvOrPrompt,
 } from "./lib/utils.mjs";
 import { build_image, tagImage, pushImage } from "./lib/container.mjs";
+import { buildWeb } from "./lib/npm.mjs";
 import {
   buildJarGradle,
   cleanGradle,
@@ -33,12 +34,12 @@ const { key } = regions.find((r) => r.name === regionName);
 const ocirUrl = `${key}.ocir.io`;
 
 if (action === "web") {
-  await release("web");
+  await releaseNpm("web");
   process.exit(0);
 }
 
 if (action === "server") {
-  await release("server");
+  await releaseNpm("server");
   process.exit(0);
 }
 
@@ -64,6 +65,9 @@ console.log("\tnpx zx scripts/release.mjs score");
 async function releaseNpm(service) {
   await cd(service);
   const currentVersion = await getVersion();
+  if (service === "web") {
+    await buildWeb();
+  }
   const image_name = `${project}/${service}`;
   await build_image(`localhost/${image_name}`, currentVersion);
   const local_image = `localhost/${image_name}:${currentVersion}`;

@@ -28,7 +28,7 @@ const { key } = regions.find((r) => r.name === regionName);
 const url = `${key}.ocir.io`;
 
 const adbCompartmentName = await setVariableFromEnvOrPrompt(
-  "ADB_COMPARTMENT",
+  "ADB_COMPARTMENT_NAME",
   "Autonomous Database Compartment Name"
 );
 const adbCompartmentId = await searchCompartmentIdByName(adbCompartmentName);
@@ -137,7 +137,7 @@ async function setScoreApplicationProperties(adbName, adbPassword) {
       exitWithError(`Error creating application.properties: ${stderr}`);
     }
     console.log(stdout);
-    console.log(`${chalk.green("application.properties")} created.`);
+    console.log(`Score ${chalk.green("application.properties")} created.`);
   } catch (error) {
     exitWithError(error.stderr);
   } finally {
