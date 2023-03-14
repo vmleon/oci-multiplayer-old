@@ -41,6 +41,7 @@ build.gradle-e
 
 wallet.zip
 deploy/**/application.properties
+deploy/k8s/overlays/prod/kustomization.yaml
 
 ### STS ###
 .apt_generated

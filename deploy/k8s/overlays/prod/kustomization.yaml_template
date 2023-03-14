@@ -2,6 +2,7 @@ bases:
   - "../../base/ingress"
   - "../../base/web"
   - "../../base/ws-server"
+  - "../../base/generator"
   - "../../base/score"
 
 patchesStrategicMerge:
