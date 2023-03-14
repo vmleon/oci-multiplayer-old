@@ -29,7 +29,8 @@ logs
 *.crt
 *.conf
 
-.env*
+.env_server
+.env
 
 HELP.md
 .gradle
