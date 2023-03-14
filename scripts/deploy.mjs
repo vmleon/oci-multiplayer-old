@@ -160,18 +160,14 @@ async function createRedisConfig(password) {
   await cd("./deploy/k8s/base/ws-server");
   try {
     let { exitCode: exitCodeConfig, stderr: stderrConfig } =
-      await $`sed 's/MASTERPASSWORD/${quote(
-        password
-      )}/' redis.conf.template > redis.conf`;
+      await $`sed 's/MASTERPASSWORD/${password}/' redis.conf.template > redis.conf`;
     if (exitCodeConfig !== 0) {
       exitWithError(`Error creating redis.conf with password: ${stderrConfig}`);
     } else {
       console.log(`${chalk.green("redis.conf")} created.`);
     }
     let { exitCode: exitCodeEnv, stderr: stderrEnv } =
-      await $`sed 's/MASTERPASSWORD/${quote(
-        password
-      )}/' env_server_template > .env_server`;
+      await $`sed 's/MASTERPASSWORD/${password}/' env_server_template > .env_server`;
     if (exitCodeEnv !== 0) {
       exitWithError(`Error creating .env_server with password: ${stderrEnv}`);
     } else {
