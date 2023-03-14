@@ -152,7 +152,7 @@ async function downloadWallet(
 ) {
   const adbs = await listAdbDatabases(compartmentId);
   const adb = adbs.find(
-    (db) => db["display-name"].toLowerCase() === name.toLowerCase()
+    (db) => db["db-name"].toLowerCase() === name.toLowerCase()
   );
   await downloadAdbWallet(adb.id, walletFilePath, walletPassword);
 }
