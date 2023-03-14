@@ -13,7 +13,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: server
+            name: ws-server
             port:
               number: 3000
       - path: /api

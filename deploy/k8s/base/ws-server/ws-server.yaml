@@ -5,6 +5,7 @@ metadata:
     app: ws-server
   name: ws-server
 spec:
+  minReadySeconds: 65
   replicas: 1
   selector:
     matchLabels:
@@ -19,6 +20,11 @@ spec:
       labels:
         app: ws-server
     spec:
+      initContainers:
+      - name: wait-for-redis
+        image: redis
+        imagePullPolicy: IfNotPresent
+        args: [ 'sh', '-c', 'sleep 60s' ]
       containers:
         - image: REGION_TEMPLATE_KEY.ocir.io/TENANCY_TEMPLATE_NAMESPACE/oci_multiplayer/server:0.0.2
           name: ws-server
