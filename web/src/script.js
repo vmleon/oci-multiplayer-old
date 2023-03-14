@@ -11,7 +11,7 @@ MathUtils.seededRandom(Date.now);
 
 const traceRateInMillis = 1;
 
-const logTrace = throttle(1, false, console.log);
+const logTrace = throttle(1000, false, console.log);
 
 let otherPlayers = {};
 let otherPlayersMeshes = {};

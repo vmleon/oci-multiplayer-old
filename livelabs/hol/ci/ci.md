@@ -127,7 +127,7 @@ In this task you will create a container image for both the server and the web p
     <copy>npx zx scripts/release.mjs web</copy>
     ```
 
-9. Copy the `Released:` path for this one as well; store it in a text documnt.
+9. Copy the `Released:` path for this one as well; store it in a text document.
 
 
 ## Task 3: Deploy to Container Instances
@@ -164,6 +164,22 @@ Now to grab just a few more pieces of information and launch the Container Insta
     ```
 
     _The command will look something like this (notice we created variables for a few of the parameter values - totally optional):_
+
+    Here's a breakdown of the command:
+    - _--oci_ - This is the CLI command to interact with the Oracle Cloud Infrastructure.  
+    - _--container-instances_ - This is the sub-command for container instances.  
+    container-instance create - This is the action to create a new container instance.  
+    - _--display-name_ oci-MultiPlayer - This is the display name for the container instance.  
+    - _--availability-domain_ <AD Name> - This specifies the availability domain to create the container instance in.
+    - _--compartment-id_ <Compartment OCID> - This specifies the compartment in which the container instance will be created.
+    - _--containers_ - This specifies the containers to be created within the container instance. This is an array of JSON objects, with each object representing a container. In this case, there are two containers: one for the server and one for the web application.
+    - _--shape_ CI.Standard.E4.Flex - This specifies the shape of the container instance.
+    - _--shape-config_ '{"memoryInGBs":16,"ocpus":4}' - This specifies the shape configuration for the container instance.
+    - _--vnics_ - This specifies the virtual network interfaces to be attached to the container instance. This is an array of JSON objects, with each object representing a virtual network interface.
+    - _--image-pull-secrets_ - This specifies the image pull secrets to be used by the container instance. This is an array of JSON objects, with each object representing an image pull secret.
+    - _--config-file_ ~/.oci/config - This specifies the configuration file to be used for the OCI CLI.
+    - _--profile_ WORKSHOP - This specifies the OCI CLI profile to use.
+    - _--auth api_key_ - This specifies the authentication method to be used for the OCI CLI.
 
     ![Create Container Instance](images/cli-create-CI.png)
 
