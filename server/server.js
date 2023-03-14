@@ -37,6 +37,11 @@ export function start(httpServer, port, pubClient, subClient) {
       players[id] = { ...others, updated: new Date() };
     });
 
+    socket.on("items.gen", ({ data }) => {
+      const { trash, marineLife } = data;
+      io.emit("items", { trash, marineLife });
+    });
+
     socket.on("disconnect", (reason) => {
       logger.info(`Disconnect: ${reason}`);
     });

@@ -105,7 +105,6 @@ async function createConfigFiles() {
   console.log("Create config files...");
   const redis_password = await generateRandomString();
   await createRedisConfig(redis_password);
-  const regionKey = await getRegions();
   await createKustomizationYaml(key, namespace);
   await createDBConfigFiles(
     adbCompartmentId,
@@ -189,25 +188,15 @@ async function createKustomizationYaml(regionKey, namespace) {
   const pwdOutput = (await $`pwd`).stdout.trim();
   await cd("./deploy/k8s/overlays/prod");
   try {
-    let { exitCode: exitCodeRegion, stderr: stderrRegion } =
-      await $`sed 's/REGION_KEY/${key}/' kustomization.yaml_template > kustomization_temp.yaml`;
-    if (exitCodeRegion !== 0) {
-      exitWithError(
-        `Error creating kustomization.yaml with region key: ${stderrRegion}`
-      );
+    let { exitCode, stderr } =
+      await $`sed 's/REGION_KEY/${regionKey}/' kustomization.yaml_template | sed 's/TENANCY_NAMESPACE/${namespace}/' > kustomization.yaml`;
+    if (exitCode !== 0) {
+      exitWithError(`Error creating kustomization.yaml: ${stderr}`);
     }
-    let { exitCode: exitCodeNamespace, stderr: stderrNamespace } =
-      await $`sed 's/TENANCY_NAMESPACE/${namespace}/' kustomization_temp.yaml > kustomization.yaml`;
-    if (exitCodeNamespace !== 0) {
-      exitWithError(
-        `Error creating kustomization.yaml with tenancy namespace: ${stderrNamespace}`
-      );
-    }
-    console.log(`${chalk.green("kustomization.yaml")} created.`);
+    console.log(`Overlay ${chalk.green("kustomization.yaml")} created.`);
   } catch (error) {
     exitWithError(error.stderr);
   } finally {
-    await $`rm -f kustomization_temp.yaml`;
     await cd(pwdOutput);
   }
 }

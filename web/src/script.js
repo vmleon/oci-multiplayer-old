@@ -5,7 +5,7 @@ import { throttle } from "throttle-debounce";
 import short from "shortid";
 import { MathUtils } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { turtleGen } from './turtleGen';
+import { turtleGen } from "./turtleGen";
 
 MathUtils.seededRandom(Date.now);
 
@@ -81,6 +81,9 @@ function init() {
       case "log":
         console.log(body);
         break;
+      case "items":
+        console.log(body);
+        break;
       case "allPlayers":
         // FIXME this delete can and should happen on the web worker
         delete body[yourId];
@@ -104,7 +107,7 @@ function init() {
           //     o.element.remove();
           //     scene.remove(o);
           //   }),
-            scene.remove(otherPlayersMeshes[body]);
+          scene.remove(otherPlayersMeshes[body]);
           delete otherPlayersMeshes[body];
         }
         break;
@@ -128,13 +131,13 @@ function init() {
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
-  
+
   renderer.physicallyCorrectLights = true;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  
+
   // Add fog to the scene
   scene.fog = new THREE.FogExp2(0xffffff, 0.01);
 
@@ -156,7 +159,7 @@ function init() {
     function (gltf) {
       const boat = gltf.scene.children[0];
       const playerMaterial = new THREE.MeshStandardMaterial({
-        color: 0xA52A2A,
+        color: 0xa52a2a,
         roughness: 0.9,
         metalness: 0.1,
       });
@@ -164,7 +167,7 @@ function init() {
       boat.position.set(0, 0, 0);
       boat.scale.set(1, 1, 1);
       boat.rotation.set(0, 0, 0);
-  
+
       // Enable shadows for the boat
       boat.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
@@ -198,24 +201,24 @@ function init() {
 
   const grassGeometry = new THREE.PlaneGeometry(113, 55);
   const grassTexture = new THREE.CanvasTexture(createGrassTexture());
-  const grassMaterial = new THREE.MeshPhongMaterial({ map: grassTexture});
+  const grassMaterial = new THREE.MeshPhongMaterial({ map: grassTexture });
   const grass = new THREE.Mesh(grassGeometry, grassMaterial);
   grass.position.set(0, 0, -0.3);
   scene.add(grass);
-  
+
   function createGrassTexture() {
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = 32;
     canvas.height = 32;
-  
-    const ctx = canvas.getContext('2d');
+
+    const ctx = canvas.getContext("2d");
     const gradient = ctx.createLinearGradient(0, 1, 16, 32);
-    gradient.addColorStop(0, 'darkgreen');
-    gradient.addColorStop(0.5, 'green');
-    gradient.addColorStop(1, 'darkgreen');
+    gradient.addColorStop(0, "darkgreen");
+    gradient.addColorStop(0.5, "green");
+    gradient.addColorStop(1, "darkgreen");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 32, 32);
-  
+
     return canvas;
   }
 
@@ -287,8 +290,7 @@ void main() {
   const SUN_X_DISTANCE = 20; // in world units
   let startTime = null;
 
-
-  // ### Send Player 
+  // ### Send Player
   sendYourPosition = throttle(traceRateInMillis, false, () => {
     const { x, y, z } = player.position;
     const { x: rotX, y: rotY, z: rotZ } = player.rotation;
@@ -306,7 +308,6 @@ void main() {
     };
     worker.postMessage({ type: "player.trace", body: trace });
   });
-  
 
   function animateSun(time) {
     if (!startTime) {
@@ -351,22 +352,20 @@ void main() {
   directionalLight.position.set(0, 0, 100);
   scene.add(directionalLight);
 
-
-
   // Load the GLTF model
   loader.load(
     "assets/turtle.gltf", // URL of the model
     function (gltf) {
       const turtle = gltf.scene.children[0];
-  
+
       // Call turtleGen function to get the turtle's position
       const { x, y, z } = turtleGen();
       turtle.position.set(x, y, z);
-      
+
       // Set the turtle's scale and rotation
       turtle.scale.set(1, 1, 1);
       turtle.rotation.set(0, 0, 0);
-  
+
       // Add the turtle to the scene
       scene.add(turtle);
       turtle.type = "wildlife";
@@ -445,22 +444,21 @@ void main() {
     clearInterval(objectIntervalId);
     objectIntervalId = undefined;
   }
-  
+
   let playerMesh;
 
-  
   function makePlayerMesh(playerMesh, scene, name) {
     const group = new THREE.Group();
-  
+
     // Clone the player's mesh
     const mesh = playerMesh.clone();
-  
+
     // Set the material of the new mesh to white
     const playerMaterial = new THREE.MeshStandardMaterial({
       color: 0x333333,
     });
     mesh.material = playerMaterial;
-  
+
     // Traverse the new mesh and set the shadow properties
     mesh.traverse((object) => {
       if (object instanceof THREE.Mesh) {
@@ -468,7 +466,7 @@ void main() {
         object.receiveShadow = true;
       }
     });
-  
+
     // Create a label for the player's name
     const nameDiv = document.createElement("div");
     nameDiv.className = "label";
@@ -477,22 +475,20 @@ void main() {
     const nameLabel = new CSS2DObject(nameDiv);
     nameLabel.position.set(0, 0, 1);
     nameLabel.layers.set(1);
-  
+
     // Add the mesh and label to the group
     group.add(mesh);
     group.add(nameLabel);
-  
+
     // Clone the player's position and rotation
     group.position.copy(playerMesh.position);
     group.rotation.copy(playerMesh.rotation);
-  
+
     // Add the group to the scene
     scene.add(group);
-  
+
     return group;
   }
-  
-
 
   function gameOver() {
     console.log("Game over!");
@@ -795,7 +791,7 @@ void main() {
       }
     });
   }
-  
+
   // Render the scene
   function animate() {
     requestAnimationFrame(animate);

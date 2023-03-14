@@ -43,6 +43,11 @@ if (action === "server") {
   process.exit(0);
 }
 
+if (action === "generator") {
+  await releaseNpm("generator");
+  process.exit(0);
+}
+
 if (action === "score") {
   await releaseGradle("score");
   process.exit(0);
@@ -51,6 +56,7 @@ if (action === "score") {
 if (a || action === "all") {
   await releaseNpm("web");
   await releaseNpm("server");
+  await releaseNpm("generator");
   await releaseGradle("score");
   process.exit(0);
 }
@@ -60,6 +66,7 @@ console.log("\tnpx zx scripts/release.mjs all");
 console.log("\tnpx zx scripts/release.mjs -a");
 console.log("\tnpx zx scripts/release.mjs web");
 console.log("\tnpx zx scripts/release.mjs server");
+console.log("\tnpx zx scripts/release.mjs generator");
 console.log("\tnpx zx scripts/release.mjs score");
 
 async function releaseNpm(service) {

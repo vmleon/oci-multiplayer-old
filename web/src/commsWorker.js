@@ -22,6 +22,10 @@ function start(wsURL) {
     postMessage({ type: "allPlayers", body: data });
   });
 
+  socket.on("items", (data) => {
+    postMessage({ type: "items", body: data });
+  });
+
   socket.on("player.new", (data) => {
     postMessage({ type: "player.new", body: data });
   });
