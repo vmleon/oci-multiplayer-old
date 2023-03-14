@@ -30,6 +30,7 @@ In this section we will configure the CLI to use APIKey-based authentication.
 
     ```
     <copy>echo $OCI_TENANCY</copy>
+    ```
 
 3. Initiate CLI configuration.
 
@@ -37,7 +38,7 @@ In this section we will configure the CLI to use APIKey-based authentication.
     <copy>oci setup config</copy>
     ```
 
-    ![Setup Config](/images/cli-config-01.png)
+    ![Setup Config](/images/cli-config-01.png) 
 
 4. You will be prompted with a series of questions. When requested, enter your user OCID, your tenancy OCID, a profile name, and the name of the region you are using (a list will be presented for reference).
 
@@ -64,6 +65,7 @@ In this section we will configure the CLI to use APIKey-based authentication.
 8. You should see either 1 or 3 AZs depending on which region you are using.
 
     ![CLI Test](images/cli-test.png)
+
 
 ## Task 2: Containerize the application
 
@@ -128,7 +130,8 @@ In this task you will create a container image for both the server and the web p
 9. Copy the `Released:` path for this one as well; store it in a text documnt.
 
 
-## Task 3: Deploy to Container Instances ##
+## Task 3: Deploy to Container Instances
+
 Now to grab just a few more pieces of information and launch the Container Instances resource.
 
 1. You may either navigate the OCI console to locate the OCID of your subnet, or run the following CLI command. Copy the Subnet OCID to a text file.
@@ -173,6 +176,7 @@ Now to grab just a few more pieces of information and launch the Container Insta
     ![CI Private IP](images/ContainerInstance-privateIp.png)
 
 ## Task 4: Modify the Load Balancer
+
 In this 4th and final task, you will add the Container Instance private IP address to the backend set of the load balancer that was deployed as part of the first lab. Optionally (but ideally), you may also remove the compute resources.
 
 1. Navigate to **`Networking`** -> `Load Balancers` and select the _LB Multiplayer_ resource.
@@ -188,14 +192,6 @@ In this 4th and final task, you will add the Container Instance private IP addre
 5. **_[OPTIONAL]_** Select and delete the pre-existing IP address from each of the `Backend Set` items.
 
 6. Copy the public IP address of your load balancer and paste it into a new browser tab / window. Confirm the game is still functional.
-
-
-
-
-
-
-
-
 
 
 ## Acknowledgements

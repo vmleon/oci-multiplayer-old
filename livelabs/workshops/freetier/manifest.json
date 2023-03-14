@@ -13,27 +13,22 @@
       "filename": "https://raw.githubusercontent.com/oracle/learning-library/master/common/labs/cloud-login/cloud-login.md"
     },
     {
-      "title": "Lab 1: Infrastructure",
-      "description": "Infrastructure",
-      "filename": "../../hol/infra/infra.md"
-    },
-    {
-      "title": "Lab 2: Deploy on Virtual Machines",
+      "title": "Lab 1: Deploy on Virtual Machines",
       "description": "Deploy on Virtual Machines",
       "filename": "../../hol/vm/vm.md"
     },
     {
-      "title": "Lab 3: Deploy on Container Instances",
+      "title": "Lab 2: Deploy on Container Instances",
       "description": "Deploy on Container Instances",
       "filename": "../../hol/ci/ci.md"
     },
     {
-      "title": "Lab 4: Deploy on Kubernetes",
+      "title": "Lab 3: Deploy on Kubernetes",
       "description": "Deploy on Kubernetes",
       "filename": "../../hol/k8s/k8s.md"
     },
     {
-      "title": "Lab 5: Clean Up (Optional)",
+      "title": "Lab 4: Clean Up (Optional)",
       "description": "Clean Up (Optional)",
       "filename": "../../hol/cleanup/cleanup.md"
     },
