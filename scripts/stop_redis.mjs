@@ -18,3 +18,14 @@ try {
 } catch (error) {
   exitWithError(error.stderr);
 }
+
+try {
+  const { stdout, stderr, exitCode } = await $`${ce} rm redis_multiplayer`;
+  if (exitCode == 0) {
+    console.log(chalk.green(stdout.trim()));
+  } else {
+    exitWithError(stderr);
+  }
+} catch (error) {
+  exitWithError(error.stderr);
+}

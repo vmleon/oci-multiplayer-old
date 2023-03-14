@@ -1,20 +1,21 @@
-FROM --platform=linux/amd64 node:19-slim AS builder
+# FROM --platform=linux/amd64 node:19-slim AS builder
 
-WORKDIR /usr/src/web
+# WORKDIR /usr/src/web
 
-COPY package*.json ./
+# COPY package*.json ./
 
-RUN npm install
-# RUN npm ci --only=production
+# RUN npm install
+# # RUN npm ci --only=production
 
-COPY static/ ./static
-COPY src/ ./src
-COPY bundler/ ./bundler
+# COPY static/ ./static
+# COPY src/ ./src
+# COPY bundler/ ./bundler
 
-RUN npm run build
+# RUN npm run build
 
 FROM --platform=linux/amd64 nginx:1.23-alpine-slim
 
-COPY --from=builder /usr/src/web/dist/ /usr/share/nginx/html/
+# --from=builder
+COPY dist/ /usr/share/nginx/html/
 
 EXPOSE 80

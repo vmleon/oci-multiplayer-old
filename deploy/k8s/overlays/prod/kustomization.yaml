@@ -1,14 +1,19 @@
 bases:
   - "../../base/ingress"
-  - "../../base/app"
+  - "../../base/web"
+  - "../../base/ws-server"
+  - "../../base/score"
 
 patchesStrategicMerge:
   - "patch_server_replicas.yaml"
 
 images:
-- name: fra.ocir.io/fruktknlrefu/oci_multiplayer/server
+- name: REGION_TEMPLATE_KEY.ocir.io/TENANCY_TEMPLATE_NAMESPACE/oci_multiplayer/server
   newName: fra.ocir.io/fruktknlrefu/oci_multiplayer/server
   newTag: 0.0.5
-- name: fra.ocir.io/fruktknlrefu/oci_multiplayer/web
+- name: REGION_TEMPLATE_KEY.ocir.io/TENANCY_TEMPLATE_NAMESPACE/oci_multiplayer/web
   newName: fra.ocir.io/fruktknlrefu/oci_multiplayer/web
-  newTag: 0.0.3
+  newTag: 0.0.4
+- name: REGION_TEMPLATE_KEY.ocir.io/TENANCY_TEMPLATE_NAMESPACE/oci_multiplayer/score
+  newName: fra.ocir.io/fruktknlrefu/oci_multiplayer/score
+  newTag: 0.0.4

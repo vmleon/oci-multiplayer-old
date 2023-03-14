@@ -1,30 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OCI Multiplayer</title>
-  </head>
-  <body onload="run();">
-    <canvas id="nb" width="512" height="128"></canvas>
-    <table>
-      <thead>
-        <th>Player</th><th>Score</th>
-      </thead>
-      <tbody id="thingy"></tbody>
-  </table>
-    <canvas class="webgl"></canvas>
-    <div id="overlay">
-      <h3>Your Name:</h3>
-      <input name="name" autofocus />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCI Multiplayer</title>
+</head>
+<body>
+  <video id="video-background" autoplay muted loop>
+    <!-- <source src="assets/menu/videoBack.m4v" type="video/mp4" /> -->
+  </video>
+  <div id="overlay">
+    <div id="logo">
+      <!-- <img src="web/static/assets/menu/logoPlusOCI.png"> -->
+    </div>
+    <div id="input">
+      <p>Your Name:</p>
+      <input name="name" autofocus>
       <button id="startButton">Play</button>
     </div>
-    <!-- <div id="blocker">
-      <div id="instructions">
-        <span style="font-size: 40px">Click to play</span>
-        <br />
-        (W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
-      </div>
-    </div> -->
-  </body>
+    <div id="lobby">
+      <h1>Game Lobby</h1>
+      <div id="games-container">
+        <table id="playerTable">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>      
+      <button id="create-game-button">Create New Game</button>
+    </div>
+    <div id="instructions">
+      <p style="font-size: 24px; font-weight: bold; text-align: center;">Instructions:</p>
+      <ul>
+        <li>Collect <span style="color:red">trash</span>, avoid <span style="color:green">animals</span></li>
+        <li><br></li>
+        <p>Controls:</p>
+        <li><b>Arrow Up </b>- Accelerate</li>
+        <li><b>Arrow Down </b> - Brake</li>
+        <li><b>Left</b> or <b>Right Arrow</b> to Steer</li>
+      </ul>
+    </div>
+  </div>
+  <canvas class="Game"></canvas>
+  <button id="restart-btn" style="display: none;">Restart</button>
+  <script src="lobby.js"></script>
+</body>
 </html>

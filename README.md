@@ -4,7 +4,7 @@ This is a Three.js "game" with a multiplayer backend using WebSockets ([socket.i
 
 ![Screenshot](images/screenshot.png)
 
-## LiveLabs
+## LiveLabs
 
 LiveLabs [Preview](https://vmleon.github.io/oci-multiplayer/livelabs/workshops/freetier/index.html)
 
@@ -38,13 +38,10 @@ LiveLabs [Preview](https://vmleon.github.io/oci-multiplayer/livelabs/workshops/f
 
 Improvements:
 
-- Scale number of backend
-- WebWorker
-- Create a stress test
-- Water and boats with heading
 - Waste Generator
-- Winning logic
 - Score board
+- Winning logic
+- Create a stress test
 - Analytics (data points, latency, etc)
 - Add LogAnalytics
 - Authentication?

@@ -16,19 +16,22 @@ logger.info(`Environment: ${environment}`);
 const app = express();
 const httpServer = createServer(app);
 
-const REDIS_HOST = process.env.REDIS_SERVICE_HOST
+const REDIS_SERVICE_HOST = process.env.REDIS_SERVICE_HOST
   ? process.env.REDIS_SERVICE_HOST
   : "localhost";
 
-const REDIS_SERVICE_PORT = process.env.REDIS_SERVICE_PORT;
+const REDIS_SERVICE_PORT = process.env.REDIS_SERVICE_PORT
+  ? process.env.REDIS_SERVICE_PORT
+  : 6379;
+
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 if (!REDIS_PASSWORD) {
   logger.error(`REDIS_PASSWORD is not declared`);
   process.exit(1);
 }
 
-const REDIS_URL = `redis://default:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_SERVICE_PORT}`;
-const REDIS_URL_OBFUSCATED = `redis://default:*******@${REDIS_HOST}:${REDIS_SERVICE_PORT}`;
+const REDIS_URL = `redis://default:${REDIS_PASSWORD}@${REDIS_SERVICE_HOST}:${REDIS_SERVICE_PORT}`;
+const REDIS_URL_OBFUSCATED = `redis://default:*******@${REDIS_SERVICE_HOST}:${REDIS_SERVICE_PORT}`;
 logger.info(`Redis URL: ${REDIS_URL_OBFUSCATED}`);
 
 const pubClient = createClient({
@@ -40,7 +43,8 @@ subClient.on("error", (err) => logger.error(`Redis Sub Client Error: ${err}`));
 
 function onSignal() {
   console.log("server is starting cleanup");
-  // TODO clean redis connections
+  pubClient.quit();
+  subClient.quit();
 }
 
 async function onHealthCheck() {

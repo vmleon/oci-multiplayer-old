@@ -5,12 +5,50 @@ import {
   generateRandomString,
   getNamespace,
   setVariableFromEnvOrPrompt,
+  printRegionNames,
 } from "./lib/utils.mjs";
-import { getRegions } from "./lib/oci.mjs";
+import {
+  downloadAdbWallet,
+  getRegions,
+  listAdbDatabases,
+  searchCompartmentIdByName,
+} from "./lib/oci.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
 $.verbose = false;
+
+const regions = await getRegions();
+const regionName = await setVariableFromEnvOrPrompt(
+  "OCI_REGION",
+  "OCI Region name",
+  () => printRegionNames(regions)
+);
+const { key } = regions.find((r) => r.name === regionName);
+const url = `${key}.ocir.io`;
+
+const adbCompartmentName = await setVariableFromEnvOrPrompt(
+  "ADB_COMPARTMENT_NAME",
+  "Autonomous Database Compartment Name"
+);
+const adbCompartmentId = await searchCompartmentIdByName(adbCompartmentName);
+
+const adbName = await setVariableFromEnvOrPrompt(
+  "ADB_NAME",
+  "Autonomous Database name"
+);
+const adbPassword = await setVariableFromEnvOrPrompt(
+  "ADB_PASSWORD",
+  "Autonomous Database password"
+);
+
+const namespace = await getNamespace();
+
+console.log(
+  `Preparing deployment for ${chalk.yellow(url)} in namespace ${chalk.yellow(
+    namespace
+  )}`
+);
 
 await checkKubectlConfigured();
 
@@ -40,8 +78,6 @@ async function checkKubectlConfigured() {
 async function createRegistrySecret() {
   console.log("Create registry secret on Kubernetes cluster...");
   try {
-    const namespace = await getNamespace();
-
     const user = await setVariableFromEnvOrPrompt(
       "OCI_OCIR_USER",
       "OCI Username (usually an email)"
@@ -51,15 +87,6 @@ async function createRegistrySecret() {
       "OCI_OCIR_TOKEN",
       "OCI Auth Token for OCI Registry"
     );
-
-    const regions = await getRegions();
-    const regionName = await setVariableFromEnvOrPrompt(
-      "OCI_REGION",
-      "OCI Region name",
-      () => printRegionNames(regions)
-    );
-    const { key } = regions.find((r) => r.name === regionName);
-    const url = `${key}.ocir.io`;
     await cleanRegisterSecret();
     const { exitCode, stdout } =
       await $`kubectl create secret docker-registry ocir-secret --docker-server=${url} --docker-username=${namespace}/${user} --docker-password=${token} --docker-email=${user}`;
@@ -78,12 +105,60 @@ async function createConfigFiles() {
   console.log("Create config files...");
   const redis_password = await generateRandomString();
   await createRedisConfig(redis_password);
+  const regionKey = await getRegions();
+  await createKustomizationYaml(key, namespace);
+  await createDBConfigFiles(
+    adbCompartmentId,
+    adbName,
+    adbPassword,
+    "./wallet.zip"
+  );
   console.log();
+}
+
+async function createDBConfigFiles(
+  adbCompartmentId,
+  adbName,
+  adbPassword,
+  walletFilePath
+) {
+  await downloadWallet(adbCompartmentId, adbName, adbPassword, walletFilePath);
+  await setScoreApplicationProperties(adbName, adbPassword);
+  await $`mv wallet.zip deploy/k8s/base/score`;
+}
+
+async function setScoreApplicationProperties(adbName, adbPassword) {
+  const pwdOutput = (await $`pwd`).stdout.trim();
+  await cd(`${pwdOutput}/deploy/k8s/base/score`);
+  try {
+    let { stdout, exitCode, stderr } =
+      await $`sed s/TEMPLATE_ADB_SERVICE/${adbName}_high/ application.properties.template | sed s/TEMPLATE_ADB_PASSWORD/${adbPassword}/ > application.properties`;
+    if (exitCode !== 0) {
+      exitWithError(`Error creating application.properties: ${stderr}`);
+    }
+    console.log(stdout);
+    console.log(`Score ${chalk.green("application.properties")} created.`);
+  } catch (error) {
+    exitWithError(error.stderr);
+  } finally {
+    await cd(pwdOutput);
+  }
+}
+
+async function downloadWallet(
+  compartmentId,
+  name,
+  walletPassword,
+  walletFilePath
+) {
+  const adbs = await listAdbDatabases(compartmentId);
+  const adb = adbs.find((db) => db["display-name"] === name);
+  await downloadAdbWallet(adb.id, walletFilePath, walletPassword);
 }
 
 async function createRedisConfig(password) {
   const pwdOutput = (await $`pwd`).stdout.trim();
-  await cd("./deploy/k8s/base/app");
+  await cd("./deploy/k8s/base/ws-server");
   try {
     let { exitCode: exitCodeConfig, stderr: stderrConfig } =
       await $`sed 's/MASTERPASSWORD/${quote(
@@ -110,6 +185,33 @@ async function createRedisConfig(password) {
   }
 }
 
+async function createKustomizationYaml(regionKey, namespace) {
+  const pwdOutput = (await $`pwd`).stdout.trim();
+  await cd("./deploy/k8s/overlays/prod");
+  try {
+    let { exitCode: exitCodeRegion, stderr: stderrRegion } =
+      await $`sed 's/REGION_KEY/${key}/' kustomization.yaml_template > kustomization_temp.yaml`;
+    if (exitCodeRegion !== 0) {
+      exitWithError(
+        `Error creating kustomization.yaml with region key: ${stderrRegion}`
+      );
+    }
+    let { exitCode: exitCodeNamespace, stderr: stderrNamespace } =
+      await $`sed 's/TENANCY_NAMESPACE/${namespace}/' kustomization_temp.yaml > kustomization.yaml`;
+    if (exitCodeNamespace !== 0) {
+      exitWithError(
+        `Error creating kustomization.yaml with tenancy namespace: ${stderrNamespace}`
+      );
+    }
+    console.log(`${chalk.green("kustomization.yaml")} created.`);
+  } catch (error) {
+    exitWithError(error.stderr);
+  } finally {
+    await $`rm -f kustomization_temp.yaml`;
+    await cd(pwdOutput);
+  }
+}
+
 async function cleanRegisterSecret() {
   try {
     let { exitCode } = await $`kubectl get secret ocir-secret`;
@@ -118,20 +220,4 @@ async function cleanRegisterSecret() {
       await $`kubectl delete secret ocir-secret`;
     }
   } catch (error) {}
-}
-
-function printRegionNames(regions) {
-  console.log("printRegionNames");
-  const regionsByZone = regions.reduce((acc, cur) => {
-    const zone = cur.name.split("-")[0];
-    if (acc[zone]) {
-      acc[zone].push(cur.name);
-    } else {
-      acc[zone] = [cur.name];
-    }
-    return acc;
-  }, {});
-  Object.keys(regionsByZone).forEach((zone) =>
-    console.log(`\t${chalk.yellow(zone)}: ${regionsByZone[zone].join(", ")}`)
-  );
 }

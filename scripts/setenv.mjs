@@ -13,6 +13,7 @@ import {
   whichContainerEngine,
   checkPodmanMachineRunning,
 } from "./lib/container.mjs";
+import { getVersionGradle } from "./lib/gradle.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
@@ -106,11 +107,15 @@ async function printRegionNames(regions) {
 async function printVersions() {
   await cd("./web");
   const webVersion = await getVersion();
+  console.log(`${chalk.yellow(`web\tv${webVersion}`)}`);
   await cd("..");
   await cd("./server");
   const serverVersion = await getVersion();
   await cd("..");
-  console.log(`${chalk.yellow(`web\tv${webVersion}`)}`);
   console.log(`${chalk.yellow(`server\tv${serverVersion}`)}`);
+  await cd("./score");
+  const scoreVersion = await getVersionGradle();
+  await cd("..");
+  console.log(`${chalk.yellow(`score\tv${scoreVersion}`)}`);
   console.log();
 }
