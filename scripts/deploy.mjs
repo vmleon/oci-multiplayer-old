@@ -131,7 +131,7 @@ async function setScoreApplicationProperties(adbName, adbPassword) {
   await cd(`${pwdOutput}/deploy/k8s/base/score`);
   try {
     let { stdout, exitCode, stderr } =
-      await $`sed s/TEMPLATE_ADB_SERVICE/${adbName}_high/ application.properties.template | sed s/TEMPLATE_ADB_PASSWORD/${adbPassword}/ > application.properties`;
+      await $`sed s/TEMPLATE_ADB_SERVICE/${adbName.toLowerCase()}_high/ application.properties.template | sed s/TEMPLATE_ADB_PASSWORD/${adbPassword}/ > application.properties`;
     if (exitCode !== 0) {
       exitWithError(`Error creating application.properties: ${stderr}`);
     }
@@ -151,7 +151,9 @@ async function downloadWallet(
   walletFilePath
 ) {
   const adbs = await listAdbDatabases(compartmentId);
-  const adb = adbs.find((db) => db["display-name"] === name);
+  const adb = adbs.find(
+    (db) => db["display-name"].toLowerCase() === name.toLowerCase()
+  );
   await downloadAdbWallet(adb.id, walletFilePath, walletPassword);
 }
 
