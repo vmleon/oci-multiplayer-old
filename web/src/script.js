@@ -6,7 +6,7 @@ import short from "shortid";
 import { MathUtils } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { turtleGen } from "./turtleGen";
-import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
+// import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 
 
 MathUtils.seededRandom(Date.now);
@@ -33,11 +33,11 @@ let timerId;
 let objectIntervalId;
 let gameOverFlag = false;
 
-// const startButton = document.getElementById("startButton");
-// startButton.addEventListener("click", init);
+const startButton = document.getElementById("startButton");
+startButton.addEventListener("click", init);
 
-const createGameButton = document.getElementById("create-game-button");
-createGameButton.addEventListener("click", init);
+// const createGameButton = document.getElementById("create-game-button");
+// createGameButton.addEventListener("click", init);
 
 function init() {
   // const inputNameValue = document.getElementsByName("name")[0].value;
@@ -51,7 +51,7 @@ function init() {
 
   playerName = localStorage.getItem("yourName") || "Player";
   // Set up the timer
-  var timer = 180; // 3 minutes in seconds
+  // var timer = 180; // 3 minutes in seconds
 
   // Create an array to store the objects in the scene
   const objects = [];
@@ -334,7 +334,7 @@ let startTime = null;
       rotY: rotY.toFixed(5), // add rotation Y value
       rotZ: rotZ.toFixed(5), // add rotation Z value
       score,
-      time: remainingTime,
+      // time: remainingTime,
     };
     worker.postMessage({ type: "player.trace", body: trace });
   });
@@ -407,73 +407,73 @@ let startTime = null;
     }
   );
 
-  // Create a variable to store the remaining time
-  let remainingTime = timer;
-  var timerDiv = document.createElement("div");
-  timerDiv.style.position = "absolute";
-  timerDiv.style.top = "45px";
-  timerDiv.style.left = "10px";
-  timerDiv.style.color = "white";
-  timerDiv.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-  timerDiv.innerHTML = "Time: " + timer;
-  document.body.appendChild(timerDiv);
+  // // Create a variable to store the remaining time
+  // let remainingTime = timer;
+  // var timerDiv = document.createElement("div");
+  // timerDiv.style.position = "absolute";
+  // timerDiv.style.top = "45px";
+  // timerDiv.style.left = "10px";
+  // timerDiv.style.color = "white";
+  // timerDiv.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  // timerDiv.innerHTML = "Time: " + timer;
+  // document.body.appendChild(timerDiv);
 
-  // Create a function to update the timer
-  function updateTimer() {
-    remainingTime--;
+  // // Create a function to update the timer
+  // function updateTimer() {
+  //   remainingTime--;
 
-    if (remainingTime <= 0) {
-      console.log("Time's up!");
+  //   if (remainingTime <= 0) {
+  //     console.log("Time's up!");
 
-      gameOver();
-      return;
-    }
+  //     gameOver();
+  //     return;
+  //   }
 
-    timerDiv.innerHTML = "Time: " + remainingTime;
+  //   timerDiv.innerHTML = "Time: " + remainingTime;
 
-    // Update the object creation function to only create objects if the game is not over
-    if (remainingTime % 10 === 0 && !gameOverFlag) {
-      createRandomObject();
-    }
+  //   // Update the object creation function to only create objects if the game is not over
+  //   if (remainingTime % 10 === 0 && !gameOverFlag) {
+  //     createRandomObject();
+  //   }
 
-    setTimeout(updateTimer, 1000);
-  }
+  //   setTimeout(updateTimer, 1000);
+  // }
 
-  // Start the timer
-  updateTimer();
+  // // Start the timer
+  // updateTimer();
 
-  function restart() {
-    // Hide the restart button
-    restartBtn.style.display = "none";
+  // function restart() {
+  //   // Hide the restart button
+  //   restartBtn.style.display = "none";
 
-    // Remove all objects from the scene
-    for (let i = 0; i < objects.length; i++) {
-      const object = objects[i];
-      scene.remove(object);
-    }
-    objects.length = 0;
+  //   // Remove all objects from the scene
+  //   for (let i = 0; i < objects.length; i++) {
+  //     const object = objects[i];
+  //     scene.remove(object);
+  //   }
+  //   objects.length = 0;
 
-    // Reset the player's position and score
-    player.position.set(0, 0, 0);
-    score = 0;
-    playerName = [];
+  //   // Reset the player's position and score
+  //   player.position.set(0, 0, 0);
+  //   score = 0;
+  //   playerName = [];
 
-    // Display the player's score on the screen
-    scoreElement.innerHTML = "Score: " + score;
+  //   // Display the player's score on the screen
+  //   scoreElement.innerHTML = "Score: " + score;
 
-    // Reset the remaining time and display it on the screen
-    remainingTime = timer;
-    timerDiv.innerHTML = "Time: " + remainingTime;
+  //   // Reset the remaining time and display it on the screen
+  //   remainingTime = timer;
+  //   timerDiv.innerHTML = "Time: " + remainingTime;
 
-    // Restart the timer
-    updateTimer();
-  }
+  //   // Restart the timer
+  //   updateTimer();
+  // }
 
   // Create a function to stop creating objects
-  function stopObjectCreation() {
-    clearInterval(objectIntervalId);
-    objectIntervalId = undefined;
-  }
+  // function stopObjectCreation() {
+  //   clearInterval(objectIntervalId);
+  //   objectIntervalId = undefined;
+  // }
 
   let playerMesh;
 
@@ -520,45 +520,45 @@ let startTime = null;
     return group;
   }
 
-  function gameOver() {
-    console.log("Game over!");
+  // function gameOver() {
+  //   console.log("Game over!");
 
-    gameOverFlag = true; // Set the game over flag to true
+  //   gameOverFlag = true; // Set the game over flag to true
 
-    // Stop creating objects by clearing the interval
-    if (objectIntervalId) {
-      stopObjectCreation();
-    }
+  //   // Stop creating objects by clearing the interval
+  //   if (objectIntervalId) {
+  //     stopObjectCreation();
+  //   }
 
-    // Disable keyboard controls
-    keyboard = {};
+  //   // Disable keyboard controls
+  //   keyboard = {};
 
-    // Remove all objects from the scene
-    for (let i = 0; i < objects.length; i++) {
-      const object = objects[i];
-      scene.remove(object);
-    }
-    objects.length = 0;
+  //   // Remove all objects from the scene
+  //   for (let i = 0; i < objects.length; i++) {
+  //     const object = objects[i];
+  //     scene.remove(object);
+  //   }
+  //   objects.length = 0;
 
-    // Display the player's score and name as a CSS overlay
-    const scoreOverlay = document.createElement("div");
-    scoreOverlay.id = "score-overlay";
-    scoreOverlay.innerHTML = "Game Over";
-    scoreOverlay.innerHTML += "<br>Name: " + playerName;
-    scoreOverlay.innerHTML += "<br>Score: " + score;
-    document.body.appendChild(scoreOverlay);
+    // // Display the player's score and name as a CSS overlay
+    // const scoreOverlay = document.createElement("div");
+    // scoreOverlay.id = "score-overlay";
+    // scoreOverlay.innerHTML = "Game Over";
+    // scoreOverlay.innerHTML += "<br>Name: " + playerName;
+    // scoreOverlay.innerHTML += "<br>Score: " + score;
+    // document.body.appendChild(scoreOverlay);
 
-    // Create a restart button
-    const restartBtn = document.createElement("button");
-    restartBtn.innerHTML = "Restart";
-    restartBtn.style.position = "absolute";
-    restartBtn.style.top = "100px";
-    restartBtn.style.left = "10px";
-    restartBtn.addEventListener("click", function () {
-      // Reload the page to restart the game
-      window.location.reload();
-    });
-    document.body.appendChild(restartBtn);
+    // // Create a restart button
+    // const restartBtn = document.createElement("button");
+    // restartBtn.innerHTML = "Restart";
+    // restartBtn.style.position = "absolute";
+    // restartBtn.style.top = "100px";
+    // restartBtn.style.left = "10px";
+    // restartBtn.addEventListener("click", function () {
+    //   // Reload the page to restart the game
+    //   window.location.reload();
+    // });
+    // document.body.appendChild(restartBtn);
 
     // Save the player's name and score to a local JSON file
     const playerData = {
@@ -571,33 +571,33 @@ let startTime = null;
     leaderboard.push(playerData);
     localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
 
-    function viewLeaderboard() {
-      const leaderboardData = localStorage.getItem("leaderboard");
-      if (leaderboardData) {
-        console.log(JSON.parse(leaderboardData));
-      } else {
-        console.log("No leaderboard data found");
-      }
-    }
-    viewLeaderboard();
+  //   function viewLeaderboard() {
+  //     const leaderboardData = localStorage.getItem("leaderboard");
+  //     if (leaderboardData) {
+  //       console.log(JSON.parse(leaderboardData));
+  //     } else {
+  //       console.log("No leaderboard data found");
+  //     }
+  //   }
+  //   viewLeaderboard();
 
-    clearTimeout(timerId);
-    stopObjectCreation();
-  }
+  //   // clearTimeout(timerId);
+  //   stopObjectCreation();
+  // }
 
-  // Create a function to start the timer
-  function startTimer() {
-    timerId = setTimeout(function () {
-      // Display a message or trigger an event to indicate that time is up
-      console.log("Time's up!");
+  // // Create a function to start the timer
+  // function startTimer() {
+  //   timerId = setTimeout(function () {
+  //     // Display a message or trigger an event to indicate that time is up
+  //     console.log("Time's up!");
 
-      // Trigger game over event
-      gameOver();
-    }, timer * 1000);
-  }
+  //     // Trigger game over event
+  //     gameOver();
+  //   }, timer * 1000);
+  // }
 
-  // Start the timer
-  startTimer();
+  // // Start the timer
+  // startTimer();
 
   // Create a variable to keep track of the player's score
   var score = 0;
@@ -628,9 +628,11 @@ let startTime = null;
   // Create a random trash or wildlife object
   function createRandomObject() {
     // Check if the game is over
-    if (remainingTime <= 0 || gameOverFlag) {
-      return;
-    }
+    // if (remainingTime <= 0 || gameOverFlag) {
+    // if (remainingTime <= 0) {
+    //   return;
+    // }
+
 
     const isWildlife = Math.random() < 0.5; // 50% chance of being wildlife
     const geometry = isWildlife ? geometries[0] : geometries[1]; // Use sphere geometry for wildlife, cube geometry for trash
@@ -662,13 +664,13 @@ let startTime = null;
 
     scene.add(object);
     objects.push(object);
-    console.table({
-      Type: geometry.type,
-      Color: material.color.getHexString(),
-      Position: object.position.toArray().join(", "),
-      Scale: object.scale.toArray().join(", "),
-      ObjectType: object.type,
-    });
+    // console.table({
+    //   Type: geometry.type,
+    //   Color: material.color.getHexString(),
+    //   Position: object.position.toArray().join(", "),
+    //   Scale: object.scale.toArray().join(", "),
+    //   ObjectType: object.type,
+    // });
   }
 
   const floatAmplitude = 0.1;
@@ -903,7 +905,7 @@ let startTime = null;
     updatePlayerPosition();
     renderer.render(scene, camera);
     checkCollisions();
-    stopObjectCreation();
+    // stopObjectCreation();
     uniforms.time.value += 0.1;
     renderer.render(scene, camera);
     animateObjects();
