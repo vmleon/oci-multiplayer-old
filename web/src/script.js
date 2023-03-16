@@ -632,8 +632,7 @@ let startTime = null;
     // if (remainingTime <= 0) {
     //   return;
     // }
-
-
+    
     const isWildlife = Math.random() < 0.5; // 50% chance of being wildlife
     const geometry = isWildlife ? geometries[0] : geometries[1]; // Use sphere geometry for wildlife, cube geometry for trash
     const material = isWildlife ? materials[0] : materials[1];
