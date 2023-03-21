@@ -80,9 +80,6 @@ Run the setup for the deployment:
 ```bash
 npx zx scripts/deploy.mjs
 ```
-
-<!-- wojciech_p@cloudshell:oci-multiplayer (uk-london-1)$ oci ce cluster create-kubeconfig --cluster-id ocid1.cluster.oc1.uk-london-1.aaaaaaaa62uoydxonasfxm2q5yvphxqef7ch3vlq625s6wknrceiuaw3zs3q --file $HOME/.kube/config --region uk-london-1 --token-version 2.0.0  --kube-endpoint PUBLIC_ENDPOINT -->
-
 When the output says:
 > Ready to deploy.
 > Run: kubectl apply -k deploy/k8s/overlays/prod
