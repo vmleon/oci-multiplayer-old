@@ -1,19 +1,18 @@
-import "./style.css";
-import * as THREE from "three";
-import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
-import { throttle } from "throttle-debounce";
 import short from "shortid";
+import * as THREE from "three";
 import { MathUtils } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import { throttle } from "throttle-debounce";
+import "./style.css";
 import { turtleGen } from "./turtleGen";
-import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 
 
 MathUtils.seededRandom(Date.now);
 
 const traceRateInMillis = 1;
 
-const logTrace = throttle(1000, false, console.log);
+const logTrace = throttle(5000, false, console.log);
 
 let otherPlayers = {};
 let otherPlayersMeshes = {};
@@ -27,9 +26,9 @@ const yourId = localStorage.getItem("yourId");
 let renderer;
 let canvas;
 let player;
+let playerModel;
 let playerName;
 let timerId;
-// Declare objectIntervalId in the global scope
 let objectIntervalId;
 let gameOverFlag = false;
 
@@ -39,7 +38,7 @@ let gameOverFlag = false;
 const createGameButton = document.getElementById("create-game-button");
 createGameButton.addEventListener("click", init);
 
-function init() {
+async function init() {
   // const inputNameValue = document.getElementsByName("name")[0].value;
   // if (inputNameValue.length) {
   //   localStorage.setItem("yourName", inputNameValue);
@@ -47,76 +46,53 @@ function init() {
   const overlay = document.getElementById("overlay");
   overlay.remove();
 
-
-
   playerName = localStorage.getItem("yourName") || "Player";
+
   // Set up the timer
   var timer = 180; // 3 minutes in seconds
 
   // Create an array to store the objects in the scene
   const objects = [];
 
-  // Comms
-  const hostname = window.location.hostname;
-  const isDevelopment = hostname === "localhost";
-  const wsURL = isDevelopment ? "ws://localhost:3000" : "ws://";
+  // Create a new loader
+  const loader = new GLTFLoader();
 
-  const worker = new Worker(new URL("./commsWorker.js", import.meta.url));
-  worker.postMessage({ type: "start", body: wsURL });
+  // Load the GLTF model
+  loader.load(
+    "assets/boat.gltf", // URL of the model
+    function (gltf) {
+      const boat = gltf.scene.children[0];
+      const playerMaterial = new THREE.MeshStandardMaterial({
+        color: 0xa52a2a,
+        roughness: 0.9,
+        metalness: 0.1,
+      });
+      // Set the boat's position and scale
+      boat.position.set(0, 0, 0);
+      boat.scale.set(1, 1, 1);
+      boat.rotation.set(0, 0, 0);
 
-  worker.onmessage = ({ data }) => {
-    const { type, body, error } = data;
-    if (error) {
+      // Enable shadows for the boat
+      boat.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          child.material = playerMaterial;
+          child.material.side = THREE.DoubleSide;
+        }
+      });
+      // Add the boat to the scene
+      scene.add(boat);
+      playerModel = boat;
+      player = boat;    
+    },
+    undefined, // onProgress callback function
+    function (error) {
       console.error(error);
-      Object.keys(otherPlayersMeshes).forEach((id) =>
-        scene.remove(otherPlayersMeshes[id])
-      );
-      Object.keys(otherPlayers).forEach((id) => delete otherPlayers[id]);
     }
-    switch (type) {
-      case "connect":
-        console.log("Web Socket connection");
-        break;
-      case "disconnect":
-        console.log("Web Socket disconnection");
-        break;
-      case "log":
-        console.log(body);
-        break;
-      case "items":
-        console.log(body);
-        break;
-      case "allPlayers":
-        // FIXME this delete can and should happen on the web worker
-        delete body[yourId];
-        for (const [key, value] of Object.entries(body)) {
-          otherPlayers[key] = value;
-        }
-        break;
-      case "player.new":
-        const { id, name } = body;
-        if (id !== yourId) {
-          console.log(`New Player ${name} (${id})`);
-          otherPlayersMeshes[id] = makePlayerMesh(player, scene, name);
-        }
-        break;
-      case "player.delete":
-        console.log(`Delete Player ${body}`);
-        if (body !== yourId) {
-          // otherPlayersMeshes[body].children
-          //   .filter((e) => e instanceof CSS2DObject)
-          //   .forEach((o) => {
-          //     o.element.remove();
-          //     scene.remove(o);
-          //   }),
-          scene.remove(otherPlayersMeshes[body]);
-          delete otherPlayersMeshes[body];
-        }
-        break;
-      default:
-        break;
-    }
-  };
+  );
+
+  
 
   // Setup the scene
   var scene = new THREE.Scene();
@@ -151,43 +127,6 @@ function init() {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
   });
-
-  // Create a new loader
-  const loader = new GLTFLoader();
-
-  // Load the GLTF model
-  loader.load(
-    "assets/boat.gltf", // URL of the model
-    function (gltf) {
-      const boat = gltf.scene.children[0];
-      const playerMaterial = new THREE.MeshStandardMaterial({
-        color: 0xa52a2a,
-        roughness: 0.9,
-        metalness: 0.1,
-      });
-      // Set the boat's position and scale
-      boat.position.set(0, 0, 0);
-      boat.scale.set(1, 1, 1);
-      boat.rotation.set(0, 0, 0);
-
-      // Enable shadows for the boat
-      boat.traverse(function (child) {
-        if (child instanceof THREE.Mesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-          child.material = playerMaterial;
-          child.material.side = THREE.DoubleSide;
-        }
-      });
-      // Add the boat to the scene
-      scene.add(boat);
-      player = boat;
-    },
-    undefined, // onProgress callback function
-    function (error) {
-      console.error(error);
-    }
-  );
 
   // const planeGeometry = new THREE.PlaneGeometry(89, 23);
   // const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x00008b });
@@ -319,6 +258,67 @@ const SUN_ANIMATION_DURATION = 180; // in seconds
 const SUN_X_DISTANCE = 20; // in world units
 let startTime = null;
 
+// Comms
+const hostname = window.location.hostname;
+const isDevelopment = hostname === "localhost";
+const wsURL = isDevelopment ? "ws://localhost:3000" : "ws://";
+
+const worker = new Worker(new URL("./commsWorker.js", import.meta.url));
+worker.postMessage({ type: "start", body: wsURL });
+
+worker.onmessage = ({ data }) => {
+  const { type, body, error } = data;
+  if (error) {
+    console.error(error);
+    Object.keys(otherPlayersMeshes).forEach((id) =>
+      scene.remove(otherPlayersMeshes[id])
+    );
+    Object.keys(otherPlayers).forEach((id) => delete otherPlayers[id]);
+  }
+  switch (type) {
+    case "connect":
+      console.log("Web Socket connection");
+      break;
+    case "disconnect":
+      console.log("Web Socket disconnection");
+      break;
+    case "log":
+      console.log(body);
+      break;
+    case "items":
+      console.log(body);
+      break;
+    case "allPlayers":
+      // FIXME this delete can and should happen on the web worker
+      delete body[yourId];
+      for (const [key, value] of Object.entries(body)) {
+        otherPlayers[key] = value;
+      }
+      break;
+    case "player.new":
+      const { id, name } = body;
+      if (id !== yourId) {
+        console.log(`New Player ${name} (${id})`);
+        otherPlayersMeshes[id] = makePlayerMesh(player, scene, name);
+      }
+      break;
+    case "player.delete":
+      console.log(`Delete Player ${body}`);
+      if (body !== yourId) {
+        // otherPlayersMeshes[body].children
+        //   .filter((e) => e instanceof CSS2DObject)
+        //   .forEach((o) => {
+        //     o.element.remove();
+        //     scene.remove(o);
+        //   }),
+        scene.remove(otherPlayersMeshes[body]);
+        delete otherPlayersMeshes[body];
+      }
+      break;
+    default:
+      break;
+  }
+};
 
   // ### Send Player
   sendYourPosition = throttle(traceRateInMillis, false, () => {
@@ -813,9 +813,6 @@ let startTime = null;
     return particles;
   }
   
-
-
-
   function updatePlayerPosition() {
     if (!player || !water || gameOverFlag) {
       return;
@@ -881,8 +878,7 @@ let startTime = null;
   checkCollisions();
   }
 
-
-  
+ 
   //player meshes id
   function animateOtherPlayers(playerMeshes) {
     if (!playerMeshes) return;
@@ -890,8 +886,6 @@ let startTime = null;
       if (otherPlayers[id]) {
         playerMeshes[id].position.x = otherPlayers[id].x;
         playerMeshes[id].position.y = otherPlayers[id].y;
-        playerMeshes[id].rotation.x = otherPlayers[id].rotX; // add rotation X value
-        playerMeshes[id].rotation.y = otherPlayers[id].rotY; // add rotation Y value
         playerMeshes[id].rotation.z = otherPlayers[id].rotZ; // add rotation Z value
       }
     });

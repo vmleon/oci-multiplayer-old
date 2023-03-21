@@ -139,7 +139,7 @@ To run in dev mode:
 Server:
 ```
 export REDIS_PASSWORD=fk3ampeHq
-zx scripts/start_redis.msj
+zx scripts/start_redis.mjs
 cd server && npm start
 ```
 
