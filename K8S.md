@@ -118,7 +118,10 @@ Run release script for the component to push the new image.
 npx zx scripts/release.mjs [component]
 ```
 
-Update `deploy/k8s/overlays/prod/kustomization.yaml` to the new version for the component.
+Update the deployment with the new versions:
+```bash
+npx zx scripts/deploy.mjs
+```
 
 Redeploy with:
 ```bash
