@@ -1,4 +1,5 @@
 import short from "shortid";
+import lobby from "./lobby";
 import * as THREE from "three";
 import { MathUtils } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";

@@ -6,7 +6,9 @@ import {
   getNamespace,
   setVariableFromEnvOrPrompt,
   printRegionNames,
+  getVersion,
 } from "./lib/utils.mjs";
+import { getVersionGradle } from "./lib/gradle.mjs";
 import {
   downloadAdbWallet,
   getRegions,
@@ -185,10 +187,25 @@ async function createRedisConfig(password) {
 
 async function createKustomizationYaml(regionKey, namespace) {
   const pwdOutput = (await $`pwd`).stdout.trim();
+  await cd("./web");
+  const webVersion = await getVersion();
+  await cd("../server");
+  const serverVersion = await getVersion();
+  await cd("../score");
+  const scoreVersion = await getVersionGradle();
+  await cd("../generator");
+  const generatorVersion = await getVersion();
+  await cd("..");
+
   await cd("./deploy/k8s/overlays/prod");
   try {
     let { exitCode, stderr } =
-      await $`sed 's/REGION_KEY/${regionKey}/' kustomization.yaml_template | sed 's/TENANCY_NAMESPACE/${namespace}/' > kustomization.yaml`;
+      await $`sed 's/REGION_KEY/${regionKey}/' kustomization.yaml_template \
+         | sed 's/SERVER_TEMPLATE_VERSION/${serverVersion}/' \
+         | sed 's/GENERATOR_TEMPLATE_VERSION/${generatorVersion}/' \
+         | sed 's/WEB_TEMPLATE_VERSION/${webVersion}/' \
+         | sed 's/SCORE_TEMPLATE_VERSION/${scoreVersion}/' \
+         | sed 's/TENANCY_NAMESPACE/${namespace}/' > kustomization.yaml`;
     if (exitCode !== 0) {
       exitWithError(`Error creating kustomization.yaml: ${stderr}`);
     }
