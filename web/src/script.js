@@ -7,7 +7,6 @@ import { throttle } from "throttle-debounce";
 import "./style.css";
 import { turtleGen } from "./turtleGen";
 
-
 MathUtils.seededRandom(Date.now);
 
 const traceRateInMillis = 1;
@@ -54,49 +53,39 @@ async function init() {
   // Create an array to store the objects in the scene
   const objects = [];
 
+  var scene = new THREE.Scene();
+
   // Create a new loader
   const loader = new GLTFLoader();
 
   // Load the GLTF model
-  loader.load(
-    "assets/boat.gltf", // URL of the model
-    function (gltf) {
-      const boat = gltf.scene.children[0];
-      const playerMaterial = new THREE.MeshStandardMaterial({
-        color: 0xa52a2a,
-        roughness: 0.9,
-        metalness: 0.1,
-      });
-      // Set the boat's position and scale
-      boat.position.set(0, 0, 0);
-      boat.scale.set(1, 1, 1);
-      boat.rotation.set(0, 0, 0);
+  const gltf = await loader.loadAsync("assets/boat.gltf");
+  const boat = gltf.scene.children[0];
+  const playerMaterial = new THREE.MeshStandardMaterial({
+    color: 0xa52a2a,
+    roughness: 0.9,
+    metalness: 0.1,
+  });
+  // Set the boat's position and scale
+  boat.position.set(0, 0, 0);
+  boat.scale.set(1, 1, 1);
+  boat.rotation.set(0, 0, 0);
 
-      // Enable shadows for the boat
-      boat.traverse(function (child) {
-        if (child instanceof THREE.Mesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-          child.material = playerMaterial;
-          child.material.side = THREE.DoubleSide;
-        }
-      });
-      // Add the boat to the scene
-      scene.add(boat);
-      playerModel = boat;
-      player = boat;    
-    },
-    undefined, // onProgress callback function
-    function (error) {
-      console.error(error);
+  // Enable shadows for the boat
+  boat.traverse(function (child) {
+    if (child instanceof THREE.Mesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+      child.material = playerMaterial;
+      child.material.side = THREE.DoubleSide;
     }
-  );
-
-  
+  });
+  // Add the boat to the scene
+  scene.add(boat);
+  playerModel = boat;
+  player = boat;
 
   // Setup the scene
-  var scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x9999ff, 0.00025);
   var camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
@@ -165,17 +154,16 @@ async function init() {
 
   const waterGeometry = new THREE.PlaneGeometry(89, 23);
 
-// Define the shader uniforms
-const uniforms = {
-  time: { value: 0 }, // Time uniform for animation
-  waterColor: { value: new THREE.Color(0x0099ff) }, // Water color
-  lightColor: { value: new THREE.Color(0xfafad2) }, // Light color
-  cameraPosition: { value: new THREE.Vector3() }, // Camera position
-};
+  // Define the shader uniforms
+  const uniforms = {
+    time: { value: 0 }, // Time uniform for animation
+    waterColor: { value: new THREE.Color(0x0099ff) }, // Water color
+    lightColor: { value: new THREE.Color(0xfafad2) }, // Light color
+    cameraPosition: { value: new THREE.Vector3() }, // Camera position
+  };
 
-
-// Define the vertex shader
-const vertexShader = `
+  // Define the vertex shader
+  const vertexShader = `
   uniform float time;
   varying vec2 vUv;
 
@@ -198,8 +186,8 @@ const vertexShader = `
   }
 `;
 
-// Define the fragment shader
-const fragmentShader = `
+  // Define the fragment shader
+  const fragmentShader = `
   uniform float time;
   uniform vec3 waterColor;
   uniform vec3 lightColor;
@@ -238,87 +226,88 @@ const fragmentShader = `
   }
 `;
 
-const waterMaterial = new THREE.ShaderMaterial({
-  uniforms,
-  vertexShader,
-  fragmentShader,
-  transparent: true,
-});
+  const waterMaterial = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader,
+    fragmentShader,
+    transparent: true,
+  });
 
-const water = new THREE.Mesh(waterGeometry, waterMaterial);
-water.position.set(0, 0, 0);
-scene.add(water);
+  const water = new THREE.Mesh(waterGeometry, waterMaterial);
+  water.position.set(0, 0, 0);
+  scene.add(water);
 
-// Add a directional light to simulate the sun
-const sun = new THREE.DirectionalLight(0xfafad2, 10);
-sun.position.set(-10, 10, 10);
-sun.castShadow = true;
-scene.add(sun);
-const SUN_ANIMATION_DURATION = 180; // in seconds
-const SUN_X_DISTANCE = 20; // in world units
-let startTime = null;
+  // Add a directional light to simulate the sun
+  const sun = new THREE.DirectionalLight(0xfafad2, 10);
+  sun.position.set(-10, 10, 10);
+  sun.castShadow = true;
+  scene.add(sun);
+  const SUN_ANIMATION_DURATION = 180; // in seconds
+  const SUN_X_DISTANCE = 20; // in world units
+  let startTime = null;
 
-// Comms
-const hostname = window.location.hostname;
-const isDevelopment = hostname === "localhost";
-const wsURL = isDevelopment ? "ws://localhost:3000" : "ws://";
+  // Comms
+  const hostname = window.location.hostname;
+  const isDevelopment = hostname === "localhost";
+  const wsURL = isDevelopment ? "ws://localhost:3000" : "ws://";
 
-const worker = new Worker(new URL("./commsWorker.js", import.meta.url));
-worker.postMessage({ type: "start", body: wsURL });
+  const worker = new Worker(new URL("./commsWorker.js", import.meta.url));
+  worker.postMessage({ type: "start", body: wsURL });
 
-worker.onmessage = ({ data }) => {
-  const { type, body, error } = data;
-  if (error) {
-    console.error(error);
-    Object.keys(otherPlayersMeshes).forEach((id) =>
-      scene.remove(otherPlayersMeshes[id])
-    );
-    Object.keys(otherPlayers).forEach((id) => delete otherPlayers[id]);
-  }
-  switch (type) {
-    case "connect":
-      console.log("Web Socket connection");
-      break;
-    case "disconnect":
-      console.log("Web Socket disconnection");
-      break;
-    case "log":
-      console.log(body);
-      break;
-    case "items":
-      console.log(body);
-      break;
-    case "allPlayers":
-      // FIXME this delete can and should happen on the web worker
-      delete body[yourId];
-      for (const [key, value] of Object.entries(body)) {
-        otherPlayers[key] = value;
-      }
-      break;
-    case "player.new":
-      const { id, name } = body;
-      if (id !== yourId) {
-        console.log(`New Player ${name} (${id})`);
-        otherPlayersMeshes[id] = makePlayerMesh(player, scene, name);
-      }
-      break;
-    case "player.delete":
-      console.log(`Delete Player ${body}`);
-      if (body !== yourId) {
-        // otherPlayersMeshes[body].children
-        //   .filter((e) => e instanceof CSS2DObject)
-        //   .forEach((o) => {
-        //     o.element.remove();
-        //     scene.remove(o);
-        //   }),
-        scene.remove(otherPlayersMeshes[body]);
-        delete otherPlayersMeshes[body];
-      }
-      break;
-    default:
-      break;
-  }
-};
+  worker.onmessage = ({ data }) => {
+    const { type, body, error } = data;
+    if (error) {
+      console.error(error);
+      Object.keys(otherPlayersMeshes).forEach((id) =>
+        scene.remove(otherPlayersMeshes[id])
+      );
+      Object.keys(otherPlayers).forEach((id) => delete otherPlayers[id]);
+    }
+    switch (type) {
+      case "connect":
+        console.log("Web Socket connection");
+        break;
+      case "disconnect":
+        console.log("Web Socket disconnection");
+        break;
+      case "log":
+        console.log(body);
+        break;
+      case "items":
+        console.log(body);
+        break;
+      case "allPlayers":
+        // FIXME this delete can and should happen on the web worker
+        delete body[yourId];
+        for (const [key, value] of Object.entries(body)) {
+          otherPlayers[key] = value;
+        }
+        break;
+      case "player.new":
+        const { id, name } = body;
+        if (id !== yourId) {
+          console.log(`New Player ${name} (${id})`);
+          otherPlayersMeshes[id] = makePlayerMesh(playerModel, scene, name);
+        }
+        break;
+      case "player.delete":
+        console.log(`Delete Player ${body}`);
+        if (body !== yourId) {
+          // otherPlayersMeshes[body].children
+          //   .filter((e) => e instanceof CSS2DObject)
+          //   .forEach((o) => {
+          //     o.element.remove();
+          //     scene.remove(o);
+          //   }),
+          scene.remove(otherPlayersMeshes[body]);
+          delete otherPlayersMeshes[body];
+          delete otherPlayers[body];
+        }
+        break;
+      default:
+        break;
+    }
+  };
 
   // ### Send Player
   sendYourPosition = throttle(traceRateInMillis, false, () => {
@@ -329,9 +318,6 @@ worker.onmessage = ({ data }) => {
       name: playerName,
       x: x.toFixed(5),
       y: y.toFixed(5),
-      z: z.toFixed(5),
-      rotX: rotX.toFixed(5), // add rotation X value
-      rotY: rotY.toFixed(5), // add rotation Y value
       rotZ: rotZ.toFixed(5), // add rotation Z value
       score,
       time: remainingTime,
@@ -383,29 +369,21 @@ worker.onmessage = ({ data }) => {
   scene.add(directionalLight);
 
   // Load the GLTF model
-  loader.load(
-    "assets/turtle.gltf", // URL of the model
-    function (gltf) {
-      const turtle = gltf.scene.children[0];
+  const gltfTurtle = await loader.loadAsync("assets/turtle.gltf");
+  const turtle = gltfTurtle.scene.children[0];
 
-      // Call turtleGen function to get the turtle's position
-      const { x, y, z } = turtleGen();
-      turtle.position.set(x, y, z);
+  // Call turtleGen function to get the turtle's position
+  const { x: xTurtle, y: yTurtle, z: zTurtle } = turtleGen();
+  turtle.position.set(xTurtle, yTurtle, zTurtle);
 
-      // Set the turtle's scale and rotation
-      turtle.scale.set(1, 1, 1);
-      turtle.rotation.set(0, 0, 0);
+  // Set the turtle's scale and rotation
+  turtle.scale.set(1, 1, 1);
+  turtle.rotation.set(0, 0, 0);
 
-      // Add the turtle to the scene
-      scene.add(turtle);
-      turtle.type = "wildlife";
-      objects.push(turtle);
-    },
-    undefined, // onProgress callback function
-    function (error) {
-      console.error(error);
-    }
-  );
+  // Add the turtle to the scene
+  scene.add(turtle);
+  turtle.type = "wildlife";
+  objects.push(turtle);
 
   // Create a variable to store the remaining time
   let remainingTime = timer;
@@ -482,6 +460,8 @@ worker.onmessage = ({ data }) => {
 
     // Clone the player's mesh
     const mesh = playerMesh.clone();
+    mesh.position.set(0, 0, 0);
+    mesh.rotation.set(0, 0, 0);
 
     // Set the material of the new mesh to white
     const playerMaterial = new THREE.MeshStandardMaterial({
@@ -509,10 +489,6 @@ worker.onmessage = ({ data }) => {
     // Add the mesh and label to the group
     group.add(mesh);
     group.add(nameLabel);
-
-    // Clone the player's position and rotation
-    group.position.copy(playerMesh.position);
-    group.rotation.copy(playerMesh.rotation);
 
     // Add the group to the scene
     scene.add(group);
@@ -718,8 +694,8 @@ worker.onmessage = ({ data }) => {
     // Create a bounding box for the player
     const playerBox = new THREE.Box3().setFromObject(player);
 
-      // Create a bounding box for the water
-  const waterBox = new THREE.Box3().setFromObject(water);
+    // Create a bounding box for the water
+    const waterBox = new THREE.Box3().setFromObject(water);
 
     // Check if the player's bounding box intersects with the water's bounding box
     if (playerBox.intersectsBox(waterBox)) {
@@ -729,7 +705,6 @@ worker.onmessage = ({ data }) => {
         scene.remove(foamParticles);
       }, foamParticles.lifetime * 1000);
     }
-  
 
     // Loop through each object in the scene
     for (let i = 0; i < objects.length; i++) {
@@ -766,39 +741,40 @@ worker.onmessage = ({ data }) => {
 
   function createOvalTexture() {
     const size = 64;
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = size;
     canvas.height = size;
-    const ctx = canvas.getContext('2d');
-  
+    const ctx = canvas.getContext("2d");
+
     // Draw an oval
     ctx.beginPath();
     ctx.ellipse(size / 2, size / 2, size / 4, size / 2, 0, 0, Math.PI * 2);
     ctx.closePath();
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = "#ffffff";
     ctx.fill();
-  
+
     return new THREE.CanvasTexture(canvas);
   }
-
 
   function spawnFoamParticles(position) {
     const particleCount = 50;
     const geometry = new THREE.BufferGeometry();
     const vertices = [];
-  
+
     // Add an offset to the Y-axis of the spawn position
     const offsetY = -0.5;
-  
+
     for (let i = 0; i < particleCount; i++) {
       vertices.push(position.x + Math.random() - 0.5);
       vertices.push(position.y + offsetY + Math.random() * 0.5);
       vertices.push(position.z + Math.random() - 0.5);
     }
-  
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
- 
-  
+
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(vertices, 3)
+    );
+
     const material = new THREE.PointsMaterial({
       size: 0.1,
       color: 0xffffff,
@@ -806,13 +782,13 @@ worker.onmessage = ({ data }) => {
       opacity: 0.1,
       map: createOvalTexture(), // Use the oval texture
     });
-  
+
     const particles = new THREE.Points(geometry, material);
     particles.lifetime = 0.2; // in seconds
     scene.add(particles);
     return particles;
   }
-  
+
   function updatePlayerPosition() {
     if (!player || !water || gameOverFlag) {
       return;
@@ -852,33 +828,32 @@ worker.onmessage = ({ data }) => {
     // Save the player's current position for backup
     const lastPosition = player.position.clone();
 
-  // Update the player's position
-  player.position.add(movement);
+    // Update the player's position
+    player.position.add(movement);
 
-  // Check if the player's position intersects with the navmesh
-  const playerBoundingBox = new THREE.Box3().setFromObject(player);
-  if (!playerBoundingBox.intersectsBox(navmeshBoundingBox)) {
-    // Move the player back to the last valid position
-    player.position.copy(lastPosition);
-  } else {
-    // If the player is moving, spawn foam particles around the boat
-    if (playerSpeed > 0.01 || playerSpeed < -0.01) {
-      const foamParticles = spawnFoamParticles(player.position);
-      setTimeout(() => {
-        scene.remove(foamParticles);
-      }, foamParticles.lifetime * 1000);
+    // Check if the player's position intersects with the navmesh
+    const playerBoundingBox = new THREE.Box3().setFromObject(player);
+    if (!playerBoundingBox.intersectsBox(navmeshBoundingBox)) {
+      // Move the player back to the last valid position
+      player.position.copy(lastPosition);
+    } else {
+      // If the player is moving, spawn foam particles around the boat
+      if (playerSpeed > 0.01 || playerSpeed < -0.01) {
+        const foamParticles = spawnFoamParticles(player.position);
+        setTimeout(() => {
+          scene.remove(foamParticles);
+        }, foamParticles.lifetime * 1000);
+      }
     }
+
+    // Update the camera position to follow the player
+    camera.position.x = player.position.x;
+    camera.position.y = player.position.y;
+    camera.position.z = player.position.z + 5;
+
+    checkCollisions();
   }
 
-  // Update the camera position to follow the player
-  camera.position.x = player.position.x;
-  camera.position.y = player.position.y;
-  camera.position.z = player.position.z + 5;
-
-  checkCollisions();
-  }
-
- 
   //player meshes id
   function animateOtherPlayers(playerMeshes) {
     if (!playerMeshes) return;
@@ -903,7 +878,6 @@ worker.onmessage = ({ data }) => {
     animateObjects();
     // traces
     sendYourPosition();
-    logTrace(otherPlayers);
     animateOtherPlayers(otherPlayersMeshes);
     waterMaterial.uniforms.cameraPosition.value.copy(camera.position);
   }
