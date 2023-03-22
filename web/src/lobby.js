@@ -16,8 +16,4 @@ function connect() {
 
         // Add this line to unhide the lobby CSS
         document.getElementById('lobby').style.display = 'block';
-
-
-
-
     }
