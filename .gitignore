@@ -74,3 +74,5 @@ out/
 
 ### VS Code ###
 .vscode/
+*.dtmp
+*.bkp
