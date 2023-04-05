@@ -1,21 +1,25 @@
 import short from "shortid";
-import lobby from "./lobby";
 import * as THREE from "three";
 import { MathUtils } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { throttle } from "throttle-debounce";
 import "./style.css";
-import { turtleGen } from "./turtleGen";
+import * as lobby from "./lobby";
 
 MathUtils.seededRandom(Date.now);
 
 const traceRateInMillis = 1;
 
-const logTrace = throttle(5000, false, console.log);
+const logTrace = throttle(1000, false, console.log);
 
+// FIXME merge other players info and meshes?
 let otherPlayers = {};
 let otherPlayersMeshes = {};
+
+let items = {};
+let itemMeshes = {};
+
 let sendYourPosition;
 
 if (!localStorage.getItem("yourId")) {
@@ -29,7 +33,6 @@ let player;
 let playerModel;
 let playerName;
 let timerId;
-let objectIntervalId;
 let gameOverFlag = false;
 
 // const startButton = document.getElementById("startButton");
@@ -39,10 +42,11 @@ const createGameButton = document.getElementById("create-game-button");
 createGameButton.addEventListener("click", init);
 
 async function init() {
-  // const inputNameValue = document.getElementsByName("name")[0].value;
-  // if (inputNameValue.length) {
-  //   localStorage.setItem("yourName", inputNameValue);
-  // }
+  // Create a new loader
+  const loader = new GLTFLoader();
+  const boatGltf = await loader.loadAsync("assets/boat.gltf");
+  const turtleGltf = await loader.loadAsync("assets/turtle.gltf");
+
   const overlay = document.getElementById("overlay");
   overlay.remove();
 
@@ -51,17 +55,10 @@ async function init() {
   // Set up the timer
   var timer = 180; // 3 minutes in seconds
 
-  // Create an array to store the objects in the scene
-  const objects = [];
-
   var scene = new THREE.Scene();
 
-  // Create a new loader
-  const loader = new GLTFLoader();
-
   // Load the GLTF model
-  const gltf = await loader.loadAsync("assets/boat.gltf");
-  const boat = gltf.scene.children[0];
+  const boat = boatGltf.scene.children[0];
   const playerMaterial = new THREE.MeshStandardMaterial({
     color: 0xa52a2a,
     roughness: 0.9,
@@ -117,12 +114,6 @@ async function init() {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
   });
-
-  // const planeGeometry = new THREE.PlaneGeometry(89, 23);
-  // const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x00008b });
-  // const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-  // plane.position.set(0, 0, -0.3);
-  // scene.add(plane);
 
   const sandGeometry = new THREE.PlaneGeometry(90, 24);
   const sandMaterial = new THREE.MeshPhongMaterial({ color: 0xf4a460 });
@@ -253,7 +244,10 @@ async function init() {
   const wsURL = isDevelopment ? "ws://localhost:3000" : "ws://";
 
   const worker = new Worker(new URL("./commsWorker.js", import.meta.url));
-  worker.postMessage({ type: "start", body: wsURL });
+  worker.postMessage({
+    type: "init",
+    body: { wsURL, yourId, yourName: playerName },
+  });
 
   worker.onmessage = ({ data }) => {
     const { type, body, error } = data;
@@ -272,38 +266,67 @@ async function init() {
         console.log("Web Socket disconnection");
         break;
       case "log":
-        console.log(body);
         break;
-      case "items":
-        console.log(body);
+      case "items.all":
+        Object.keys(body).forEach((key) => {
+          if (!items[key]) {
+            createItemMesh(
+              key,
+              body[key].type,
+              body[key].position,
+              body[key].size
+            );
+          }
+          items[key] = body[key];
+        });
+        // FIXME create meshes
         break;
-      case "allPlayers":
-        // FIXME this delete can and should happen on the web worker
-        delete body[yourId];
-        for (const [key, value] of Object.entries(body)) {
-          otherPlayers[key] = value;
+      case "item.new":
+        const { id: itemIdToCreate, data: itemData } = body;
+        createItemMesh(
+          itemIdToCreate,
+          itemData.type,
+          itemData.position,
+          itemData.size
+        );
+        items[itemIdToCreate] = itemData;
+        break;
+      case "item.destroy":
+        const itemIdToDestroy = body;
+        const item = items[itemIdToDestroy];
+        const mesh = itemMeshes[itemIdToDestroy];
+        if (item && mesh) {
+          scene.remove(mesh);
+          delete items[itemIdToDestroy];
+          delete itemMeshes[itemIdToDestroy];
         }
         break;
-      case "player.new":
-        const { id, name } = body;
-        if (id !== yourId) {
-          console.log(`New Player ${name} (${id})`);
-          otherPlayersMeshes[id] = makePlayerMesh(playerModel, scene, name);
+      case "player.trace.all":
+        for (const [key, traceData] of Object.entries(body)) {
+          otherPlayers[key] = traceData;
+          if (!otherPlayersMeshes[key]) {
+            otherPlayersMeshes[key] = makePlayerMesh(playerModel, scene);
+          }
         }
         break;
-      case "player.delete":
-        console.log(`Delete Player ${body}`);
-        if (body !== yourId) {
-          // otherPlayersMeshes[body].children
-          //   .filter((e) => e instanceof CSS2DObject)
-          //   .forEach((o) => {
-          //     o.element.remove();
-          //     scene.remove(o);
-          //   }),
-          scene.remove(otherPlayersMeshes[body]);
-          delete otherPlayersMeshes[body];
-          delete otherPlayers[body];
+      case "player.info.joined":
+        const { id: joinedId, name: joinedName } = body;
+        if (joinedId !== yourId) {
+          otherPlayersMeshes[joinedId] = makePlayerMesh(playerModel, scene);
         }
+        break;
+      case "player.info.left":
+        const playerId = body;
+        if (playerId !== yourId) {
+          scene.remove(otherPlayersMeshes[playerId]);
+          delete otherPlayersMeshes[playerId];
+          delete otherPlayers[playerId];
+        }
+        break;
+      case "player.score":
+        const scoreFromBackend = body;
+        score = scoreFromBackend;
+        scoreElement.innerHTML = "Score: " + score;
         break;
       default:
         break;
@@ -320,10 +343,8 @@ async function init() {
       x: x.toFixed(5),
       y: y.toFixed(5),
       rotZ: rotZ.toFixed(5), // add rotation Z value
-      score,
-      time: remainingTime,
     };
-    worker.postMessage({ type: "player.trace", body: trace });
+    worker.postMessage({ type: "player.trace.change", body: trace });
   });
 
   function animateSun(time) {
@@ -370,21 +391,7 @@ async function init() {
   scene.add(directionalLight);
 
   // Load the GLTF model
-  const gltfTurtle = await loader.loadAsync("assets/turtle.gltf");
-  const turtle = gltfTurtle.scene.children[0];
-
-  // Call turtleGen function to get the turtle's position
-  const { x: xTurtle, y: yTurtle, z: zTurtle } = turtleGen();
-  turtle.position.set(xTurtle, yTurtle, zTurtle);
-
-  // Set the turtle's scale and rotation
-  turtle.scale.set(1, 1, 1);
-  turtle.rotation.set(0, 0, 0);
-
-  // Add the turtle to the scene
-  scene.add(turtle);
-  turtle.type = "wildlife";
-  objects.push(turtle);
+  const turtle = turtleGltf.scene.children[0];
 
   // Create a variable to store the remaining time
   let remainingTime = timer;
@@ -410,11 +417,6 @@ async function init() {
 
     timerDiv.innerHTML = "Time: " + remainingTime;
 
-    // Update the object creation function to only create objects if the game is not over
-    if (remainingTime % 10 === 0 && !gameOverFlag) {
-      createRandomObject();
-    }
-
     setTimeout(updateTimer, 1000);
   }
 
@@ -425,12 +427,10 @@ async function init() {
     // Hide the restart button
     restartBtn.style.display = "none";
 
-    // Remove all objects from the scene
-    for (let i = 0; i < objects.length; i++) {
-      const object = objects[i];
-      scene.remove(object);
+    // Remove all item meshes from the scene
+    for (const [key, mesh] of Object.entries(itemMeshes)) {
+      scene.remove(mesh);
     }
-    objects.length = 0;
 
     // Reset the player's position and score
     player.position.set(0, 0, 0);
@@ -448,15 +448,7 @@ async function init() {
     updateTimer();
   }
 
-  // Create a function to stop creating objects
-  function stopObjectCreation() {
-    clearInterval(objectIntervalId);
-    objectIntervalId = undefined;
-  }
-
-  let playerMesh;
-
-  function makePlayerMesh(playerMesh, scene, name) {
+  function makePlayerMesh(playerMesh, scene) {
     const group = new THREE.Group();
 
     // Clone the player's mesh
@@ -479,17 +471,17 @@ async function init() {
     });
 
     // Create a label for the player's name
-    const nameDiv = document.createElement("div");
-    nameDiv.className = "label";
-    nameDiv.textContent = name;
-    nameDiv.style.marginTop = "-1em";
-    const nameLabel = new CSS2DObject(nameDiv);
-    nameLabel.position.set(0, 0, 1);
-    nameLabel.layers.set(1);
+    // const nameDiv = document.createElement("div");
+    // nameDiv.className = "label";
+    // nameDiv.textContent = name;
+    // nameDiv.style.marginTop = "-1em";
+    // const nameLabel = new CSS2DObject(nameDiv);
+    // nameLabel.position.set(0, 0, 1);
+    // nameLabel.layers.set(1);
 
     // Add the mesh and label to the group
     group.add(mesh);
-    group.add(nameLabel);
+    // group.add(nameLabel);
 
     // Add the group to the scene
     scene.add(group);
@@ -502,20 +494,13 @@ async function init() {
 
     gameOverFlag = true; // Set the game over flag to true
 
-    // Stop creating objects by clearing the interval
-    if (objectIntervalId) {
-      stopObjectCreation();
-    }
-
     // Disable keyboard controls
     keyboard = {};
 
-    // Remove all objects from the scene
-    for (let i = 0; i < objects.length; i++) {
-      const object = objects[i];
-      scene.remove(object);
+    // Remove all item meshes from the scene
+    for (const [key, mesh] of Object.entries(itemMeshes)) {
+      scene.remove(mesh);
     }
-    objects.length = 0;
 
     // Display the player's score and name as a CSS overlay
     const scoreOverlay = document.createElement("div");
@@ -559,7 +544,6 @@ async function init() {
     viewLeaderboard();
 
     clearTimeout(timerId);
-    stopObjectCreation();
   }
 
   // Create a function to start the timer
@@ -577,7 +561,7 @@ async function init() {
   startTimer();
 
   // Create a variable to keep track of the player's score
-  var score = 0;
+  let score = 0;
 
   // Display the player's score on the screen
   var scoreElement = document.createElement("div");
@@ -589,7 +573,6 @@ async function init() {
   scoreElement.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
   scoreElement.innerHTML = "Score: " + score;
   document.body.appendChild(scoreElement);
-  console.log(score);
 
   const materials = [
     new THREE.MeshPhongMaterial({ color: 0x00ff00 }), // Green material for wildlife
@@ -602,30 +585,34 @@ async function init() {
     new THREE.BufferGeometry(),
   ];
 
-  // Create a random trash or wildlife object
-  function createRandomObject() {
-    // Check if the game is over
-    if (remainingTime <= 0 || gameOverFlag) {
-      return;
+  function isMarineLife(type) {
+    switch (type) {
+      case "turtle":
+        return true;
+      case "trash":
+        return false;
+      default:
+        return false;
     }
+  }
 
-    const isWildlife = Math.random() < 0.5; // 50% chance of being wildlife
-    const geometry = isWildlife ? geometries[0] : geometries[1]; // Use sphere geometry for wildlife, cube geometry for trash
-    const material = isWildlife ? materials[0] : materials[1];
-    const object = new THREE.Mesh(geometry, material);
-    object.position.set(
-      Math.random() * 88 - 44, // set random position within the plane width
-      Math.random() * 22 - 11, // set random position within the plane height
-      0
-    );
-    const scale = Math.random() * 1; // Random scale value between 1 and 15
-    object.scale.set(scale, scale, scale);
-    object.type = isWildlife ? "wildlife" : "trash";
-    object.outOfBounds = false;
+  // Create a random trash or wildlife object
+  function createItemMesh(itemId, itemType, position, size) {
+    // FIXME use marine life models when isMarineLife() returns true
+    const geometry = isMarineLife(itemType) ? geometries[0] : geometries[1]; // Use sphere geometry for wildlife, cube geometry for trash
+    const material = isMarineLife(itemType) ? materials[0] : materials[1];
+    const itemMesh = new THREE.Mesh(geometry, material);
+    // Math.random() * 88 - 44, // set random position within the plane width
+    // Math.random() * 22 - 11, // set random position within the plane height
+    itemMesh.position.set(position.x, position.y, position.z);
+    itemMesh.scale.set(size, size, size);
+    itemMesh.itemId = itemId;
+    itemMesh.itemType = itemType;
+    itemMesh.outOfBounds = false;
 
     // check if object is within the bounds of the plane
     const waterBoundaries = waterGeometry.parameters;
-    const objectBoundaries = new THREE.Box3().setFromObject(object);
+    const objectBoundaries = new THREE.Box3().setFromObject(itemMesh);
     if (
       objectBoundaries.min.x > waterBoundaries.width / 2 ||
       objectBoundaries.max.x < -waterBoundaries.width / 2 ||
@@ -633,45 +620,28 @@ async function init() {
       objectBoundaries.max.y < -waterBoundaries.height / 2
     ) {
       // if the object is outside the plane, mark it as out of bounds and return
-      object.outOfBounds = true;
+      itemMesh.outOfBounds = true;
       return;
     }
 
-    scene.add(object);
-    objects.push(object);
-    console.table({
-      Type: geometry.type,
-      Color: material.color.getHexString(),
-      Position: object.position.toArray().join(", "),
-      Scale: object.scale.toArray().join(", "),
-      ObjectType: object.type,
-    });
+    scene.add(itemMesh);
+    itemMeshes[itemId] = itemMesh;
+    return itemMesh;
   }
 
   const floatAmplitude = 0.1;
 
-  function animateObjects() {
+  function animateItems() {
     const time = performance.now() * 0.001; // Get current time in seconds
-    objects.forEach((object) => {
-      if (!object.outOfBounds) {
+    for (const [key, mesh] of Object.entries(itemMeshes)) {
+      if (!mesh.outOfBounds) {
         const sinValue = Math.sin(
-          time * 2 + object.position.x * 0.5 + object.position.y * 0.3
+          time * 2 + mesh.position.x * 0.5 + mesh.position.y * 0.3
         );
-        object.position.z = sinValue * floatAmplitude;
+        mesh.position.z = sinValue * floatAmplitude;
       }
-    });
+    }
   }
-
-  // Check for collisions between the player and each object in the scene
-
-  function createObject() {
-    createRandomObject();
-    const timeInterval = Math.floor(Math.random() * 9000) + 1000; // Random time interval between 1 and 10 seconds
-    setTimeout(createObject, timeInterval);
-  }
-
-  // Call createObject to start creating objects
-  createObject();
 
   // Add ambient light to the scene
   const ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -708,34 +678,37 @@ async function init() {
     }
 
     // Loop through each object in the scene
-    for (let i = 0; i < objects.length; i++) {
-      const object = objects[i];
-
+    for (const [key, mesh] of Object.entries(itemMeshes)) {
       // Check if the object is out of bounds
-      if (object.outOfBounds) {
+      if (mesh.outOfBounds) {
         continue;
       }
 
-      // Create a bounding box for the object
-      const objectBox = new THREE.Box3().setFromObject(object);
+      // Create a bounding box for the mesh
+      const itemMeshBox = new THREE.Box3().setFromObject(mesh);
 
-      // Check if the player's bounding box intersects with the object's bounding box
-      if (playerBox.intersectsBox(objectBox)) {
-        // Remove the object from the scene and the objects array
-        scene.remove(object);
-        objects.splice(i, 1);
+      // Check if the player's bounding box intersects with the mesh's bounding box
+      // FIXME use cannon.js or any physics engine
+      const collision = playerBox.intersectsBox(itemMeshBox);
+      if (collision) {
+        // Remove the object from the scene and the itemMeshes
+        const collisionData = {
+          itemId: key,
+          playerId: yourId,
+          playerName: playerName,
+        };
+        worker.postMessage({
+          type: "items.collision",
+          body: collisionData,
+        });
 
-        // Add or deduct points based on the object type
-        if (object.type === "trash") {
-          score++;
-          console.log("Score:", score);
-        } else if (object.type === "wildlife") {
-          score--;
-          console.log("Score:", score);
-        }
-
+        scene.remove(mesh);
+        // FIXME score has to be backend driven
+        isMarineLife(mesh.itemType) ? score++ : score--;
         // Update the score element on the page
         scoreElement.innerHTML = "Score: " + score;
+
+        delete itemMeshes[key];
       }
     }
   }
@@ -852,7 +825,8 @@ async function init() {
     camera.position.y = player.position.y;
     camera.position.z = player.position.z + 5;
 
-    checkCollisions();
+    // FIXME Don't think we need this check collisions here and in the animate function
+    // checkCollisions();
   }
 
   //player meshes id
@@ -873,12 +847,16 @@ async function init() {
     updatePlayerPosition();
     renderer.render(scene, camera);
     checkCollisions();
-    stopObjectCreation();
     uniforms.time.value += 0.1;
     renderer.render(scene, camera);
-    animateObjects();
+    animateItems();
     // traces
     sendYourPosition();
+    // logTrace(
+    //   `Player on (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(
+    //     1
+    //   )}) heading to ${player.rotation.z.toFixed(1)}`
+    // );
     animateOtherPlayers(otherPlayersMeshes);
     waterMaterial.uniforms.cameraPosition.value.copy(camera.position);
   }

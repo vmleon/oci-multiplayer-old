@@ -2,6 +2,7 @@ package com.oracle.developer.multiplayer.score;
 
 import com.oracle.developer.multiplayer.score.data.Score;
 import com.oracle.developer.multiplayer.score.data.ScoreDAO;
+import com.oracle.developer.multiplayer.score.data.ScoreOperationDAO;
 import com.oracle.developer.multiplayer.score.data.ScoreRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class ScoreController {
@@ -48,18 +48,28 @@ public class ScoreController {
     }
 
     @PutMapping("/api/score/{uuid}")
-    ScoreDAO addScore(@PathVariable("uuid") String uuid, @RequestBody ScoreDAO body) {
+    ScoreDAO addScore(@PathVariable("uuid") String uuid, @RequestBody ScoreOperationDAO body) {
         logger.info("PUT /api/score/" + uuid);
         Score scoreFromStore = repository.findByUuid(uuid)
                 .orElse(new Score());
-        if (scoreFromStore.getScore() < body.getScore()) {
-            scoreFromStore.setScore(body.getScore());
-            scoreFromStore.setName(body.getName());
-            scoreFromStore.setUuid(uuid);
-            Score saved = repository.save(scoreFromStore);
-            return new ScoreDAO(saved.getUuid(),saved.getName(), saved.getScore() );
+        Long deltaScore;
+        switch (body.getOperationType()) {
+            case DECREMENT:
+                deltaScore = - 1L;
+                break;
+            case INCREMENT:
+                deltaScore = 1L;
+                break;
+            default:
+                deltaScore = 0L;
+                break;
         }
-        throw new NotAuthorizedOrNotFound();
+        Long newScoreValue = scoreFromStore.getScore() + deltaScore;
+        scoreFromStore.setScore(newScoreValue);
+        scoreFromStore.setName(body.getName());
+        scoreFromStore.setUuid(uuid);
+        Score saved = repository.save(scoreFromStore);
+        return new ScoreDAO(saved.getUuid(),saved.getName(), saved.getScore() );
     }
 
     @DeleteMapping("/api/score")

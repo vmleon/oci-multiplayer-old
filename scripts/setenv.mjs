@@ -117,9 +117,5 @@ async function printVersions() {
   const scoreVersion = await getVersionGradle();
   await cd("..");
   console.log(`${chalk.yellow(`score\t\tv${scoreVersion}`)}`);
-  await cd("./generator");
-  const generatorVersion = await getVersion();
-  await cd("..");
-  console.log(`${chalk.yellow(`generator\tv${generatorVersion}`)}`);
   console.log();
 }

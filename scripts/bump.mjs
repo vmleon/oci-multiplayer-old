@@ -20,11 +20,6 @@ if (action === "server") {
   process.exit(0);
 }
 
-if (action === "generator") {
-  await bumpVersion("generator");
-  process.exit(0);
-}
-
 if (action === "score") {
   await bumpVersionJava("score");
   process.exit(0);
@@ -34,7 +29,6 @@ console.log("Usage:");
 console.log("\tnpx zx scripts/bump.mjs web");
 console.log("\tnpx zx scripts/bump.mjs server");
 console.log("\tnpx zx scripts/bump.mjs score");
-console.log("\tnpx zx scripts/bump.mjs generator");
 
 async function bumpVersion(service) {
   await cd(service);
