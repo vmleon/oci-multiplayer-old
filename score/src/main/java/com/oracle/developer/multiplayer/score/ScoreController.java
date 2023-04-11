@@ -1,9 +1,8 @@
 package com.oracle.developer.multiplayer.score;
 
 import com.oracle.developer.multiplayer.score.data.Score;
-import com.oracle.developer.multiplayer.score.data.ScoreDAO;
-import com.oracle.developer.multiplayer.score.data.ScoreOperationDAO;
-import com.oracle.developer.multiplayer.score.data.ScoreRepository;
+import com.oracle.developer.multiplayer.score.dao.ScoreDAO;
+import com.oracle.developer.multiplayer.score.repository.ScoreRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -26,9 +25,9 @@ public class ScoreController {
         this.repository = repository;
     }
 
-    @GetMapping("/api/score")
+    @GetMapping("/api/top/score")
     List<ScoreDAO> getAll() {
-        logger.info("GET /api/score");
+        logger.info("GET /api/top/score");
         List<ScoreDAO> all = new ArrayList<>();
         Sort sortByScore = Sort.by(Sort.Direction.DESC, "score");
         Pageable topResults = PageRequest.of(0,10, sortByScore);
@@ -38,43 +37,16 @@ public class ScoreController {
         return all;
     }
 
-    @GetMapping("/api/score/{uuid}")
+    @GetMapping("/api/top/score/{uuid}")
     ScoreDAO getByUuid(@PathVariable("uuid") String uuid) {
-        logger.info("GET /api/score/" + uuid);
-        Sort sortByScore = Sort.by(Sort.Direction.DESC, "score");
-        Pageable topResults = PageRequest.of(0,10, sortByScore);
+        logger.info("GET /api/top/score/" + uuid);
         Score score = repository.findByUuid(uuid).orElseThrow(() -> new NotAuthorizedOrNotFound());
         return new ScoreDAO(score.getUuid(),score.getName(), score.getScore() );
     }
 
-    @PutMapping("/api/score/{uuid}")
-    ScoreDAO addScore(@PathVariable("uuid") String uuid, @RequestBody ScoreOperationDAO body) {
-        logger.info("PUT /api/score/" + uuid);
-        Score scoreFromStore = repository.findByUuid(uuid)
-                .orElse(new Score());
-        Long deltaScore;
-        switch (body.getOperationType()) {
-            case DECREMENT:
-                deltaScore = - 1L;
-                break;
-            case INCREMENT:
-                deltaScore = 1L;
-                break;
-            default:
-                deltaScore = 0L;
-                break;
-        }
-        Long newScoreValue = scoreFromStore.getScore() + deltaScore;
-        scoreFromStore.setScore(newScoreValue);
-        scoreFromStore.setName(body.getName());
-        scoreFromStore.setUuid(uuid);
-        Score saved = repository.save(scoreFromStore);
-        return new ScoreDAO(saved.getUuid(),saved.getName(), saved.getScore() );
-    }
-
-    @DeleteMapping("/api/score")
+    @DeleteMapping("/api/top/score")
     ResponseEntity<Void> deleteAll() {
-        logger.info("DELETE /api/score");
+        logger.info("DELETE /api/top/score");
         repository.deleteAll();
         return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }

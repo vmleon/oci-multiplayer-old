@@ -1,4 +1,4 @@
-package com.oracle.developer.multiplayer.score.data;
+package com.oracle.developer.multiplayer.score.dao;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -7,9 +7,9 @@ import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode
-public class ScoreDAO {
+public class CurrentScoreDAO {
 
-    public ScoreDAO(String uuid, String name, Long score) {
+    public CurrentScoreDAO(String uuid, String name, Long score) {
         this.uuid = uuid;
         this.name = name;
         this.score = score;

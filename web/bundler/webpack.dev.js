@@ -15,6 +15,7 @@ module.exports = merge(commonConfiguration, {
     watchContentBase: true,
     proxy: {
       "/socket.io": { target: "ws://localhost:3000" },
+      "/api": { target: "ws://localhost:8080" },
     },
     open: true,
     https: false,

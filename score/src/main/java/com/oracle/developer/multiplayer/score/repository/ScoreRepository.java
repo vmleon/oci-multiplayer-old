@@ -1,5 +1,6 @@
-package com.oracle.developer.multiplayer.score.data;
+package com.oracle.developer.multiplayer.score.repository;
 
+import com.oracle.developer.multiplayer.score.data.Score;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;

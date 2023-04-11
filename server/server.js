@@ -33,11 +33,13 @@ const scoreServiceUrl = `${SCORE_SERVICE_HOST}:${SCORE_SERVICE_PORT}`;
 logger.info(`Connecting to Score on ${scoreServiceUrl}`);
 
 // FIXME variable env?
-const ITEM_MAX_SIZE = 0.9;
-const ITEM_MIN_SIZE = 0.5;
+const ITEM_MAX_SIZE = process.env.ITEM_MAX_SIZE || 0.9;
+const ITEM_MIN_SIZE = process.env.ITEM_MIN_SIZE || 0.5;
 
-const WORLD_SIZE_X = 88;
-const WORLD_SIZE_Y = 22;
+const WORLD_SIZE_X = process.env.WORLD_SIZE_X || 88;
+const WORLD_SIZE_Y = process.env.WORLD_SIZE_Y || 22;
+
+const GAME_DURATION_IN_SECONDS = process.env.GAME_DURATION_IN_SECONDS || 30;
 
 // FIXME this needs to be stored on some DB
 let playersTraces = {};
@@ -53,14 +55,36 @@ export function start(httpServer, port, pubClient, subClient) {
   io.on("connection", (socket) => {
     logger.info(`New client added, ${io.engine.clientsCount} in total.`);
 
-    socket.emit("server.info", { id: serverId });
+    socket.emit("server.info", {
+      id: serverId,
+      gameDuration: GAME_DURATION_IN_SECONDS,
+    });
     socket.emit("items.all", { ...trashPoll, ...marineLifePoll });
 
     // FIXME scope this to surrounding players only
     socket.emit("player.info.all", playersInfo);
 
+    socket.emit("game.on");
+
     socket.on("player.info.joining", ({ id, name }) => {
       playersInfo[id] = { name };
+    });
+
+    socket.on("game.start", ({ playerId }) => {
+      logger.info(`Client ${playerId} sent "game.start"`);
+      setTimeout(async () => {
+        logger.info(`"game.end" sent to client ${playerId}`);
+        socket.emit("game.end");
+        // FIXME thrown exceptions will kill the process!
+        const response = await fetch(
+          `http://${scoreServiceUrl}/api/score/${playerId}`,
+          {
+            method: "DELETE",
+            headers: { "Content-type": "application/json" },
+          }
+        );
+        // const jsonResponse = await response.json();
+      }, GAME_DURATION_IN_SECONDS * 1000);
     });
 
     socket.on("player.trace.change", ({ id, ...traceData }) => {
@@ -71,23 +95,27 @@ export function start(httpServer, port, pubClient, subClient) {
     });
 
     socket.on("items.collision", async (data) => {
-      const { itemId, playerId, playerName } = data;
+      console.log(data);
+      const { itemId, playerId, playerName, localScore } = data;
+      let stringifyBody;
       if (trashPoll[itemId]) {
         logger.info(
           `Player ${playerId} increased score for collecting ${itemId} trash`
         );
         delete trashPoll[itemId];
         io.emit("item.destroy", itemId);
+        stringifyBody = JSON.stringify({
+          operationType: "INCREMENT",
+          name: playerName,
+        });
+        console.log({ stringifyBody });
         // FIXME thrown exceptions will kill the process!
         const response = await fetch(
           `http://${scoreServiceUrl}/api/score/${playerId}`,
           {
             method: "PUT",
             headers: { "Content-type": "application/json" },
-            body: JSON.stringify({
-              operationType: "INCREMENT",
-              name: playerName,
-            }),
+            body: stringifyBody,
           }
         );
         const jsonResponse = await response.json();
@@ -98,16 +126,18 @@ export function start(httpServer, port, pubClient, subClient) {
         );
         delete marineLifePoll[itemId];
         io.emit("item.destroy", itemId);
+        stringifyBody = JSON.stringify({
+          operationType: "DECREMENT",
+          name: playerName,
+        });
+        console.log({ stringifyBody });
         // FIXME thrown exceptions will kill the process!
         const response = await fetch(
           `http://${scoreServiceUrl}/api/score/${playerId}`,
           {
             method: "PUT",
             headers: { "Content-type": "application/json" },
-            body: JSON.stringify({
-              operationType: "DECREMENT",
-              name: playerName,
-            }),
+            body: stringifyBody,
           }
         );
         const jsonResponse = await response.json();

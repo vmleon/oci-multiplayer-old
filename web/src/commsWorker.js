@@ -25,6 +25,10 @@ function init(wsURL, yourId, yourName) {
     postMessage({ type: "player.trace.all", body: data });
   });
 
+  socket.on("game.end", () => {
+    postMessage({ type: "game.end" });
+  });
+
   socket.on("items.all", (data) => {
     postMessage({ type: "items.all", body: data });
   });
@@ -37,8 +41,12 @@ function init(wsURL, yourId, yourName) {
     postMessage({ type: "item.destroy", body: data });
   });
 
-  socket.on("server.info", ({ id }) => {
-    logger(`Connected to server ${id}`);
+  socket.on("server.info", (data) => {
+    postMessage({ type: "server.info", body: data });
+  });
+
+  socket.on("game.on", (data) => {
+    postMessage({ type: "game.on", body: data });
   });
 
   socket.on("player.info.joined", (data) => {
@@ -59,6 +67,9 @@ onmessage = ({ data }) => {
     case "player.trace.change":
       socket.emit("player.trace.change", data.body);
       break;
+    case "game.start":
+      socket.emit("game.start", data.body);
+      break;
     case "items.collision":
       socket.emit("items.collision", data.body);
       break;
@@ -72,5 +83,8 @@ onmessage = ({ data }) => {
 };
 
 function logger(message) {
-  postMessage({ type: "log", body: message });
+  postMessage({
+    type: "log",
+    body: `Comms Worker: ${JSON.stringify(message)}`,
+  });
 }
