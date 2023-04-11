@@ -1,7 +1,6 @@
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import * as dotenv from "dotenv";
-import fetch from "node-fetch";
 import short from "short-uuid";
 import pino from "pino";
 import { deleteCurrentScore, postCurrentScore } from "./score.js";
@@ -75,7 +74,6 @@ export function start(httpServer, port, pubClient, subClient) {
 
     socket.on("items.collision", async (data) => {
       const { itemId, playerId, playerName } = data;
-      let stringifyBody;
       if (trashPoll[itemId]) {
         delete trashPoll[itemId];
         io.emit("item.destroy", itemId);
@@ -143,11 +141,6 @@ export function start(httpServer, port, pubClient, subClient) {
     ).toFixed(2);
     return { id: short.generate(), type, position: { x, y, z }, size };
   }
-
-  // broadcast all players info
-  setInterval(() => {
-    io.emit("gen.info.all", playersInfo);
-  }, BROADCAST_REFRESH_UPDATE);
 
   // Clean stale players, and send delete player if stale
   setInterval(() => {
