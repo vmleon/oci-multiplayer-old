@@ -4,6 +4,7 @@ import * as dotenv from "dotenv";
 import fetch from "node-fetch";
 import short from "short-uuid";
 import pino from "pino";
+import { deleteCurrentScore, postCurrentScore } from "./score.js";
 
 dotenv.config({ path: "./config/.env" });
 // FIXME change log level based on NODE_ENV
@@ -18,28 +19,16 @@ const BROADCAST_REFRESH_UPDATE = process.env.BROADCAST_REFRESH_UPDATE || 50;
 const CLEANUP_STALE_IN_SECONDS = process.env.CLEANUP_STALE_IN_SECONDS || 2;
 const BROADCAST_ITEMS_IN_SECONDS = process.env.BROADCAST_ITEMS_IN_SECONDS || 2;
 
-const SCORE_SERVICE_HOST = process.env.SCORE_SERVICE_HOST;
-if (!SCORE_SERVICE_HOST) {
-  logger.error(`SCORE_SERVICE_HOST not defined`);
-  process.exit(1);
-}
-const SCORE_SERVICE_PORT = process.env.SCORE_SERVICE_PORT;
-if (!SCORE_SERVICE_PORT) {
-  logger.error(`SCORE_SERVICE_PORT not defined`);
-  process.exit(1);
-}
-
-const scoreServiceUrl = `${SCORE_SERVICE_HOST}:${SCORE_SERVICE_PORT}`;
-logger.info(`Connecting to Score on ${scoreServiceUrl}`);
-
 // FIXME variable env?
 const ITEM_MAX_SIZE = process.env.ITEM_MAX_SIZE || 0.9;
 const ITEM_MIN_SIZE = process.env.ITEM_MIN_SIZE || 0.5;
 
+// FIXME variable env?
 const WORLD_SIZE_X = process.env.WORLD_SIZE_X || 88;
 const WORLD_SIZE_Y = process.env.WORLD_SIZE_Y || 22;
 
-const GAME_DURATION_IN_SECONDS = process.env.GAME_DURATION_IN_SECONDS || 30;
+// FIXME variable env?
+const GAME_DURATION_IN_SECONDS = process.env.GAME_DURATION_IN_SECONDS || 180;
 
 // FIXME this needs to be stored on some DB
 let playersTraces = {};
@@ -71,19 +60,9 @@ export function start(httpServer, port, pubClient, subClient) {
     });
 
     socket.on("game.start", ({ playerId }) => {
-      logger.info(`Client ${playerId} sent "game.start"`);
       setTimeout(async () => {
-        logger.info(`"game.end" sent to client ${playerId}`);
         socket.emit("game.end");
-        // FIXME thrown exceptions will kill the process!
-        const response = await fetch(
-          `http://${scoreServiceUrl}/api/score/${playerId}`,
-          {
-            method: "DELETE",
-            headers: { "Content-type": "application/json" },
-          }
-        );
-        // const jsonResponse = await response.json();
+        await deleteCurrentScore(playerId);
       }, GAME_DURATION_IN_SECONDS * 1000);
     });
 
@@ -95,53 +74,24 @@ export function start(httpServer, port, pubClient, subClient) {
     });
 
     socket.on("items.collision", async (data) => {
-      console.log(data);
-      const { itemId, playerId, playerName, localScore } = data;
+      const { itemId, playerId, playerName } = data;
       let stringifyBody;
       if (trashPoll[itemId]) {
-        logger.info(
-          `Player ${playerId} increased score for collecting ${itemId} trash`
-        );
         delete trashPoll[itemId];
         io.emit("item.destroy", itemId);
-        stringifyBody = JSON.stringify({
-          operationType: "INCREMENT",
-          name: playerName,
-        });
-        console.log({ stringifyBody });
-        // FIXME thrown exceptions will kill the process!
-        const response = await fetch(
-          `http://${scoreServiceUrl}/api/score/${playerId}`,
-          {
-            method: "PUT",
-            headers: { "Content-type": "application/json" },
-            body: stringifyBody,
-          }
+        const jsonResponse = await postCurrentScore(
+          playerId,
+          playerName,
+          "INCREMENT"
         );
-        const jsonResponse = await response.json();
-        socket.emit("player.score", jsonResponse.score);
       } else if (marineLifePoll[itemId]) {
-        logger.info(
-          `Player ${playerId} decreased score for hitting ${itemId} marine life`
-        );
         delete marineLifePoll[itemId];
         io.emit("item.destroy", itemId);
-        stringifyBody = JSON.stringify({
-          operationType: "DECREMENT",
-          name: playerName,
-        });
-        console.log({ stringifyBody });
-        // FIXME thrown exceptions will kill the process!
-        const response = await fetch(
-          `http://${scoreServiceUrl}/api/score/${playerId}`,
-          {
-            method: "PUT",
-            headers: { "Content-type": "application/json" },
-            body: stringifyBody,
-          }
+        const jsonResponse = await postCurrentScore(
+          playerId,
+          playerName,
+          "DECREMENT"
         );
-        const jsonResponse = await response.json();
-        socket.emit("player.score", jsonResponse.score);
       }
     });
 

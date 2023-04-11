@@ -1,6 +1,3 @@
-// const createGameButton = document.getElementById("create-game-button");
-// createGameButton.addEventListener("click", connect);
-
 const startButton = document.getElementById("startButton");
 startButton.addEventListener("click", connect);
 
@@ -26,9 +23,9 @@ function connect() {
 }
 
 function buildTable(data) {
-  var table = document.getElementById("playerTable");
-  for (var i = 0; i < data.length; i++) {
-    var row = `<tr class="item-id-${data[i].id}"> <td>${data[i].name}</td> <td>${data[i].score}</td></tr>`;
+  const table = document.getElementById("playerTable");
+  for (let i = 0; i < data.length; i++) {
+    const row = `<tr class="item-id-${data[i].id}"> <td>${data[i].name}</td> <td>${data[i].score}</td></tr>`;
     table.innerHTML += row;
   }
 }

@@ -12,7 +12,6 @@ const traceRateInMillis = 1;
 
 const logTrace = throttle(1000, false, console.log);
 
-// FIXME merge other players info and meshes?
 let otherPlayers = {};
 let otherPlayersMeshes = {};
 
@@ -21,6 +20,7 @@ let itemMeshes = {};
 
 let sendYourPosition;
 
+// FIXME boundaries from backend?
 let boundaries = { width: 89, height: 23 };
 
 if (!localStorage.getItem("yourId")) {
@@ -107,12 +107,10 @@ async function init() {
         gameDuration = body.gameDuration;
         break;
       case "game.on":
-        console.log("GAME ON!");
-        startGame(gameDuration, [boat, turtle], geometries);
+        startGame(gameDuration, [boat, turtle]);
         break;
       case "game.end":
-        console.log("GAME END!");
-        gameOver(); // FIXME rename me to endGame()
+        endGame();
         break;
       case "items.all":
         Object.keys(body).forEach((key) => {
@@ -168,9 +166,6 @@ async function init() {
           delete otherPlayersMeshes[playerId];
           delete otherPlayers[playerId];
         }
-        break;
-      case "player.score":
-        scoreFromBackend = body;
         break;
       default:
         break;
@@ -256,8 +251,8 @@ async function init() {
   overlay.remove();
 }
 
-// FIXME models, geometries, materials... nasty
-function startGame(gameDuration, [boat, turtle], geometries, materials) {
+// FIXME models passed as array?
+function startGame(gameDuration, [boat, turtle]) {
   const playerMaterial = new THREE.MeshStandardMaterial({
     color: 0xa52a2a,
     roughness: 0.9,
@@ -532,8 +527,6 @@ function startGame(gameDuration, [boat, turtle], geometries, materials) {
     // Reset the player's position and score
     player.position.set(0, 0, 0);
     localScore = 0;
-    // FIXME playerName and array?
-    playerName = [];
 
     // Display the player's score on the screen
     scoreElement.innerHTML = "Score: " + localScore;
@@ -635,7 +628,6 @@ function startGame(gameDuration, [boat, turtle], geometries, materials) {
         });
 
         scene.remove(mesh);
-        // FIXME score has to be backend driven
         isMarineLife(mesh.itemType) ? localScore-- : localScore++;
         // Update the score element on the page
         scoreElement.innerHTML = "Score: " + localScore;
@@ -756,9 +748,6 @@ function startGame(gameDuration, [boat, turtle], geometries, materials) {
     camera.position.x = player.position.x;
     camera.position.y = player.position.y;
     camera.position.z = player.position.z + 25;
-
-    // FIXME Don't think we need this check collisions here and in the animate function
-    // checkCollisions();
   }
 
   //player meshes id
@@ -810,7 +799,7 @@ function isMarineLife(type) {
   }
 }
 
-function gameOver() {
+function endGame() {
   console.log("Game over!");
 
   gameOverFlag = true; // Set the game over flag to true
@@ -850,6 +839,5 @@ function gameOver() {
 function startTimer() {
   timerId = setTimeout(function () {
     // Display a message or trigger an event to indicate that time is up
-    console.log("Time's up!");
   }, remainingTime * 1000);
 }

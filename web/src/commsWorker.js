@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 let socket;
 
 function init(wsURL, yourId, yourName) {
-  logger(`WebWorker commsWorker start on "${wsURL}"`);
+  logger(`WebWorker commsWorker start on ${wsURL}`);
   socket = io(wsURL, { transports: ["websocket"] });
 
   socket.emit("player.info.joining", { id: yourId, name: yourName });
@@ -55,10 +55,6 @@ function init(wsURL, yourId, yourName) {
 
   socket.on("player.info.left", (data) => {
     postMessage({ type: "player.info.left", body: data });
-  });
-
-  socket.on("player.score", (data) => {
-    postMessage({ type: "player.score", body: data });
   });
 }
 
