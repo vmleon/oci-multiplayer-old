@@ -1,5 +1,4 @@
 resources:
-  - redis-storage.yaml
   - redis-svc.yaml
   - redis.yaml
   - ws-server.yaml
