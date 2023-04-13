@@ -84,6 +84,9 @@ export async function searchCompartmentIdByName(compartmentName) {
   if (!compartmentName) {
     exitWithError("Compartment name required");
   }
+  if (compartmentName === "root") {
+    return getTenancyId();
+  }
   try {
     const { stdout, exitCode, stderr } =
       await $`oci iam compartment list --compartment-id-in-subtree true --name ${compartmentName} --query "data[].id"`;

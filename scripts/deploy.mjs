@@ -1,55 +1,29 @@
 #!/usr/bin/env zx
 
-import {
-  exitWithError,
-  generateRandomString,
-  getNamespace,
-  setVariableFromEnvOrPrompt,
-  printRegionNames,
-  getVersion,
-} from "./lib/utils.mjs";
+import { exitWithError, getVersion, readEnvJson } from "./lib/utils.mjs";
 import { getVersionGradle } from "./lib/gradle.mjs";
-import {
-  downloadAdbWallet,
-  getRegions,
-  listAdbDatabases,
-  searchCompartmentIdByName,
-} from "./lib/oci.mjs";
+import { downloadAdbWallet, listAdbDatabases } from "./lib/oci.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
 $.verbose = false;
 
-const regions = await getRegions();
-const regionName = await setVariableFromEnvOrPrompt(
-  "OCI_REGION",
-  "OCI Region name",
-  () => printRegionNames(regions)
-);
-const { key } = regions.find((r) => r.name === regionName);
-const url = `${key}.ocir.io`;
-
-const adbCompartmentName = await setVariableFromEnvOrPrompt(
-  "ADB_COMPARTMENT_NAME",
-  "Autonomous Database Compartment Name"
-);
-const adbCompartmentId = await searchCompartmentIdByName(adbCompartmentName);
-
-const adbName = await setVariableFromEnvOrPrompt(
-  "ADB_NAME",
-  "Autonomous Database name"
-);
-const adbPassword = await setVariableFromEnvOrPrompt(
-  "ADB_PASSWORD",
-  "Autonomous Database password"
-);
-
-const namespace = await getNamespace();
+const {
+  containerRegistryURL,
+  containerRegistryUser,
+  containerRegistryToken,
+  redisPassword,
+  namespace,
+  regionKey,
+  adbCompartmentId,
+  adbName,
+  adbPassword,
+} = await readEnvJson();
 
 console.log(
-  `Preparing deployment for ${chalk.yellow(url)} in namespace ${chalk.yellow(
-    namespace
-  )}`
+  `Preparing deployment for ${chalk.yellow(
+    containerRegistryURL
+  )} in namespace ${chalk.yellow(namespace)}`
 );
 
 await checkKubectlConfigured();
@@ -58,9 +32,12 @@ await createRegistrySecret();
 
 await createConfigFiles();
 
-console.log(`Ready to deploy.`);
+console.log(`Ready to deploy, run:`);
+console.log(chalk.yellow("kubectl apply -k deploy/k8s/overlays/prod"));
 console.log(
-  `Run: ${chalk.yellow("kubectl apply -k deploy/k8s/overlays/prod")}`
+  `Get Load Balancer IP address with: ${chalk.yellow(
+    "kubectl -n ingress-nginx get svc"
+  )}`
 );
 
 async function checkKubectlConfigured() {
@@ -71,27 +48,27 @@ async function checkKubectlConfigured() {
       exitWithError("kubectl not configured");
     } else {
       console.log(`${chalk.green("[ok]")} kubectl connects to cluster`);
+      const kubectlContext = (
+        await $`kubectl config current-context`
+      ).stdout.trim();
+      console.log(`Context: ${chalk.green(kubectlContext)}`);
     }
   } catch (error) {
     exitWithError(error.stderr);
   }
   console.log();
 }
+
 async function createRegistrySecret() {
   console.log("Create registry secret on Kubernetes cluster...");
   try {
-    const user = await setVariableFromEnvOrPrompt(
-      "OCI_OCIR_USER",
-      "OCI Username (usually an email)"
-    );
-
-    const token = await setVariableFromEnvOrPrompt(
-      "OCI_OCIR_TOKEN",
-      "OCI Auth Token for OCI Registry"
-    );
     await cleanRegisterSecret();
     const { exitCode, stdout } =
-      await $`kubectl create secret docker-registry ocir-secret --docker-server=${url} --docker-username=${namespace}/${user} --docker-password=${token} --docker-email=${user}`;
+      await $`kubectl create secret docker-registry ocir-secret \
+        --docker-server=${containerRegistryURL} \
+        --docker-username=${namespace}/${containerRegistryUser} \
+        --docker-password=${containerRegistryToken} \
+        --docker-email=${containerRegistryUser}`;
     if (exitCode !== 0) {
       exitWithError("docker-registry secret not created");
     } else {
@@ -105,9 +82,8 @@ async function createRegistrySecret() {
 
 async function createConfigFiles() {
   console.log("Create config files...");
-  const redis_password = await generateRandomString();
-  await createRedisConfig(redis_password);
-  await createKustomizationYaml(key, namespace);
+  await createRedisConfig(redisPassword);
+  await createKustomizationYaml(regionKey, namespace);
   await createDBConfigFiles(
     adbCompartmentId,
     adbName,

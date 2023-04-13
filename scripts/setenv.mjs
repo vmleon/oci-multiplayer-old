@@ -5,8 +5,10 @@ import {
   getVersion,
   getNamespace,
   setVariableFromEnvOrPrompt,
+  writeEnvJson,
+  generateRandomString,
 } from "./lib/utils.mjs";
-import { getRegions } from "./lib/oci.mjs";
+import { getRegions, searchCompartmentIdByName } from "./lib/oci.mjs";
 import { createSelfSignedCert } from "./lib/tls.mjs";
 import {
   containerLogin,
@@ -23,11 +25,18 @@ const ce = await whichContainerEngine();
 console.log(`Using ${chalk.yellow(ce)} as container engine.`);
 console.log();
 
+const namespace = await getNamespace();
+let properties = { ce, namespace };
+
 await checkDependencies();
 
 await createCerts();
 
 await loginContainerRegistry();
+
+await redisDetails();
+
+await adbDetails();
 
 await printVersions();
 
@@ -42,10 +51,6 @@ async function checkDependencies() {
 async function createCerts() {
   console.log("Generate Self signed certs...");
 
-  const shell = process.env.SHELL | "/bin/zsh";
-  $.shell = shell;
-  $.verbose = false;
-
   const certPath = "./deploy/k8s/base/ingress/.certs";
   const prevKeyExists = await fs.pathExists(path.join(certPath, "tls.key"));
   if (prevKeyExists) {
@@ -57,34 +62,84 @@ async function createCerts() {
   } else {
     await createSelfSignedCert(certPath);
   }
+  properties = { ...properties, certPath };
   console.log();
 }
 
 async function loginContainerRegistry() {
   console.log("Login to container registry login...");
-  const namespace = await getNamespace();
 
-  const user = await setVariableFromEnvOrPrompt(
+  const containerRegistryUser = await setVariableFromEnvOrPrompt(
     "OCI_OCIR_USER",
     "OCI Username (usually an email)"
   );
 
-  const token = await setVariableFromEnvOrPrompt(
+  const containerRegistryToken = await setVariableFromEnvOrPrompt(
     "OCI_OCIR_TOKEN",
     "OCI Auth Token for OCI Registry"
   );
 
   const regions = await getRegions();
-  const regionName = await setVariableFromEnvOrPrompt(
+  const regionNameValue = await setVariableFromEnvOrPrompt(
     "OCI_REGION",
     "OCI Region name",
     async () => printRegionNames(regions)
   );
-  const { key } = regions.find((r) => r.name === regionName);
-  const url = `${key}.ocir.io`;
+  const { key: regionKey, name: regionName } = regions.find(
+    (r) => r.name === regionNameValue
+  );
+  const containerRegistryURL = `${regionKey}.ocir.io`;
 
-  await containerLogin(namespace, user, token, url);
+  properties = {
+    ...properties,
+    regionKey,
+    regionName,
+    containerRegistryURL,
+    containerRegistryUser,
+    containerRegistryToken,
+  };
+
+  await containerLogin(
+    namespace,
+    containerRegistryUser,
+    containerRegistryToken,
+    containerRegistryURL
+  );
   console.log();
+}
+
+async function redisDetails() {
+  const redisPassword = await generateRandomString();
+  properties = { ...properties, redisPassword };
+}
+
+async function adbDetails() {
+  const adbCompartmentName = await setVariableFromEnvOrPrompt(
+    "ADB_COMPARTMENT_NAME",
+    "Autonomous Database Compartment Name (root)"
+  );
+
+  const adbCompartmentId = await searchCompartmentIdByName(
+    adbCompartmentName || "root"
+  );
+
+  const adbName = await setVariableFromEnvOrPrompt(
+    "ADB_NAME",
+    "Autonomous Database name"
+  );
+
+  const adbPassword = await setVariableFromEnvOrPrompt(
+    "ADB_PASSWORD",
+    "Autonomous Database password"
+  );
+
+  properties = {
+    ...properties,
+    adbCompartmentId,
+    adbCompartmentName,
+    adbName,
+    adbPassword,
+  };
 }
 
 async function printRegionNames(regions) {
@@ -117,5 +172,9 @@ async function printVersions() {
   const scoreVersion = await getVersionGradle();
   await cd("..");
   console.log(`${chalk.yellow(`score\t\tv${scoreVersion}`)}`);
+
+  properties = { ...properties, webVersion, serverVersion, scoreVersion };
   console.log();
 }
+
+await writeEnvJson(properties);
