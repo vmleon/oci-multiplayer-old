@@ -8,7 +8,7 @@ import * as lobby from "./lobby";
 
 MathUtils.seededRandom(Date.now);
 
-const traceRateInMillis = 1;
+const traceRateInMillis = 10;
 
 const logTrace = throttle(1000, false, console.log);
 
@@ -27,7 +27,7 @@ if (!localStorage.getItem("yourId")) {
   localStorage.setItem("yourId", short());
 }
 const yourId = localStorage.getItem("yourId");
-let playerName = localStorage.getItem("yourName") || "Bot";
+let playerName = localStorage.getItem("yourName") || "Default";
 
 let renderer;
 let scene;

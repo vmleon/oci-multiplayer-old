@@ -52,6 +52,7 @@ export function start(httpServer, port, pubClient, subClient) {
     // FIXME scope this to surrounding players only
     socket.emit("player.info.all", playersInfo);
 
+    // FIXME send random starting position
     socket.emit("game.on");
 
     socket.on("player.info.joining", ({ id, name }) => {
