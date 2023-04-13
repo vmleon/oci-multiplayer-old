@@ -8,7 +8,7 @@ import * as lobby from "./lobby";
 
 MathUtils.seededRandom(Date.now);
 
-const traceRateInMillis = 10;
+const traceRateInMillis = 50;
 
 const logTrace = throttle(1000, false, console.log);
 
