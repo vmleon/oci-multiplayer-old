@@ -38,7 +38,9 @@ let marineLifePoll = {};
 export function start(httpServer, port, pubClient, subClient) {
   const io = new Server(httpServer, {});
 
-  io.adapter(createAdapter(pubClient, subClient));
+  if (pubClient && subClient) {
+    io.adapter(createAdapter(pubClient, subClient));
+  }
 
   io.on("connection", (socket) => {
     logger.info(`New client added, ${io.engine.clientsCount} in total.`);
