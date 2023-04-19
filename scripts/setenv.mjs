@@ -7,8 +7,13 @@ import {
   setVariableFromEnvOrPrompt,
   writeEnvJson,
   generateRandomString,
+  readEnvJson,
 } from "./lib/utils.mjs";
-import { getRegions, searchCompartmentIdByName } from "./lib/oci.mjs";
+import {
+  getRegions,
+  getTenancyId,
+  searchCompartmentIdByName,
+} from "./lib/oci.mjs";
 import { createSelfSignedCert } from "./lib/tls.mjs";
 import {
   containerLogin,
@@ -25,8 +30,11 @@ const ce = await whichContainerEngine();
 console.log(`Using ${chalk.yellow(ce)} as container engine.`);
 console.log();
 
+let properties = await readEnvJson();
+
 const namespace = await getNamespace();
-let properties = { ce, namespace };
+const tenancyId = await getTenancyId();
+properties = { ...properties, ce, namespace, tenancyId };
 
 await checkDependencies();
 
@@ -54,11 +62,7 @@ async function createCerts() {
   const certPath = "./deploy/k8s/base/ingress/.certs";
   const prevKeyExists = await fs.pathExists(path.join(certPath, "tls.key"));
   if (prevKeyExists) {
-    console.log(
-      `${chalk.yellow("Existing key pair ")} on ${certPath}. ${chalk.red(
-        "Key pair not generated"
-      )}.`
-    );
+    console.log(`${chalk.yellow("Existing key pair ")} on ${certPath}.`);
   } else {
     await createSelfSignedCert(certPath);
   }

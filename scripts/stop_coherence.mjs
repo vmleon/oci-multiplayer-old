@@ -6,7 +6,7 @@ const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
 $.verbose = false;
 
-const containerName = "redis_multiplayer";
+const containerName = "coherence_multiplayer";
 
 const ce = await whichContainerEngine();
 

@@ -25,6 +25,7 @@ logs
 
 *.retry
 
+*.pem
 *.key
 *.crt
 *.conf

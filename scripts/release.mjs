@@ -12,7 +12,8 @@ const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
 $.verbose = false;
 
-const { containerRegistryURL, namespace } = await readEnvJson();
+let properties = await readEnvJson();
+const { containerRegistryURL, namespace } = properties;
 
 const { a, _ } = argv;
 const [action] = _;

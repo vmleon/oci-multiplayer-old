@@ -6,77 +6,110 @@ import pino from "pino";
 import { deleteCurrentScore, postCurrentScore } from "./score.js";
 
 dotenv.config({ path: "./config/.env" });
-// FIXME change log level based on NODE_ENV
-const logger = pino();
+
+const isProduction = process.env.NODE_ENV === "production";
+const logger = pino({ level: isProduction ? "warn" : "debug" });
 
 const serverId = short.generate();
 logger.info(`Server ${serverId}`);
 
-const BROADCAST_REFRESH_UPDATE = process.env.BROADCAST_REFRESH_UPDATE || 50;
+const BROADCAST_REFRESH_UPDATE = process.env.BROADCAST_REFRESH_UPDATE
+  ? parseInt(process.env.BROADCAST_REFRESH_UPDATE)
+  : 50;
 
-// FIXME variable env?
-const CLEANUP_STALE_IN_SECONDS = process.env.CLEANUP_STALE_IN_SECONDS || 2;
-const BROADCAST_ITEMS_IN_SECONDS = process.env.BROADCAST_ITEMS_IN_SECONDS || 2;
+const CLEANUP_STALE_IN_SECONDS = process.env.CLEANUP_STALE_IN_SECONDS
+  ? parseInt(process.env.CLEANUP_STALE_IN_SECONDS)
+  : 2;
+const BROADCAST_ITEMS_IN_SECONDS = process.env.BROADCAST_ITEMS_IN_SECONDS
+  ? parseInt(process.env.BROADCAST_ITEMS_IN_SECONDS)
+  : 2;
 
-// FIXME variable env?
-const ITEM_MAX_SIZE = process.env.ITEM_MAX_SIZE || 0.9;
-const ITEM_MIN_SIZE = process.env.ITEM_MIN_SIZE || 0.5;
+const ITEM_MAX_SIZE = process.env.ITEM_MAX_SIZE
+  ? parseFloat(process.env.ITEM_MAX_SIZE)
+  : 0.9;
+const ITEM_MIN_SIZE = process.env.ITEM_MIN_SIZE
+  ? parseFloat(process.env.ITEM_MIN_SIZE)
+  : 0.5;
 
-// FIXME variable env?
-const WORLD_SIZE_X = process.env.WORLD_SIZE_X || 88;
-const WORLD_SIZE_Y = process.env.WORLD_SIZE_Y || 22;
+const WORLD_SIZE_X = process.env.WORLD_SIZE_X
+  ? parseInt(process.env.WORLD_SIZE_X)
+  : 88;
+const WORLD_SIZE_Y = process.env.WORLD_SIZE_Y
+  ? parseInt(process.env.WORLD_SIZE_Y)
+  : 22;
 
-// FIXME variable env?
-const GAME_DURATION_IN_SECONDS = process.env.GAME_DURATION_IN_SECONDS || 180;
+const GAME_DURATION_IN_SECONDS = process.env.GAME_DURATION_IN_SECONDS
+  ? parseInt(process.env.GAME_DURATION_IN_SECONDS)
+  : 180;
+
+let mapPlayersTraces;
+let mapPlayersInfo;
 
 // FIXME this needs to be stored on some DB
-let playersTraces = {};
-let playersInfo = {};
 let trashPoll = {};
 let marineLifePoll = {};
 
-export function start(httpServer, port, pubClient, subClient) {
+export async function start(
+  httpServer,
+  port,
+  cacheSession,
+  pubClient,
+  subClient
+) {
   const io = new Server(httpServer, {});
 
   if (pubClient && subClient) {
     io.adapter(createAdapter(pubClient, subClient));
   }
 
-  io.on("connection", (socket) => {
-    logger.info(`New client added, ${io.engine.clientsCount} in total.`);
+  // FIXME consider ENABLE_COHERENCE_BACKEND flag
+  mapPlayersTraces = await cacheSession.getMap("playerTraces");
+  mapPlayersInfo = await cacheSession.getMap("playersInfo");
+
+  io.on("connection", async (socket) => {
+    let playerIdForSocket;
 
     socket.emit("server.info", {
       id: serverId,
       gameDuration: GAME_DURATION_IN_SECONDS,
     });
+
     socket.emit("items.all", { ...trashPoll, ...marineLifePoll });
 
     // FIXME scope this to surrounding players only
-    socket.emit("player.info.all", playersInfo);
+    socket.emit("player.info.all", await readCacheEntries(mapPlayersInfo));
 
     // FIXME send random starting position
-    socket.emit("game.on");
+    socket.emit("game.on", {});
 
-    socket.on("player.info.joining", ({ id, name }) => {
-      playersInfo[id] = { name };
+    socket.on("player.info.joining", async ({ id, name }) => {
+      await writeCache(mapPlayersInfo, id, { name });
     });
 
-    socket.on("game.start", ({ playerId }) => {
+    socket.on("game.start", async ({ playerId, playerName }) => {
+      playerIdForSocket = playerId;
+      await writeCache(mapPlayersInfo, playerId, { name: playerName });
+      io.emit("player.info.joined", {
+        id: playerId,
+        name: playerName,
+      });
+
       setTimeout(async () => {
-        socket.emit("game.end");
+        socket.emit("game.end", { playerId });
+        io.emit("player.info.left", playerId);
+        await deleteCache(mapPlayersTraces, playerId);
         await deleteCurrentScore(playerId);
+        await deleteCache(mapPlayersInfo, playerId);
+        playerIdForSocket = undefined;
       }, GAME_DURATION_IN_SECONDS * 1000);
     });
 
-    socket.on("player.trace.change", ({ id, ...traceData }) => {
-      if (!playersTraces[id]) {
-        io.emit("player.info.joined", { id, ...playersInfo[id] });
-      }
-      playersTraces[id] = { ...traceData, updated: new Date() };
+    socket.on("player.trace.change", async ({ id, ...traceData }) => {
+      const body = { ...traceData, updated: new Date() };
+      await writeCache(mapPlayersTraces, id, body);
     });
 
-    socket.on("items.collision", async (data) => {
-      const { itemId, playerId, playerName } = data;
+    socket.on("items.collision", async ({ itemId, playerId, playerName }) => {
       if (trashPoll[itemId]) {
         delete trashPoll[itemId];
         io.emit("item.destroy", itemId);
@@ -96,23 +129,29 @@ export function start(httpServer, port, pubClient, subClient) {
       }
     });
 
-    socket.on("disconnect", (reason) => {
-      logger.info(`Disconnect: ${reason}`);
+    socket.on("disconnect", async (reason) => {
+      io.emit("player.info.left", playerIdForSocket);
+      await deleteCache(mapPlayersTraces, playerIdForSocket);
+      await deleteCache(mapPlayersInfo, playerIdForSocket);
+      logger.info(`${playerIdForSocket} disconnected because ${reason}`);
+      playerIdForSocket = undefined;
     });
   });
 
-  io.engine.on("connection_error", (err) => {
+  io.engine.on("connection_error", async (err) => {
     logger.error(`ERROR ${err.code}: ${err.message}; ${err.context}`);
   });
 
   // broadcast all players traces
-  setInterval(() => {
-    io.emit("player.trace.all", playersTraces);
+  setInterval(async () => {
+    // FIXME scope this to surrounding players only
+    const traces = await readCacheEntries(mapPlayersTraces);
+    io.emit("player.trace.all", traces);
   }, BROADCAST_REFRESH_UPDATE);
 
   // refresh items
-  setInterval(() => {
-    const numberOfPlayers = Object.keys(playersInfo).length;
+  setInterval(async () => {
+    const numberOfPlayers = await mapPlayersInfo.size;
     const numberOfTrash = Object.keys(trashPoll).length;
     const numberOfMarineLife = Object.keys(marineLifePoll).length;
     const deltaOfDesiredNumberOfTrash = numberOfPlayers - numberOfTrash;
@@ -146,35 +185,74 @@ export function start(httpServer, port, pubClient, subClient) {
   }
 
   // Clean stale players, and send delete player if stale
-  setInterval(() => {
+  setInterval(async () => {
     const now = new Date();
     // FIXME can we delete them without adding elapsed to all of them?
-    const elapsedTimesById = Object.entries(playersTraces).map((player) => ({
+    // FIXME can we use TTL from Coherence
+    // FIXME do we need clean up stales to begin with?
+    const traces = await readCacheEntries(mapPlayersTraces);
+    const elapsedTimesById = Object.entries(traces).map((player) => ({
       id: player[0],
       elapsed: now - player[1].updated,
     }));
     const staleIds = elapsedTimesById.filter((e) => e.elapsed > 250);
-    staleIds.forEach((p) => {
+    staleIds.forEach(async (p) => {
       logger.info(`Stale player ${p.id} by ${p.elapsed}ms`);
+      await deleteCache(mapPlayersTraces, p.id);
+      await deleteCache(mapPlayersInfo, p.id);
       io.emit("player.info.left", p.id);
-      playersTraces[p.id] = undefined;
-      delete playersTraces[p.id];
-      playersInfo[p.id] = undefined;
-      delete playersInfo[p.id];
     });
   }, CLEANUP_STALE_IN_SECONDS * 1000);
 
-  setInterval(
-    () =>
-      logger.info(
-        `${Object.keys(playersInfo).length} Players, ${
-          Object.keys(trashPoll).length
-        } Trash items and ${Object.keys(marineLifePoll).length} Marine Life`
-      ),
-    5000
-  );
+  setInterval(async () => {
+    logger.info(
+      `${await mapPlayersInfo.size} Players, ${
+        Object.keys(trashPoll).length
+      } Trash items and ${Object.keys(marineLifePoll).length} Marine Life`
+    );
+  }, 5000);
 
   httpServer.listen(port, () =>
     logger.info(`Server listening to port ${port}`)
   );
+}
+
+async function writeCache(cache, id, value) {
+  try {
+    await cache.set(id, value);
+  } catch (error) {
+    logger.error(
+      `Error writing ${id}: ${JSON.stringify(value)}. ${error.message}`
+    );
+  }
+}
+
+async function readCache(cache, id) {
+  try {
+    return await cache.get(id);
+  } catch (error) {
+    logger.error(`Error reading ${id}. ${error.message}`);
+  }
+}
+
+async function deleteCache(cache, id) {
+  if (!id) return;
+  try {
+    await cache.delete(id);
+  } catch (error) {
+    logger.error(`Error deleting ${id}. ${error.message}`);
+  }
+}
+
+async function readCacheEntries(cache) {
+  try {
+    const response = await cache.entries();
+    let data = {};
+    for await (const entry of response) {
+      data[entry.key] = entry.value;
+    }
+    return data;
+  } catch (error) {
+    logger.error(`Error reading all entries. ${error.message}`);
+  }
 }

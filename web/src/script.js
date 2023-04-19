@@ -33,7 +33,8 @@ let renderer;
 let scene;
 let canvas;
 let player;
-let playerModel;
+let boatModel;
+let turtleModel;
 let gameOverFlag = false;
 
 let scoreFromBackend;
@@ -54,9 +55,9 @@ async function init() {
   // Load the GLTF models
   const loader = new GLTFLoader();
   const boatGltf = await loader.loadAsync("assets/boat.gltf");
-  const boat = boatGltf.scene.children[0];
+  boatModel = boatGltf.scene.children[0];
   const turtleGltf = await loader.loadAsync("assets/turtle.gltf");
-  const turtle = turtleGltf.scene.children[0];
+  turtleModel = turtleGltf.scene.children[0];
 
   scene = new THREE.Scene();
 
@@ -89,7 +90,8 @@ async function init() {
       Object.keys(otherPlayersMeshes).forEach((id) =>
         scene.remove(otherPlayersMeshes[id])
       );
-      Object.keys(otherPlayers).forEach((id) => delete otherPlayers[id]);
+      otherPlayers = {};
+      otherPlayersMeshes = {};
     }
     switch (type) {
       case "connect":
@@ -107,7 +109,11 @@ async function init() {
         gameDuration = body.gameDuration;
         break;
       case "game.on":
-        startGame(gameDuration, [boat, turtle]);
+        worker.postMessage({
+          type: "game.start",
+          body: { playerId: yourId, playerName },
+        });
+        startGame(gameDuration, [boatModel, turtleModel]);
         break;
       case "game.end":
         endGame();
@@ -149,14 +155,14 @@ async function init() {
         for (const [key, traceData] of Object.entries(body)) {
           otherPlayers[key] = traceData;
           if (!otherPlayersMeshes[key]) {
-            otherPlayersMeshes[key] = makePlayerMesh(playerModel, scene);
+            otherPlayersMeshes[key] = makePlayerMesh(boatModel, scene);
           }
         }
         break;
       case "player.info.joined":
         const { id: joinedId, name: joinedName } = body;
         if (joinedId !== yourId) {
-          otherPlayersMeshes[joinedId] = makePlayerMesh(playerModel, scene);
+          otherPlayersMeshes[joinedId] = makePlayerMesh(boatModel, scene);
         }
         break;
       case "player.info.left":
@@ -167,12 +173,20 @@ async function init() {
           delete otherPlayers[playerId];
         }
         break;
+      case "player.info.all":
+        // FIXME update player info
+        console.log("player.info.all", body);
+        // otherPlayers
+        break;
       default:
         break;
     }
   };
 
-  worker.postMessage({ type: "game.start", body: { playerId: yourId } });
+  // FIXME Disconnect properly when kill tab, reload, etc
+  window.addEventListener("beforeunload", function (e) {
+    console.log("beforeunload");
+  });
 
   function makePlayerMesh(playerMesh, scene) {
     const group = new THREE.Group();
@@ -274,7 +288,6 @@ function startGame(gameDuration, [boat, turtle]) {
   });
   // Add the boat to the scene
   scene.add(boat);
-  playerModel = boat;
   player = boat;
 
   // Setup the scene
@@ -437,6 +450,8 @@ function startGame(gameDuration, [boat, turtle]) {
 
   // Send Player position
   sendYourPosition = throttle(traceRateInMillis, false, () => {
+    if (gameOverFlag) return;
+    // FIXME don't send trace if no changes
     const { x, y, z } = player.position;
     const { x: rotX, y: rotY, z: rotZ } = player.rotation;
     const trace = {
@@ -800,7 +815,7 @@ function isMarineLife(type) {
 }
 
 function endGame() {
-  console.log("Game over!");
+  worker.postMessage({ type: "close" });
 
   gameOverFlag = true; // Set the game over flag to true
 

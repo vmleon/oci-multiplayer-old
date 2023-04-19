@@ -138,20 +138,34 @@ kubectl delete -k deploy/k8s/overlays/prod
 
 > TODO delete container images on OCI registry
 
+## Development Locally
+
 To run in dev mode:
-Server:
-```
+
+Server on its own terminal:
+```bash
 export REDIS_PASSWORD=fk3ampeHq
 zx scripts/start_redis.mjs
+zx scripts/start_coherence.mjs
 cd server && npm start
 ```
 
-Client:
+Client on its own terminal:
+
 ```
 cd web
 npm run dev
 ```
 
-Make sure you change the local ip for localhost on the browser.
+Score on its own terminal:
+```bash
+cd score
+./gradlew bootRun
+```
 
-Can you add the steps to run on dev in the README?
+To clean up after
+
+```bash
+zx scripts/stop_redis.mjs
+zx scripts/stop_coherence.mjs
+```
