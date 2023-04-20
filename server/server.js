@@ -44,10 +44,8 @@ const GAME_DURATION_IN_SECONDS = process.env.GAME_DURATION_IN_SECONDS
 
 let mapPlayersTraces;
 let mapPlayersInfo;
-
-// FIXME this needs to be stored on some DB
-let trashPoll = {};
-let marineLifePoll = {};
+let mapTrash;
+let mapMarineLife;
 
 export async function start(
   httpServer,
@@ -65,6 +63,8 @@ export async function start(
   // FIXME consider ENABLE_COHERENCE_BACKEND flag
   mapPlayersTraces = await cacheSession.getMap("playerTraces");
   mapPlayersInfo = await cacheSession.getMap("playersInfo");
+  mapTrash = await cacheSession.getMap("trash");
+  mapMarineLife = await cacheSession.getMap("marineLife");
 
   io.on("connection", async (socket) => {
     let playerIdForSocket;
@@ -74,7 +74,9 @@ export async function start(
       gameDuration: GAME_DURATION_IN_SECONDS,
     });
 
-    socket.emit("items.all", { ...trashPoll, ...marineLifePoll });
+    const trashFromCache = await readCacheEntries(mapTrash);
+    const marineLifeFromCache = await readCacheEntries(mapMarineLife);
+    socket.emit("items.all", { ...trashFromCache, ...marineLifeFromCache });
 
     // FIXME scope this to surrounding players only
     socket.emit("player.info.all", await readCacheEntries(mapPlayersInfo));
@@ -110,16 +112,16 @@ export async function start(
     });
 
     socket.on("items.collision", async ({ itemId, playerId, playerName }) => {
-      if (trashPoll[itemId]) {
-        delete trashPoll[itemId];
+      if (await mapTrash.has(itemId)) {
+        await deleteCache(mapTrash, itemId);
         io.emit("item.destroy", itemId);
         const jsonResponse = await postCurrentScore(
           playerId,
           playerName,
           "INCREMENT"
         );
-      } else if (marineLifePoll[itemId]) {
-        delete marineLifePoll[itemId];
+      } else if (await mapMarineLife.has(itemId)) {
+        await deleteCache(mapMarineLife, itemId);
         io.emit("item.destroy", itemId);
         const jsonResponse = await postCurrentScore(
           playerId,
@@ -152,8 +154,8 @@ export async function start(
   // refresh items
   setInterval(async () => {
     const numberOfPlayers = await mapPlayersInfo.size;
-    const numberOfTrash = Object.keys(trashPoll).length;
-    const numberOfMarineLife = Object.keys(marineLifePoll).length;
+    const numberOfTrash = await mapTrash.size;
+    const numberOfMarineLife = await mapMarineLife.size;
     const deltaOfDesiredNumberOfTrash = numberOfPlayers - numberOfTrash;
     const deltaOfDesiredNumberOfMarineLife =
       numberOfPlayers * 2 - numberOfMarineLife;
@@ -163,14 +165,19 @@ export async function start(
       extraTrashPoll[id] = trashData;
       io.emit("item.new", { id, data: extraTrashPoll[id] });
     }
-    trashPoll = { ...trashPoll, ...extraTrashPoll };
+    Object.keys(extraTrashPoll).forEach(
+      async (key) => await writeCache(mapTrash, key, extraTrashPoll[key])
+    );
     const extraMarineLifePoll = {};
     for (let index = 0; index < deltaOfDesiredNumberOfMarineLife; index++) {
-      const { id, ...trashData } = createObject("turtle");
-      extraMarineLifePoll[id] = trashData;
+      const { id, ...marineLifeData } = createObject("turtle");
+      extraMarineLifePoll[id] = marineLifeData;
       io.emit("item.new", { id, data: extraMarineLifePoll[id] });
     }
-    marineLifePoll = { ...marineLifePoll, ...extraMarineLifePoll };
+    Object.keys(extraMarineLifePoll).forEach(
+      async (key) =>
+        await writeCache(mapMarineLife, key, extraMarineLifePoll[key])
+    );
   }, BROADCAST_ITEMS_IN_SECONDS * 1000);
 
   function createObject(type) {
@@ -205,10 +212,11 @@ export async function start(
   }, CLEANUP_STALE_IN_SECONDS * 1000);
 
   setInterval(async () => {
+    const numPlayers = await mapPlayersInfo.size;
+    const numTrash = await mapTrash.size;
+    const numMarineLife = await mapMarineLife.size;
     logger.info(
-      `${await mapPlayersInfo.size} Players, ${
-        Object.keys(trashPoll).length
-      } Trash items and ${Object.keys(marineLifePoll).length} Marine Life`
+      `${numPlayers} Players, ${numTrash} Trash items and ${numMarineLife} Marine Life`
     );
   }, 5000);
 
