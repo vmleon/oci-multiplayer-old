@@ -30,6 +30,8 @@ logs
 *.crt
 *.conf
 
+appendonlydir/
+
 .env_server
 .env
 .env.json
