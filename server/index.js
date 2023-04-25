@@ -79,7 +79,7 @@ if (ENABLE_REDIS_BACKEND) {
     start(httpServer, port, cacheSession, pubClient, subClient);
   });
 } else {
-  start(httpServer, port, cacheSession);
+  createCacheSession().then(() => { start(httpServer, port, cacheSession)});
 }
 
 function onSignal() {

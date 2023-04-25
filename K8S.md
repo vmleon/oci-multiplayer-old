@@ -142,12 +142,17 @@ kubectl delete -k deploy/k8s/overlays/prod
 
 To run in dev mode:
 
+-TODO: Create steps about config in the server (.env)
+
+
 Server on its own terminal:
 ```bash
 export REDIS_PASSWORD=fk3ampeHq
 zx scripts/start_redis.mjs
 zx scripts/start_coherence.mjs
-cd server && npm start
+cd server
+npm install
+npm start
 ```
 
 Client on its own terminal:

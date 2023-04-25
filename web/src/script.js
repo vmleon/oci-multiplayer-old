@@ -2,6 +2,8 @@ import short from "shortid";
 import * as THREE from "three";
 import { MathUtils } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { throttle } from "throttle-debounce";
 import "./style.css";
 import * as lobby from "./lobby";
@@ -54,12 +56,20 @@ createGameButton.addEventListener("click", init);
 async function init() {
   // Load the GLTF models
   const loader = new GLTFLoader();
-  const boatGltf = await loader.loadAsync("assets/boat.gltf");
+  const boatGltf = await loader.loadAsync("assets/boat2.gltf");
   boatModel = boatGltf.scene.children[0];
   const turtleGltf = await loader.loadAsync("assets/turtle.gltf");
   turtleModel = turtleGltf.scene.children[0];
-
+ 
   scene = new THREE.Scene();
+
+ new RGBELoader()
+ .loadAsync('assets/bg.hdr', function (texture) {
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  scene.background = texture;
+  scene.environment = texture;
+  console.log('im here');
+ });
 
   const geometries = [
     new THREE.SphereGeometry(),
@@ -210,15 +220,6 @@ async function init() {
       }
     });
 
-    // Create a label for the player's name
-    // const nameDiv = document.createElement("div");
-    // nameDiv.className = "label";
-    // nameDiv.textContent = name;
-    // nameDiv.style.marginTop = "-1em";
-    // const nameLabel = new CSS2DObject(nameDiv);
-    // nameLabel.position.set(0, 0, 1);
-    // nameLabel.layers.set(1);
-
     // Add the mesh and label to the group
     group.add(mesh);
     // group.add(nameLabel);
@@ -235,8 +236,6 @@ async function init() {
     const geometry = isMarineLife(itemType) ? geometries[0] : geometries[1]; // Use sphere geometry for wildlife, cube geometry for trash
     const material = isMarineLife(itemType) ? materials[0] : materials[1];
     const itemMesh = new THREE.Mesh(geometry, material);
-    // Math.random() * 88 - 44, // set random position within the plane width
-    // Math.random() * 22 - 11, // set random position within the plane height
     itemMesh.position.set(position.x, position.y, position.z);
     itemMesh.scale.set(size, size, size);
     itemMesh.itemId = itemId;
@@ -439,14 +438,14 @@ function startGame(gameDuration, [boat, turtle]) {
   water.position.set(0, 0, 0);
   scene.add(water);
 
-  // Add a directional light to simulate the sun
-  const sun = new THREE.DirectionalLight(0xfafad2, 10);
-  sun.position.set(-10, 10, 10);
-  sun.castShadow = true;
-  scene.add(sun);
-  const SUN_ANIMATION_DURATION = 180; // in seconds
-  const SUN_X_DISTANCE = 20; // in world units
-  let startTime = null;
+  // // Add a directional light to simulate the sun
+  // const sun = new THREE.DirectionalLight(0xfafad2, 10);
+  // sun.position.set(-10, 10, 10);
+  // sun.castShadow = true;
+  // scene.add(sun);
+  // const SUN_ANIMATION_DURATION = 180; // in seconds
+  // const SUN_X_DISTANCE = 20; // in world units
+  // let startTime = null;
 
   // Send Player position
   sendYourPosition = throttle(traceRateInMillis, false, () => {
@@ -463,20 +462,20 @@ function startGame(gameDuration, [boat, turtle]) {
     worker.postMessage({ type: "player.trace.change", body: trace });
   });
 
-  function animateSun(time) {
-    if (!startTime) {
-      startTime = time;
-    }
-    const elapsedTime = (time - startTime) / 1000; // convert to seconds
-    const progress = elapsedTime / SUN_ANIMATION_DURATION;
-    const x = -SUN_X_DISTANCE + progress * SUN_X_DISTANCE * 2;
-    sun.position.setX(x);
-    if (progress <= 1) {
-      requestAnimationFrame(animateSun);
-    }
-  }
+  // function animateSun(time) {
+  //   if (!startTime) {
+  //     startTime = time;
+  //   }
+  //   const elapsedTime = (time - startTime) / 1000; // convert to seconds
+  //   const progress = elapsedTime / SUN_ANIMATION_DURATION;
+  //   const x = -SUN_X_DISTANCE + progress * SUN_X_DISTANCE * 2;
+  //   sun.position.setX(x);
+  //   if (progress <= 1) {
+  //     requestAnimationFrame(animateSun);
+  //   }
+  // }
 
-  requestAnimationFrame(animateSun);
+  // requestAnimationFrame(animateSun);
 
   // Add ambient light to simulate scattered light
   const ambient = new THREE.AmbientLight(0xffffff, 1);
@@ -761,8 +760,10 @@ function startGame(gameDuration, [boat, turtle]) {
 
     // Update the camera position to follow the player
     camera.position.x = player.position.x;
-    camera.position.y = player.position.y;
-    camera.position.z = player.position.z + 25;
+    camera.position.y = player.position.y - 5;
+    camera.position.z = player.position.z + 3;
+    camera.lookAt(player.position);
+
   }
 
   //player meshes id
