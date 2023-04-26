@@ -1,10 +1,10 @@
 ## Copyright © 2021, Oracle and/or its affiliates. 
 ## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
 
-    title: "Deploy microservices based game in Oracle Cloud Infrastructure (OCI) "
-    stackDescription: "Powered by OKE, ADB, Java and Redis"
-    schemaVersion: 1.0.0
-    version: "20230425"
+    title: "Deploy microservices to a Kubernetes cluster (OKE) in Oracle Cloud Infrastructure (OCI)"
+    stackDescription: "Deploy microservices to a Kubernetes cluster (OKE) in Oracle Cloud Infrastructure (OCI)."
+    schemaVersion: 1.1.0
+    version: "20190404"
     locale: "en"
 
     variableGroups:
@@ -17,18 +17,6 @@
       - campaign
       - instance_os
       - linux_os_version
-      # - INSTALL_HOME
-      # - install_jdk11
-      # - freeform_tags
-      # - instance_ad_number
-      # - instance_count
-      # - instance_state
-      # - cloud_agent_plugins
-      # - source_type
-      # - boot_volume_backup_policy
-      # - block_storage_sizes_in_gbs
-      # - assign_public_ip
-      # - public_ip
 
     - title: Required Configuration 
       visible: true  
@@ -55,27 +43,6 @@
       - node_pool_shape
       - node_pool_flex_shape_memory
       - node_pool_flex_shape_ocpus
-
-    - title: "Autonomous Database Provisioning"
-      visible: true  
-      variables:
-      - create_database
-      - ADB_NAME
-      - IS_FREE_TIER
-      - autonomous_database_type
-      - autonomous_database_cpu_core_count
-      - autonomous_database_data_storage_size_in_tbs
-      - database_compartment
-      - database
-
-    - title: "Database Configuration"
-      visible: true  
-      variables:
-      - ADMIN_PASSWORD
-      - APEX_WORKSPACE
-      - DB_USER
-      - DB_SCHEMA
-      - DB_PASSWORD
 
     variables:
 
@@ -110,145 +77,6 @@
           compartmentId: ${compartment_ocid}
 
       # Optional Configuration     
-
-      IS_FREE_TIER:
-        type: boolean
-        title: "ATP Free Tier"
-        required: true
-        default: true
-        visible:
-          create_database
-
-      ADB_NAME:
-        type: string
-        title: "Database Name"
-        required: true
-        default: "f1simdb"
-        visible:
-          create_database
-
-      ADMIN_PASSWORD:
-        type: password
-        title: "ADMIN User Password - leave blank if random password is preferred"
-        required: false
-        visible: true
-        default: "W3lc0m3SIM123!#"
-
-      APEX_WORKSPACE:
-        type: string
-        title: "APEX Workspace (for F1SIM)"
-        required: true
-        visible: true
-        default: "LIVELAPS"
-
-      DB_SCHEMA:
-        type: string
-        title: "Database Schema (for F1SIM)"
-        required: true
-        visible: true
-        default: "SIMUSER"
-
-      DB_USER:
-        type: string
-        title: "Database User (for F1SIM)"
-        required: true
-        visible: true
-        default: "SIMUSER"
-
-      DB_PASSWORD:
-        type: password
-        title: "Database Password (for Database User) - leave blank if random password is preferred"
-        required: false
-        visible: true
-        default: "W3lc0m3SIM123"
-
-      package_install:
-        type: string
-        title: "Package Install"
-        required: true
-        visible: true
-        default: "f1-simulator-cloud/f1-simulator-cloud-v5_0_0-1.tar.gz"
-
-      package_baseurl:
-        type: string
-        title: "Package Repo URL"
-        required: true
-        visible: true
-        default: "https://rooms.opcvr.com/packages/"
-
-      customer_contacts:
-        type: string
-        title: "Customer Contact"
-        required: true
-        visible: true
-        default: "demo@withoracle.cloud"
-
-      INSTALL_HOME:
-        type: string
-        required: true
-        visible: false
-        default: "."
-
-      autonomous_database_cpu_core_count:
-        type: integer
-        default: 1
-        minimum: 1
-        maximum: 64
-        title: "Autonomous Database OCPU"
-        description: ""
-        visible:
-          and:
-            - not:
-              - IS_FREE_TIER
-            - create_database
-
-      autonomous_database_data_storage_size_in_tbs:
-        type: integer
-        default: 1
-        minimum: 1
-        maximum: 10
-        title: "Autonomous Database Storage (TB)"
-        description: ""
-        visible:
-          and:
-            - not:
-              - IS_FREE_TIER
-            - create_database
-
-      create_database:
-        title: "Create New Database?"
-        type: boolean
-
-      database_compartment:
-        type: oci:identity:compartment:id
-        title: "Autonomous Database Compartment"
-        required: false
-        visible:
-          not:
-            - create_database
-
-      database:
-        type: oci:database:autonomousdatabase:id
-        title: "Use Existing Autonomous Database"
-        required: false
-        dependsOn:
-          compartmentId: ${database_compartment}
-        visible:
-          not:
-            - create_database
-
-      autonomous_database_type:
-        type: enum
-        title: "Workload Type"
-        default: "OLTP"
-        # enumerated values
-        enum:
-          - OLTP
-          - DW
-          - AJD
-        visible:
-          create_database
-
 
       VCN-CIDR:
         type: string

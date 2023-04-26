@@ -92,3 +92,70 @@ locals {
 locals {
   is_flexible_node_shape = contains(local.compute_flexible_shapes, var.node_pool_shape)
 }
+
+# variable package_baseurl {
+#   type = string
+#   default = "https://rooms.opcvr.com/packages/"
+# }
+# variable package_install {
+#   type = string
+#   default = "f1-simulator-cloud/f1-simulator-cloud-v4_0_0-20.tar.gz"
+# }
+
+variable IS_FREE_TIER {
+  default = "true"
+}
+
+# variable INSTALL_HOME {
+#   default = ".local"
+# }
+
+variable ADB_NAME {
+  default = "f1simdb"
+}
+
+variable DB_USER {
+  default = "SIMUSER"
+}
+
+variable DB_SCHEMA {
+  default = "save-the-wildlife" 
+}
+
+variable APEX_WORKSPACE {
+  default = "save-planet" 
+}
+
+variable DB_PASSWORD {
+  default = "joinus!ocw2023"
+  sensitive = true 
+}
+
+variable ADMIN_PASSWORD {
+  default = "joinus!vegas2023"
+  sensitive = true
+}
+
+variable "autonomous_database_type" {
+  default = "OLTP"
+}
+
+variable "autonomous_database_cpu_core_count" {
+  default = 1
+}
+
+variable "autonomous_database_data_storage_size_in_tbs" {
+  default = 1
+}
+
+variable "database_compartment" {
+  default = ""
+}
+
+variable "database" {
+  default = ""
+}
+
+variable "create_database" {
+  default = "true"
+}
