@@ -5,6 +5,8 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise.js";
+import { Sky } from "three/examples/jsm/objects/Sky.js";
+import { Water } from "three/examples/jsm/objects/Water.js";
 import { throttle } from "throttle-debounce";
 import "./style.css";
 import * as lobby from "./lobby";
@@ -286,6 +288,45 @@ function startGame(gameDuration, [boat, turtle]) {
       child.material.side = THREE.DoubleSide;
     }
   });
+
+  				// // Skybox
+
+          // var sky = new Sky();
+
+          // var uniforms = sky.material.uniforms;
+  
+          // uniforms[ 'turbidity' ].value = 10;
+          // uniforms[ 'rayleigh' ].value = 2;
+          // uniforms[ 'luminance' ].value = 1;
+          // uniforms[ 'mieCoefficient' ].value = 0.005;
+          // uniforms[ 'mieDirectionalG' ].value = 0.8;
+  
+          // var parameters = {
+          //   distance: 400,
+          //   inclination: 0.49,
+          //   azimuth: 0.205
+          // };
+  
+          // var cubeCamera = new THREE.CubeCamera( 0.1, 1, 512 );
+          // cubeCamera.renderTarget.texture.generateMipmaps = true;
+          // cubeCamera.renderTarget.texture.minFilter = THREE.LinearMipmapLinearFilter;
+  
+          // scene.background = cubeCamera.renderTarget;
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // Add the boat to the scene
   scene.add(boat);
   player = boat;
@@ -322,131 +363,28 @@ function startGame(gameDuration, [boat, turtle]) {
     camera.updateProjectionMatrix();
   });
 
-  const sandGeometry = new THREE.PlaneGeometry(90, 24);
-  const sandMaterial = new THREE.MeshPhongMaterial({ color: 0xf4a460 });
-  const sand = new THREE.Mesh(sandGeometry, sandMaterial);
-  sand.position.set(0, 0, -0.2);
-  scene.add(sand);
+  // const sandGeometry = new THREE.PlaneGeometry(90, 24);
+  // const sandMaterial = new THREE.MeshPhongMaterial({ color: 0xf4a460 });
+  // const sand = new THREE.Mesh(sandGeometry, sandMaterial);
+  // sand.position.set(0, 0, -0.2);
+  // scene.add(sand);
 
-  const grassGeometry = new THREE.PlaneGeometry(113, 55);
-  const grassTexture = new THREE.CanvasTexture(createGrassTexture());
-  const grassMaterial = new THREE.MeshPhongMaterial({ map: grassTexture });
-  const grass = new THREE.Mesh(grassGeometry, grassMaterial);
-  grass.position.set(0, 0, -0.3);
-  scene.add(grass);
-
-  function createGrassTexture() {
-    const canvas = document.createElement("canvas");
-    canvas.width = 32;
-    canvas.height = 32;
-
-    const ctx = canvas.getContext("2d");
-    const gradient = ctx.createLinearGradient(0, 1, 16, 32);
-    gradient.addColorStop(0, "darkgreen");
-    gradient.addColorStop(0.5, "green");
-    gradient.addColorStop(1, "darkgreen");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 32, 32);
-
-    return canvas;
-  }
+  // const grassGeometry = new THREE.PlaneGeometry(113, 55);
+  // const grassTexture = new THREE.MeshPhongMaterial({ color: 0xf4a460 });
+  // const grassMaterial = new THREE.MeshPhongMaterial({ map: grassTexture });
+  // const grass = new THREE.Mesh(grassGeometry, grassMaterial);
+  // grass.position.set(0, 0, -0.3);
+  // scene.add(grass);
 
   const waterGeometry = new THREE.PlaneGeometry(
     boundaries.width,
     boundaries.height
   );
 
-  // Define the shader uniforms
-  const uniforms = {
-    time: { value: 0 }, // Time uniform for animation
-    waterColor: { value: new THREE.Color(0x0099ff) }, // Water color
-    lightColor: { value: new THREE.Color(0xfafad2) }, // Light color
-    cameraPosition: { value: new THREE.Vector3() }, // Camera position
-  };
-
-  // Define the vertex shader
-  const vertexShader = `
-  uniform float time;
-  varying vec2 vUv;
-
-  float wave(vec2 uv, float frequency, float amplitude, float speed) {
-    float waveValue = sin(uv.y * frequency + time * speed) * amplitude;
-    return waveValue;
-  }
-
-  void main() {
-    vUv = uv;
-
-    vec3 newPosition = position;
-
-    // Add waves to the water surface
-    newPosition.z += wave(vUv, 2.0, 0.2, 1.0);
-    newPosition.z += wave(vUv, 4.0, 0.1, 1.5);
-    newPosition.z += wave(vUv, 8.0, 0.05, 2.0);
-
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
-  }
-`;
-
-  // Define the fragment shader
-  const fragmentShader = `
-  uniform float time;
-  uniform vec3 waterColor;
-  uniform vec3 lightColor;
-  varying vec2 vUv;
-
-  // Simple noise function
-  float snoise(vec2 co) {
-    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
-  }
-
-  void main() {
-    vec2 uv = vUv;
-
-    // Calculate the distance from the center of the plane
-    float dist = length(uv - vec2(0.5));
-
-    // Scale the UV coordinates to create ripples
-    uv *= 10.0;
-
-    // Create a combined noise pattern based on the UV coordinates and the current time
-    float noise1 = snoise(uv * 0.5 + time * 0.1);
-    float noise2 = snoise(uv * 2.0 + time * 0.2);
-    float noise3 = snoise(uv * 4.0 + time * 0.4);
-
-    // Calculate the ripple intensity based on the distance from the center
-    float ripple = smoothstep(0.3, 0.52, dist) * 0.6;
-
-    // Add the ripple intensity to the noise to create the final ripple effect
-    float alpha = (noise1 * noise2 * noise3) * ripple * 0.1;
-
-    // Calculate the gradient color based on the distance from the center
-    vec3 color = mix(waterColor, lightColor, 1.0 - dist);
-
-    // Combine the color and alpha values to create the final fragment color
-    gl_FragColor = vec4(color, alpha);
-  }
-`;
-
-  const waterMaterial = new THREE.ShaderMaterial({
-    uniforms,
-    vertexShader,
-    fragmentShader,
-    transparent: true,
-  });
-
+  const waterMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff });
   const water = new THREE.Mesh(waterGeometry, waterMaterial);
   water.position.set(0, 0, 0);
   scene.add(water);
-
-  // // Add a directional light to simulate the sun
-  // const sun = new THREE.DirectionalLight(0xfafad2, 10);
-  // sun.position.set(-10, 10, 10);
-  // sun.castShadow = true;
-  // scene.add(sun);
-  // const SUN_ANIMATION_DURATION = 180; // in seconds
-  // const SUN_X_DISTANCE = 20; // in world units
-  // let startTime = null;
 
   // Send Player position
   sendYourPosition = throttle(traceRateInMillis, false, () => {
@@ -462,21 +400,6 @@ function startGame(gameDuration, [boat, turtle]) {
     };
     worker.postMessage({ type: "player.trace.change", body: trace });
   });
-
-  // function animateSun(time) {
-  //   if (!startTime) {
-  //     startTime = time;
-  //   }
-  //   const elapsedTime = (time - startTime) / 1000; // convert to seconds
-  //   const progress = elapsedTime / SUN_ANIMATION_DURATION;
-  //   const x = -SUN_X_DISTANCE + progress * SUN_X_DISTANCE * 2;
-  //   sun.position.setX(x);
-  //   if (progress <= 1) {
-  //     requestAnimationFrame(animateSun);
-  //   }
-  // }
-
-  // requestAnimationFrame(animateSun);
 
   // Add ambient light to simulate scattered light
   const ambient = new THREE.AmbientLight(0xffffff, 1);
@@ -607,15 +530,6 @@ function startGame(gameDuration, [boat, turtle]) {
     // Create a bounding box for the water
     const waterBox = new THREE.Box3().setFromObject(water);
 
-    // Check if the player's bounding box intersects with the water's bounding box
-    if (playerBox.intersectsBox(waterBox)) {
-      // Spawn foam particles around the boat
-      const foamParticles = spawnFoamParticles(player.position);
-      setTimeout(() => {
-        scene.remove(foamParticles);
-      }, foamParticles.lifetime * 1000);
-    }
-
     // Loop through each object in the scene
     for (const [key, mesh] of Object.entries(itemMeshes)) {
       // Check if the object is out of bounds
@@ -650,56 +564,6 @@ function startGame(gameDuration, [boat, turtle]) {
         delete itemMeshes[key];
       }
     }
-  }
-
-  function createOvalTexture() {
-    const size = 64;
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
-
-    // Draw an oval
-    ctx.beginPath();
-    ctx.ellipse(size / 2, size / 2, size / 4, size / 2, 0, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
-
-    return new THREE.CanvasTexture(canvas);
-  }
-
-  function spawnFoamParticles(position) {
-    const particleCount = 50;
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [];
-
-    // Add an offset to the Y-axis of the spawn position
-    const offsetY = -0.5;
-
-    for (let i = 0; i < particleCount; i++) {
-      vertices.push(position.x + Math.random() - 0.5);
-      vertices.push(position.y + offsetY + Math.random() * 0.5);
-      vertices.push(position.z + Math.random() - 0.5);
-    }
-
-    geometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(vertices, 3)
-    );
-
-    const material = new THREE.PointsMaterial({
-      size: 0.1,
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.1,
-      map: createOvalTexture(), // Use the oval texture
-    });
-
-    const particles = new THREE.Points(geometry, material);
-    particles.lifetime = 0.2; // in seconds
-    scene.add(particles);
-    return particles;
   }
 
   function updatePlayerPosition() {
@@ -749,15 +613,8 @@ function startGame(gameDuration, [boat, turtle]) {
     if (!playerBoundingBox.intersectsBox(navmeshBoundingBox)) {
       // Move the player back to the last valid position
       player.position.copy(lastPosition);
-    } else {
-      // If the player is moving, spawn foam particles around the boat
-      if (playerSpeed > 0.01 || playerSpeed < -0.01) {
-        const foamParticles = spawnFoamParticles(player.position);
-        setTimeout(() => {
-          scene.remove(foamParticles);
-        }, foamParticles.lifetime * 1000);
-      }
     }
+
 
     // Update the camera position to follow the player
     camera.position.x = player.position.x;
@@ -783,9 +640,7 @@ function startGame(gameDuration, [boat, turtle]) {
   function animate() {
     requestAnimationFrame(animate);
     updatePlayerPosition();
-    renderer.render(scene, camera);
     checkCollisions();
-    uniforms.time.value += 0.1;
     renderer.render(scene, camera);
     animateItems();
     // traces
@@ -796,7 +651,6 @@ function startGame(gameDuration, [boat, turtle]) {
     //   )}) heading to ${player.rotation.z.toFixed(1)}`
     // );
     animateOtherPlayers(otherPlayersMeshes);
-    waterMaterial.uniforms.cameraPosition.value.copy(camera.position);
   }
   animate();
 
