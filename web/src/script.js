@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { MathUtils } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader.js";
 import { throttle } from "throttle-debounce";
 import "./style.css";
 import * as lobby from "./lobby";
@@ -54,10 +55,14 @@ const createGameButton = document.getElementById("create-game-button");
 createGameButton.addEventListener("click", init);
 
 async function init() {
-  // Load the environment texture
+  scene = new THREE.Scene();
+  
+  // const listener = new THREE.AudioListener();
+
+
   const textureLoader = new THREE.TextureLoader();
   const textureEquirec = await new Promise((resolve) => {
-    textureLoader.load("assets/main.png", (texture) => {
+    textureLoader.load("assets/envmap.png", (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
       texture.encoding = THREE.sRGBEncoding;
       console.log("Texture loaded:", texture);
@@ -66,7 +71,7 @@ async function init() {
   });
 
   // Set up the scene
-  scene = new THREE.Scene();
+
   scene.background = textureEquirec;
   scene.environment = textureEquirec;
 
@@ -278,10 +283,22 @@ async function init() {
 function startGame(gameDuration, [boat, turtle]) {
   scene.environment = textureEquirec;
 
-  const backgroundGeometry = new THREE.SphereBufferGeometry(100000, 48, 24);
+  const backgroundGeometry = new THREE.SphereBufferGeometry(100000, 100000, 24);
   const backgroundMaterial = new THREE.MeshBasicMaterial({ map: textureEquirec });
   const backgroundMesh = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
   scene.add(backgroundMesh);
+  // backgroundMesh.position.set(0,0,0);
+
+  // const audioLoader = new THREE.AudioListener();
+  // audioLoader.load( '/assets/mixkit-motorboat-on-the-sea-1183.wav', function( buffer ) {
+  //   sound.setBuffer( buffer );
+  //   sound.setLoop( true );
+  //   sound.setVolume( 0.5 );
+  //   sound.play();
+  // });
+
+  const listener = new THREE.AudioListener();
+
 
   const playerMaterial = new THREE.MeshStandardMaterial({
     color: 0xa52a2a,
@@ -304,6 +321,10 @@ function startGame(gameDuration, [boat, turtle]) {
     0.1,
     1000
   );
+  camera.add(listener);
+
+
+
   renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     antialias: true,
@@ -324,6 +345,9 @@ function startGame(gameDuration, [boat, turtle]) {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
   });
+
+  camera.add( listener );
+  scene.add( camera );
 
   const waterGeometry = new THREE.PlaneGeometry(
     boundaries.width,
@@ -357,9 +381,9 @@ function startGame(gameDuration, [boat, turtle]) {
   const navmeshGeometry = new THREE.PlaneGeometry(89, 23);
   const navmeshMaterial = new THREE.MeshBasicMaterial({
     color: 0x0000ff, 
-    opacity: 0,
+    opacity: 0.1,
     transparent: true,
-    wireframe: false,
+    wireframe: true,
   });
   const navmesh = new THREE.Mesh(navmeshGeometry, navmeshMaterial);
 
@@ -521,9 +545,11 @@ document.addEventListener("keydown", function (event) {
     const CAMERA_DISTANCE = 4;
     const CAMERA_HEIGHT = 1.5;
     const SPRING_STRENGTH = 0.1;
+
     movement.copy(direction).multiplyScalar(playerSpeed);
     const lastPosition = player.position.clone();
     player.position.add(movement);
+
     const playerBoundingBox = new THREE.Box3().setFromObject(player);
     if (!playerBoundingBox.intersectsBox(navmeshBoundingBox)) {player.position.copy(lastPosition);}
     const targetCameraPosition = new THREE.Vector3();
@@ -542,7 +568,7 @@ document.addEventListener("keydown", function (event) {
       if (otherPlayers[id]) {
         playerMeshes[id].position.x = otherPlayers[id].x;
         playerMeshes[id].position.z = otherPlayers[id].z;
-        playerMeshes[id].rotation.y = otherPlayers[id].rotY; // add rotation Z value
+        playerMeshes[id].rotation.y = otherPlayers[id].rotY;
       }
     });
   }
@@ -556,11 +582,11 @@ document.addEventListener("keydown", function (event) {
     animateItems();
     // traces
     sendYourPosition();
-    // logTrace(
-    //   `Player on (${player.position.x.toFixed(1)}, ${player.position.z.toFixed(
-    //     1, 
-    //   )}) heading to ${player.rotation.y.toFixed(1)}`
-    // );
+    logTrace(
+      `Player on (${player.position.x.toFixed(2)}, ${player.position.z.toFixed(
+        2, 
+      )}) heading to ${player.rotation.y.toFixed(2)}`
+    );
     animateOtherPlayers(otherPlayersMeshes);
   }
   animate();

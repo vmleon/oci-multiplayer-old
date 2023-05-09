@@ -183,9 +183,9 @@ export async function start(
   }, BROADCAST_ITEMS_IN_SECONDS * 1000);
 
   function createObject(type) {
-    const x = Math.round(Math.random() * WORLD_SIZE_X - WORLD_SIZE_X / 2);
+    const x = Math.round((Math.random() - 0.5) * (WORLD_SIZE_X - 1));
     const y = 0;
-    const z = Math.round(Math.random() * WORLD_SIZE_Z - WORLD_SIZE_Z / 2);
+    const z = Math.round((Math.random() - 0.5) * (WORLD_SIZE_Z -1));
     const size = (
       Math.random() * (ITEM_MAX_SIZE - ITEM_MIN_SIZE) +
       ITEM_MIN_SIZE
