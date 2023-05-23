@@ -67,7 +67,7 @@ async function init() {
     textureLoader.load("assets/envmap.png", (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
       texture.encoding = THREE.sRGBEncoding;
-      console.log("Texture loaded:", texture);
+      // console.log("Texture loaded:", texture);
       resolve(texture);
     });
   });
@@ -98,7 +98,7 @@ async function init() {
   //add music loader
   const audioLoader = new THREE.AudioLoader();
   const sounds = await audioLoader.loadAsync("assets/mixkit-motorboat-on-the-sea-1183.m4v");
-  console.log("Sound loaded: ", sounds);
+  // console.log("Sound loaded: ", sounds);
 
   // Comms
   const hostname = window.location.hostname;
@@ -114,7 +114,7 @@ async function init() {
   worker.onmessage = ({ data }) => {
     const { type, body, error } = data;
     if (error) {
-      console.error(error);
+      // console.error(error);
       Object.keys(otherPlayersMeshes).forEach((id) =>
         scene.remove(otherPlayersMeshes[id])
       );
@@ -123,22 +123,22 @@ async function init() {
     }
     switch (type) {
       case "connect":
-        console.log("Web Socket connection");
+        // console.log("Web Socket connection");
         break;
       case "disconnect":
-        console.log("Web Socket disconnection");
+        // console.log("Web Socket disconnection");
         break;
       case "log":
         console.log(body);
         break;
       case "server.info":
-        console.log(`Connected to server ${body.id}`);
-        console.log(`Game duration ${body.gameDuration} seconds`);
+        // console.log(`Connected to server ${body.id}`);
+        // console.log(`Game duration ${body.gameDuration} seconds`);
         gameDuration = body.gameDuration;
         // console.log(`World X: ${body.worldSizeX} World Z: ${body.worldSizeZ}`);
         boundaries.width = body.worldSizeX;
         boundaries.height = body.worldSizeZ;
-        console.log(`Updated boundaries: width: ${boundaries.width}, height: ${boundaries.height}`);
+        // console.log(`Updated boundaries: width: ${boundaries.width}, height: ${boundaries.height}`);
         break;
       case "game.on":
         worker.postMessage({
@@ -207,7 +207,7 @@ async function init() {
         break;
       case "player.info.all":
         // FIXME update player info
-        console.log("player.info.all", body);
+        // console.log("player.info.all", body);
         // otherPlayers
         break;
       default:
@@ -217,7 +217,7 @@ async function init() {
 
   // FIXME Disconnect properly when kill tab, reload, etc
   window.addEventListener("beforeunload", function (e) {
-    console.log("beforeunload");
+    // console.log("beforeunload");
   });
 
   function makePlayerMesh(playerMesh, scene) {
@@ -259,6 +259,7 @@ async function init() {
     const material = isMarineLife(itemType) ? materials[0] : materials[1];
     const itemMesh = new THREE.Mesh(geometry, material);
     itemMesh.position.set(position.x, position.y, position.z);
+    // console.log(position);
     itemMesh.scale.set(size, size, size);
     itemMesh.itemId = itemId;
     itemMesh.itemType = itemType;
@@ -296,7 +297,7 @@ function startGame(gameDuration, [boat, turtle],sounds) {
   scene.add(backgroundMesh);
   // backgroundMesh.position.set(0,0,0);
 
-console.log("Input sound: ", sounds);
+// console.log("Input sound: ", sounds);
 
   const playerMaterial = new THREE.MeshStandardMaterial({
     color: 0xa52a2a,
@@ -387,7 +388,7 @@ sound.setLoop(true);
     color: 0x0000ff, 
     opacity: 0.1,
     transparent: true,
-    wireframe: true,
+    wireframe: false,
   });
   const navmesh = new THREE.Mesh(navmeshGeometry, navmeshMaterial);
 
@@ -469,9 +470,9 @@ sound.setLoop(true);
     for (const [key, mesh] of Object.entries(itemMeshes)) {
       if (!mesh.outOfBounds) {
         const sinValue = Math.sin(
-          time * 2 + mesh.position.x * 0.5 + mesh.position.y * 0.3
+          time * 2 + mesh.position.x * 0.5 + mesh.position.z * 0.3
         );
-        mesh.position.z = sinValue * floatAmplitude;
+        mesh.position.y = sinValue * floatAmplitude;
       }
     }
   }
