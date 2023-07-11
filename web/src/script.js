@@ -35,6 +35,7 @@ let playerName = localStorage.getItem("yourName") || "Default";
 let renderer, scene, camera, sun, water;
 let canvas;
 let player, controls;
+let waternormals;
 
 let turtleModel, boxModel;
 
@@ -106,7 +107,10 @@ const listener = new THREE.AudioListener();
 
 
 // Load the GLTF models
+
 const loader = new GLTFLoader();
+const textureLoader = new THREE.TextureLoader();
+
 const boatGltf = await loader.loadAsync("assets/boat.gltf");
 const boatModel = boatGltf.scene.children[0];
 
@@ -116,15 +120,20 @@ const turtleModel = turtleGltf.scene.children[0];
 const boxGltf = await loader.loadAsync("assets/box.gltf");
 const boxModel = boxGltf.scene.children[0];
 
+
+const waternormals = await textureLoader.loadAsync( 'assets/waternormals.jpg');
+waternormals.wrapS = waternormals.wrapT = THREE.RepeatWrapping;
+// console.log("init: ",waternormals);
+
+
 const geometries = [
-new THREE.SphereGeometry(),
-new THREE.BoxGeometry(),
-new THREE.BufferGeometry(),
+  new THREE.BoxGeometry(), // Cube geometry for wildlife
+  boxModel.geometry,       // Box GLTF for trash
 ];
 
 const materials = [
 new THREE.MeshPhongMaterial({ color: 0x000000 }), // Green material for wildlife
-new THREE.MeshPhongMaterial({ color: 0xFFFFFF }), // Red material for trash
+new THREE.MeshPhongMaterial({ color: 0x654321 }), // material for trash
 ];
 
 //add music loader
@@ -176,7 +185,7 @@ case "game.on":
     type: "game.start",
     body: { playerId: yourId, playerName },
   });
-  startGame(gameDuration, [boatModel, turtleModel, boxModel],sounds);
+  startGame(gameDuration, [boatModel, turtleModel, boxModel],sounds, waternormals);
   break;
 case "game.end":
   endGame();
@@ -280,43 +289,67 @@ return group;
 
 // Create a random trash or wildlife object
 function createItemMesh(itemId, itemType, position, size) {
-// FIXME use marine life models when isMarineLife() returns true
-const geometry = isMarineLife(itemType) ? geometries[0] : geometries[1];
-const material = isMarineLife(itemType) ? materials[0] : materials[1];
-const itemMesh = new THREE.Mesh(geometry, material);
-itemMesh.position.set(position.x, position.y, position.z);
+  // Using marine life models when isMarineLife() returns true
+  const geometry = isMarineLife(itemType) ? geometries[0] : geometries[1];
+  const material = isMarineLife(itemType) ? materials[0] : materials[1];
+  const itemMesh = new THREE.Mesh(geometry, material);
+  itemMesh.position.set(position.x, position.y, position.z);
 
-console.log(position);
-itemMesh.scale.set(size, size, size);
-itemMesh.itemId = itemId;
-itemMesh.itemType = itemType;
-itemMesh.outOfBounds = false;
+    if (!isMarineLife(itemType)) { // If it's a trash item
+        itemMesh.animationActions = itemMesh.animations.map((animation) => {
+            const action = itemMesh.mixer.clipAction(animation);
+            
+            action.addEventListener('finished', function() {
+                // Decrease the count of playing animations
+                itemMesh.playingAnimationsCount--;
+                
+                // If all animations have finished playing, remove the mesh from the scene
+                if (itemMesh.playingAnimationsCount === 0) {
+                    scene.remove(mesh);
+                    delete itemMeshes[itemId];
+                }
+            });
+            
+            return action;
+        });
 
-// check if object is within the bounds of the plane
-const objectBoundaries = new THREE.Box3().setFromObject(itemMesh);
-if (
-objectBoundaries.min.x > boundaries.width / 2 ||
-objectBoundaries.max.x < -boundaries.width / 2 ||
-objectBoundaries.min.z > boundaries.height / 2 ||
-objectBoundaries.max.z < -boundaries.height / 2
-) {
-// if the object is outside the plane, mark it as out of bounds and return
-itemMesh.outOfBounds = true;
-return;
 }
 
-scene.add(itemMesh);
-itemMeshes[itemId] = itemMesh;
-return itemMesh;
+  console.log(position);
+  itemMesh.scale.set(size, size, size);
+  itemMesh.itemId = itemId;
+  itemMesh.itemType = itemType;
+  itemMesh.isTrash = !isMarineLife(itemType); // Set the isTrash flag to the itemMesh
+  itemMesh.outOfBounds = false;
+
+  // check if object is within the bounds of the plane
+  const objectBoundaries = new THREE.Box3().setFromObject(itemMesh);
+  if (
+      objectBoundaries.min.x > boundaries.width / 2 ||
+      objectBoundaries.max.x < -boundaries.width / 2 ||
+      objectBoundaries.min.z > boundaries.height / 2 ||
+      objectBoundaries.max.z < -boundaries.height / 2
+  ) {
+      // if the object is outside the plane, mark it as out of bounds and return
+      itemMesh.outOfBounds = true;
+      return;
+  }
+
+  scene.add(itemMesh);
+  itemMeshes[itemId] = itemMesh;
+  return itemMesh;
 }
 
 const overlay = document.getElementById("overlay");
 overlay.remove();
 }
 
-// FIXME models passed as array?
-function startGame(gameDuration, [boat, turtle],sounds) {
 
+// FIXME models passed as array?
+function startGame(gameDuration, [boat, turtle],sounds, waternormals) {
+
+  
+  console.log("StartGame: ",waternormals);
 
 //renders
 renderer = new THREE.WebGLRenderer({
@@ -381,11 +414,12 @@ water = new Water(
   {
     textureWidth: 512,
     textureHeight: 512,
-    waterNormals: new THREE.TextureLoader().load( 'assets/waternormals.jpg', function ( texture ) {
+    // waterNormals: new THREE.TextureLoader().load( 'assets/waternormals.jpg', function ( texture ) {
 
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    //   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
-    } ),
+    // } ),
+    waterNormals: waternormals,
     sunDirection: new THREE.Vector3(),
     sunColor: 0xffffff,
     waterColor: 0x001e0f,
@@ -443,9 +477,9 @@ const { x, y, z } = player.position;
 const { x: rotX, y: rotY, z: rotZ } = player.rotation;
 const trace = {
 id: yourId,
-x: x.toFixed(5),
-z: z.toFixed(5),
-rotY: rotY.toFixed(5)
+x: x.toFixed(10),
+z: z.toFixed(10),
+rotY: rotY.toFixed(10)
 };
 worker.postMessage({ type: "player.trace.change", body: trace });
 });
@@ -565,6 +599,14 @@ const itemMeshBox = new THREE.Box3().setFromObject(mesh);
 // FIXME use cannon.js or any physics engine
 const collision = playerBox.intersectsBox(itemMeshBox);
 if (collision) {
+
+            // Play all animations and set the count of playing animations
+            if (mesh.animationActions) {
+              mesh.playingAnimationsCount = mesh.animationActions.length;
+              mesh.animationActions.forEach((action) => action.play());
+          }
+
+
   // Remove the object from the scene and the itemMeshes
   const collisionData = {
     itemId: key,
