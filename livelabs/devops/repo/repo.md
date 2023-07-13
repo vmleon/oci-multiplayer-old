@@ -13,7 +13,7 @@ Estimated Lab Time: 15 minutes
 
 ## Task 1: Fork repo
 
-1. Open a new tab in your browser and go to the [OCI DevOps OKE](https://github.com/vmleon/oci-devops-oke) repository.
+1. Open a new tab in your browser and go to the [OCI DevOps OKE](https://github.com/vmleon/oci-multiplayer) repository.
   
   ![xxx](images/xxx-xxx-xxx.png)
 
@@ -45,7 +45,7 @@ Estimated Lab Time: 15 minutes
 
 8. Check **Only select repositories**.
 
-9. Select your `oci-devops-oke`.
+9. Select your `oci-multiplayer`.
 
 10. On permissions, set **Contents** to **Read-only**. (to be confirmed that this is enough)
 
@@ -68,7 +68,7 @@ Estimated Lab Time: 15 minutes
   ![xxx](images/xxx-xxx-xxx.png)
 
     ```bash
-    <copy>git clone https://github.com/YOUR_USER_HANDLER/oci-devops-oke.git</copy>
+    <copy>git clone https://github.com/YOUR_USER_HANDLER/oci-multiplayer.git</copy>
     ```
 
   ![xxx](images/xxx-xxx-xxx.png)
@@ -76,7 +76,7 @@ Estimated Lab Time: 15 minutes
 1. Change the directory to the cloned repository:
     
     ```bash
-    <copy>cd oci-devops-oke</copy>
+    <copy>cd oci-multiplayer</copy>
     ```
 
 You may now [proceed to the next lab](#next).

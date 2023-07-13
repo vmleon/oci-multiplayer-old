@@ -35,7 +35,7 @@ Estimated Lab Time: XX minutes
 1. Change to the folder `tf-devops` where all the DevOps infrastructure definitions are.
     
     ```bash
-    <copy>cd tf-devops</copy>
+    <copy>cd deploy/devops/tf-devops/</copy>
     ```
 
 2. Run the `init` command for terraform.
@@ -86,7 +86,7 @@ Estimated Lab Time: XX minutes
 3. Come back to the parent directory.
 
     ```bash
-    <copy>cd ..</copy>
+    <copy>cd ../../..</copy>
     ```
 
 4. You have completed this lab.

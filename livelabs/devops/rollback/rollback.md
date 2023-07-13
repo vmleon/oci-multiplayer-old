@@ -17,18 +17,18 @@ Estimated Lab Time: XX minutes
 
   ![xxx](./images/xxx.png)
 
-2. Open the file `src/hello-server/package.json` and change `1.0.0` to `1.0.1` on line 3.
+1. Open the file `server/package.json` and change `1.0.0` to `1.0.1` on line 3.
 
   ![xxx](./images/xxx.png)
 
-3. Open the file `src/hello-server/index.js` and change `hello` to `hola` on line 72.
+3. Open the file `server/index.js` and change `hello` to `hola` on line 72.
 
   ![xxx](./images/xxx.png)
 
 4. Run the git add
 
     ```bash
-    <copy>git add src/hello-server</copy>
+    <copy>git add server/</copy>
     ```
 
   ![xxx](./images/xxx.png)
@@ -36,7 +36,7 @@ Estimated Lab Time: XX minutes
 5. Run the git commit
 
     ```bash
-    <copy>git commit -m "bump hello service to 1.0.1"</copy>
+    <copy>git commit -m "bump ws server to 1.0.1"</copy>
     ```
 
   ![xxx](./images/xxx.png)

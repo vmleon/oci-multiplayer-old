@@ -41,10 +41,10 @@ Estimated Lab Time: XX minutes
 
 ## Task 2: Apply foundational infrastructure
 
-1. Change to the folder `tf-env` where all the foundational infrastructure definitions are.
+1. Change to the folder `deploy/devops/tf-env` where all the foundational infrastructure definitions are.
     
     ```bash
-    <copy>cd tf-env</copy>
+    <copy>cd deploy/devops/tf-env</copy>
     ```
   
   ![xxx](images/tfenv.png)
@@ -105,7 +105,7 @@ Estimated Lab Time: XX minutes
 3. Come back to the parent directory.
 
     ```bash
-    <copy>cd ..</copy>
+    <copy>cd ../../..</copy>
     ```
 
 4. You have completed this lab.
