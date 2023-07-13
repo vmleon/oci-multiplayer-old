@@ -73,7 +73,7 @@ async function releaseNpm(service, push = false) {
   await cd("..");
 }
 
-async function releaseGradle(service, push) {
+async function releaseGradle(service, push = false) {
   await cd(`${service}`);
   const currentVersion = await getVersionGradle();
   console.log(
