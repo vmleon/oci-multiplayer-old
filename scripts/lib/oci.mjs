@@ -18,6 +18,15 @@ export async function getRegions() {
   }
 }
 
+export async function getRegionByName(name) {
+  const tenancyId = await getTenancyId();
+  const output = (
+    await $`oci iam region-subscription list  --tenancy-id ${tenancyId}`
+  ).stdout.trim();
+  const { data } = JSON.parse(output);
+  return data.find((r) => name === r["region-name"]);
+}
+
 export async function getNamespace() {
   const output = (await $`oci os ns get`).stdout.trim();
   const { data } = JSON.parse(output);
