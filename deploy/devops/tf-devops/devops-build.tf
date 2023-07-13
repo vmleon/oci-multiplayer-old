@@ -45,7 +45,7 @@ resource "oci_devops_build_pipeline_stage" "build_github_stage" {
   build_source_collection {
     items {
       connection_type = "GITHUB"
-      branch          = "devops"
+      branch          = "main"
       connection_id   = oci_devops_connection.devops_connection.id
       name            = "github_build_source"
       repository_url  = var.github_repo_url

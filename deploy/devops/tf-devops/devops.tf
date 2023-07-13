@@ -51,7 +51,7 @@ resource "oci_devops_repository" "github_mirrored_repository" {
   name       = "github_mirrored_repository"
   project_id = oci_devops_project.devops_project.id
 
-  default_branch  = "refs/heads/devops"
+  default_branch  = "refs/heads/main"
   description     = "GitHub Mirrored Repository"
   repository_type = "MIRRORED"
   mirror_repository_config {
