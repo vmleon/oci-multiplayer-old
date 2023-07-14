@@ -34,7 +34,8 @@ steps:
       cd /workspace/oci-multiplayer
       redis_password=$(oci secrets secret-bundle get --secret-id ${redis_password_id} --query 'data."secret-bundle-content".content' | tr -d '\"' | base64 -d)
       adb_admin_password=$(oci secrets secret-bundle get --secret-id ${adb_admin_password_id} --query 'data."secret-bundle-content".content' | tr -d '\"' | base64 -d)
-      npx zx scripts/kustom.mjs ${region_key} $redis_password $adb_admin_password ${adb_service} ${adb_id}
+      oci db autonomous-database generate-wallet --autonomous-database-id ${adb_id} --file "./deploy/k8s/base/score/wallet.zip" --password $adb_admin_password
+      npx zx scripts/kustom.mjs ${region_key} $redis_password $adb_admin_password ${adb_service}
   - type: Command
     name: "Create OCIR Secret"
     shell: bash

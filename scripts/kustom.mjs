@@ -8,7 +8,7 @@ $.shell = shell;
 $.verbose = false;
 
 const { _ } = argv;
-const [key, redisPassword, adbAdminPassword, adbService, adbId] = _;
+const [key, redisPassword, adbAdminPassword, adbService] = _;
 
 const regionKey = key;
 const namespace = await getNamespace();
@@ -16,7 +16,6 @@ const namespace = await getNamespace();
 await createKustomizationYaml(regionKey, namespace);
 
 await createWsServerConfigFile(redisPassword);
-await generateScoreWallet(adbId, adbAdminPassword);
 await createRedisConfigFile(redisPassword);
 await createScoreConfigFile(adbAdminPassword, adbService);
 
@@ -73,13 +72,6 @@ async function createWsServerConfigFile(redisPassword) {
   } finally {
     await cd(pwdOutput);
   }
-}
-async function generateScoreWallet(adbId, adbAdminPassword) {
-  const pwdOutput = (await $`pwd`).stdout.trim();
-  await cd("./deploy/k8s/base/score/");
-  console.log(`Generating ADB Wallet`);
-  await downloadAdbWallet(adbId, "./wallet.zip", adbAdminPassword);
-  await cd(pwdOutput);
 }
 
 async function createRedisConfigFile(redisPassword) {
