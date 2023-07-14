@@ -67,7 +67,7 @@ resource "oci_devops_build_pipeline_stage" "deliver_artifact_stage" {
   deliver_artifact_collection {
     items {
       artifact_id   = oci_devops_deploy_artifact.ws_server_image.id
-      artifact_name = "ws-server"
+      artifact_name = "server"
     }
     items {
       artifact_id   = oci_devops_deploy_artifact.web_image.id
@@ -93,14 +93,14 @@ resource "oci_devops_deploy_artifact" "ws_server_image" {
   deploy_artifact_source {
     deploy_artifact_source_type = "OCIR"
 
-    image_uri     = "${var.region_key}.ocir.io/${var.namespace}/${local.repo_name}/ws-server:$${WS_SERVER_VERSION}"
+    image_uri     = "${var.region_key}.ocir.io/${var.namespace}/${local.repo_name}/server:$${WS_SERVER_VERSION}"
     repository_id = oci_devops_repository.github_mirrored_repository.id
   }
 
   deploy_artifact_type = "DOCKER_IMAGE"
   project_id           = oci_devops_project.devops_project.id
 
-  display_name = "Container Image Web Socket Server"
+  display_name = "Container Image WS Server"
 }
 
 resource "oci_devops_deploy_artifact" "web_image" {
@@ -134,5 +134,5 @@ resource "oci_devops_deploy_artifact" "score_image" {
   deploy_artifact_type = "DOCKER_IMAGE"
   project_id           = oci_devops_project.devops_project.id
 
-  display_name = "Container Image Japp Server"
+  display_name = "Container Image Score"
 }

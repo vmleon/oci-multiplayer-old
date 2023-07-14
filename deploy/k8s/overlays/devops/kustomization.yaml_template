@@ -9,7 +9,7 @@ patchesStrategicMerge:
 
 images:
 - name: ws-server
-  newName: REGION_KEY.ocir.io/NAMESPACE/oci_multiplayer/ws-server
+  newName: REGION_KEY.ocir.io/NAMESPACE/oci_multiplayer/server
   newTag: WS_SERVER_VERSION
 - name: web
   newName: REGION_KEY.ocir.io/NAMESPACE/oci_multiplayer/web

@@ -39,9 +39,9 @@ steps:
       npx zx scripts/build.mjs score
 
 outputArtifacts:
-  - name: ws-server
+  - name: server
     type: DOCKER_IMAGE
-    location: ws-server:${WS_SERVER_VERSION}
+    location: server:${WS_SERVER_VERSION}
   - name: web
     type: DOCKER_IMAGE
     location: web:${WEB_VERSION}
