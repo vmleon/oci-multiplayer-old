@@ -34,7 +34,7 @@ async function createKustomizationYaml(regionKey, namespace) {
   console.log(`web v${webVersion}`);
   console.log(`score v${scoreVersion}`);
 
-  await cd("./deploy/k8s/overlay/devops");
+  await cd("./deploy/k8s/overlays/devops");
   try {
     let { exitCode, stderr } =
       await $`sed 's/REGION_KEY/${regionKey}/' kustomization.yaml_template \
