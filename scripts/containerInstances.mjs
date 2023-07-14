@@ -55,7 +55,6 @@ const createContainerInstances = async (attributes) => {
     "subnet_ocid": "xxx",
     "containerRegistryURL": containerRegistryURL,
     "containerRegistryUser": containerRegistryUser,
-    "auth": "xxx",
     "region": "xxx",
     "servercontainerURL": "xxx.ocir.io/xxx/oci_multiplayer/server:0.0.8",
     "webcontainerURL": "xxx.ocir.io/xxx/oci_multiplayer/web:0.0.8",
