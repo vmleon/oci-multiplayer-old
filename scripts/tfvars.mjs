@@ -115,6 +115,7 @@ async function devopsTFvars() {
     user_auth_token_id: userAuthTokenId,
     adb_admin_password_id: adbAdminPasswordId,
     adb_service: adbService,
+    adb_id: adbId,
     redis_password_id: redisPasswordId,
   } = values;
 
@@ -152,6 +153,7 @@ async function devopsTFvars() {
            | sed 's/USER_AUTH_TOKEN_OCID/${userAuthTokenId}/' \
            | sed 's/ADB_ADMIN_PASSWORD_OCID/${adbAdminPasswordId}/' \
            | sed 's/ADB_SERVICE/${adbService}/' \
+           | sed 's/ADB_OCID/${adbId}/' \
            | sed 's/REDIS_PASSWORD_OCID/${redisPasswordId}/' \
            | sed ${replaceCmdURL} \
            | sed 's/GITHUB_USER/${githubUser}/' > deploy/devops/tf-devops/terraform.tfvars`;

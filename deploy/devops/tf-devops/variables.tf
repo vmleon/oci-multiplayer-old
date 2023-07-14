@@ -63,3 +63,7 @@ variable "redis_password_id" {
 variable "adb_service" {
   type = string
 }
+
+variable "adb_id" {
+  type = string
+}

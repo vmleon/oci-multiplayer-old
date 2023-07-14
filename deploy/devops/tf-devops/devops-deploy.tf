@@ -43,7 +43,7 @@ resource "oci_devops_deploy_artifact" "command_spec_deploy" {
 
   deploy_artifact_source {
     deploy_artifact_source_type = "INLINE"
-    base64encoded_content       = templatefile("${path.module}/../../../command_spec.yaml", { region : "${var.region}", region_key : "${var.region_key}", github_repo_url : "${var.github_repo_url}", cluster : "${var.oke_cluster_ocid}", oci_namespace : "${var.namespace}", ocir_user : "${var.ocir_user}", user_auth_token_id : "${var.user_auth_token_id}", adb_admin_password_id : "${var.adb_admin_password_id}", redis_password_id : "${var.redis_password_id}", adb_service : "${var.adb_service}" })
+    base64encoded_content       = templatefile("${path.module}/../../../command_spec.yaml", { region : "${var.region}", region_key : "${var.region_key}", github_repo_url : "${var.github_repo_url}", cluster : "${var.oke_cluster_ocid}", oci_namespace : "${var.namespace}", ocir_user : "${var.ocir_user}", user_auth_token_id : "${var.user_auth_token_id}", adb_admin_password_id : "${var.adb_admin_password_id}", redis_password_id : "${var.redis_password_id}", adb_service : "${var.adb_service}", adb_id : "${var.adb_id}" })
   }
 
 }

@@ -50,3 +50,8 @@ output "adb_service" {
   sensitive = false
   value     = oci_database_autonomous_database.adb.db_name
 }
+
+output "adb_id" {
+  sensitive = false
+  value     = oci_database_autonomous_database.adb.id
+}

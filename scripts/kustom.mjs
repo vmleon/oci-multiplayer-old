@@ -1,6 +1,6 @@
 import { getVersionGradle } from "./lib/gradle.mjs";
 import { getNpmVersion } from "./lib/npm.mjs";
-import { getNamespace } from "./lib/oci.mjs";
+import { getNamespace, downloadAdbWallet } from "./lib/oci.mjs";
 import { exitWithError } from "./lib/utils.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
@@ -8,7 +8,7 @@ $.shell = shell;
 $.verbose = false;
 
 const { _ } = argv;
-const [key, redisPassword, adbAdminPassword, adbService] = _;
+const [key, redisPassword, adbAdminPassword, adbService, adbId] = _;
 
 const regionKey = key;
 const namespace = await getNamespace();
@@ -16,6 +16,7 @@ const namespace = await getNamespace();
 await createKustomizationYaml(regionKey, namespace);
 
 await createWsServerConfigFile(redisPassword);
+await generateScoreWallet(adbId, adbAdminPassword);
 await createRedisConfigFile(redisPassword);
 await createScoreConfigFile(adbAdminPassword, adbService);
 
@@ -72,6 +73,13 @@ async function createWsServerConfigFile(redisPassword) {
   } finally {
     await cd(pwdOutput);
   }
+}
+async function generateScoreWallet(adbId, adbAdminPassword) {
+  const pwdOutput = (await $`pwd`).stdout.trim();
+  await cd("./deploy/k8s/base/score/");
+  console.log(`Generating ADB Wallet`);
+  await downloadAdbWallet(adbId, "./wallet.zip", adbAdminPassword);
+  await cd(pwdOutput);
 }
 
 async function createRedisConfigFile(redisPassword) {
