@@ -63,7 +63,7 @@ async function createWsServerConfigFile(redisPassword) {
   const replaceCmdRedisPassword = `s/MASTERPASSWORD/${redisPassword}/`;
   try {
     let { exitCode, stderr } = await $`sed '${replaceCmdRedisPassword}' \
-          .env_server_template > .env_server`;
+          env_server_template > .env_server`;
     if (exitCode !== 0) {
       exitWithError(`Error creating .env_server: ${stderr}`);
     }
