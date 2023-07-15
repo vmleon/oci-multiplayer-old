@@ -25,7 +25,7 @@ console.log({ regionKey });
 const { a, _ } = argv;
 const [action, push] = _;
 
-const project = "oci-multiplayer";
+const project = "oci_multiplayer";
 
 if (action === "ws-server") {
   await releaseNpm("server", push);
