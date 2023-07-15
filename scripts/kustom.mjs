@@ -44,10 +44,6 @@ async function createKustomizationYaml(regionKey, namespace) {
     if (exitCode !== 0) {
       exitWithError(`Error creating kustomization.yaml: ${stderr}`);
     }
-    const kustomizationOutput = await $`cat kustomization.yaml`;
-    console.log(kustomizationOutput.stderr);
-    const kustomizationContent = kustomizationOutput.stdout.trim();
-    console.log(kustomizationContent);
     console.log(`Overlay ${chalk.green("kustomization.yaml")} created.`);
   } catch (error) {
     exitWithError(error.stderr);
