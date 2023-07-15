@@ -33,9 +33,7 @@ steps:
     command: |
       cd /workspace/oci-multiplayer
       adb_admin_password=$(oci secrets secret-bundle get --secret-id ${adb_admin_password_id} --query 'data."secret-bundle-content".content' | tr -d '\"' | base64 -d)
-      ls -l /workspace/oci-multiplayer/deploy/k8s/base/score/
-      oci db autonomous-database generate-wallet --debug --autonomous-database-id ${adb_id} --file "./deploy/k8s/base/score/wallet.zip" --password $adb_admin_password
-      ls -l /workspace/oci-multiplayer/deploy/k8s/base/score/
+      oci db autonomous-database generate-wallet --autonomous-database-id ${adb_id} --file "./deploy/k8s/base/score/wallet.zip" --password $adb_admin_password
   - type: Command
     name: "Custom Kustomize with versions"
     shell: bash

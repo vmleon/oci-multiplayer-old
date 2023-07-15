@@ -73,6 +73,7 @@ resource "oci_identity_policy" "devops_policy_in_compartment" {
     "allow dynamic-group ${local.dynamic_group_name} to manage all-artifacts in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to manage compute-container-instances in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to manage compute-containers in compartment id ${var.compartment_ocid}",
+    "allow dynamic-group ${local.dynamic_group_name} to manage autonomous-database in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to manage adm-vulnerability-audits in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to read secret-family in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to use dhcp-options in compartment id ${var.compartment_ocid}",
