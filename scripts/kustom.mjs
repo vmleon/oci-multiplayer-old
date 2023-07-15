@@ -1,3 +1,4 @@
+import { createSelfSignedCert } from "./lib/tls.mjs";
 import { getVersionGradle } from "./lib/gradle.mjs";
 import { getNpmVersion } from "./lib/npm.mjs";
 import { getNamespace, downloadAdbWallet } from "./lib/oci.mjs";
@@ -18,6 +19,7 @@ await createKustomizationYaml(regionKey, namespace);
 await createWsServerConfigFile(redisPassword);
 await createRedisConfigFile(redisPassword);
 await createScoreConfigFile(adbAdminPassword, adbService);
+await createCerts();
 
 async function createKustomizationYaml(regionKey, namespace) {
   const pwdOutput = (await $`pwd`).stdout.trim();
@@ -106,4 +108,21 @@ async function createScoreConfigFile(adbAdminPassword, adbService) {
   } finally {
     await cd(pwdOutput);
   }
+}
+
+async function createCerts() {
+  console.log("Generate Self signed certs...");
+
+  const certPath = "./deploy/k8s/base/ingress/.certs";
+  const prevKeyExists = await fs.pathExists(path.join(certPath, "tls.key"));
+  if (prevKeyExists) {
+    console.log(
+      `${chalk.yellow("Existing key pair ")} on ${certPath}. ${chalk.red(
+        "Key pair not generated"
+      )}.`
+    );
+  } else {
+    await createSelfSignedCert(certPath);
+  }
+  console.log();
 }
