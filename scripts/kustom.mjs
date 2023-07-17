@@ -94,11 +94,12 @@ async function createScoreConfigFile(adbAdminPassword, adbService) {
   const pwdOutput = (await $`pwd`).stdout.trim();
   await cd("./deploy/k8s/base/score/");
   const replaceCmdAdbPassword = `s/TEMPLATE_ADB_PASSWORD/${adbAdminPassword}/`;
-  const replaceCmdAdbService = `s/TEMPLATE_ADB_SERVICE/${adbService}/`;
+  console.log({ adbAdminPassword, replaceCmdAdbPassword });
+  const replaceCmdAdbService = `s/TEMPLATE_ADB_SERVICE/${adbService}_high/`;
   try {
     let { exitCode, stderr } =
       await $`sed '${replaceCmdAdbPassword}' application.properties.template \
-                                    | sed '${replaceCmdAdbService}' > application.properties`;
+            | sed '${replaceCmdAdbService}' > application.properties`;
     if (exitCode !== 0) {
       exitWithError(`Error creating application.properties: ${stderr}`);
     }
