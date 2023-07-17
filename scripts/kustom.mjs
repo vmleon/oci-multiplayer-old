@@ -94,7 +94,6 @@ async function createScoreConfigFile(adbAdminPassword, adbService) {
   const pwdOutput = (await $`pwd`).stdout.trim();
   await cd("./deploy/k8s/base/score/");
   const replaceCmdAdbPassword = `s/TEMPLATE_ADB_PASSWORD/${adbAdminPassword}/`;
-  console.log({ adbAdminPassword, replaceCmdAdbPassword });
   const replaceCmdAdbService = `s/TEMPLATE_ADB_SERVICE/${adbService}_high/`;
   try {
     let { exitCode, stderr } =
@@ -104,9 +103,6 @@ async function createScoreConfigFile(adbAdminPassword, adbService) {
       exitWithError(`Error creating application.properties: ${stderr}`);
     }
     console.log(`Overlay ${chalk.green("application.properties")} created.`);
-    const appPropertiesOutput = await $`cat application.properties`;
-    const appPropertiesContent = appPropertiesOutput.stdout.trim();
-    console.log(appPropertiesContent);
   } catch (error) {
     exitWithError(error.stderr);
   } finally {
