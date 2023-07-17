@@ -103,6 +103,9 @@ async function createScoreConfigFile(adbAdminPassword, adbService) {
       exitWithError(`Error creating application.properties: ${stderr}`);
     }
     console.log(`Overlay ${chalk.green("application.properties")} created.`);
+    const appPropertiesOutput = await $`cat application.properties`;
+    const appPropertiesContent = appPropertiesOutput.stdout.trim();
+    console.log(appPropertiesContent);
   } catch (error) {
     exitWithError(error.stderr);
   } finally {
