@@ -17,10 +17,8 @@ const logTrace = throttle(1000, false, console.log);
 
 let otherPlayers = {};
 let otherPlayersMeshes = {};
-
 let items = {};
 let itemMeshes = {};
-
 let sendYourPosition;
 
 // Default
@@ -372,7 +370,6 @@ sun = new THREE.Vector3();
 
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-
 scene.add(boat);
 player = boat;
 
@@ -468,7 +465,7 @@ function updateSun() {
   scene.environment = pmremGenerator.fromScene( sky ).texture;
 
 }
-console.log("sun ", sun);
+// console.log("sun ", sun);
 
 sendYourPosition = throttle(traceRateInMillis, false, () => {
 if (gameOverFlag) return;

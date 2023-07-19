@@ -6,7 +6,6 @@ In this lab we will create container images for the application components and d
 
 To help streamline the process, you'll use a custom script to create and publish container images to the OCI Container Registry. Container Registry makes it easy to store, share, and managed container images. Registries can be private (default) or public.
 
-**_Important_** The instructions in this lab are designed around the Cloud Shell and utilize some of the built-in session variables. Should you choose to complete this outside of cloud shell, you will need to locate those resource OCID's manually (Web UI or OCI CLI).
 
 Estimated Lab Time: 15 minutes
 
@@ -129,8 +128,16 @@ In this task you will create a container image for both the server and the web p
 
 9. Copy the `Released:` path for this one as well; store it in a text document.
 
+## Task 3A: Deploy to Container Instances
 
-## Task 3: Deploy to Container Instances
+
+Now to grab just a few more pieces of information and launch the Container Instances resource.
+
+1. You may either navigate the OCI console to locate the OCID of your subnet, or run the following CLI command. Copy the Subnet OCID to a text file.
+
+
+
+## (Optional) Task 3B: Deploy to Container Instances (command line)
 
 Now to grab just a few more pieces of information and launch the Container Instances resource.
 
