@@ -10,7 +10,7 @@ resource "random_password" "adb_admin_password" {
   min_special      = 3
   min_lower        = 3
   min_upper        = 3
-  override_special = "()-_[]{}?"
+  override_special = "-_@.=:"
 }
 
 resource "random_password" "redis_password" {
@@ -20,12 +20,3 @@ resource "random_password" "redis_password" {
   min_lower   = 3
   min_upper   = 3
 }
-
-# resource "random_password" "adb_wallet_password" {
-#   length      = 16
-#   special     = true
-#   min_numeric = 3
-#   min_special = 3
-#   min_lower   = 3
-#   min_upper   = 3
-# }

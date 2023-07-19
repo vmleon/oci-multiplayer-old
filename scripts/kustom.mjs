@@ -1,3 +1,4 @@
+import { createSelfSignedCert } from "./lib/tls.mjs";
 import { getVersionGradle } from "./lib/gradle.mjs";
 import { getNpmVersion } from "./lib/npm.mjs";
 import { getNamespace, downloadAdbWallet } from "./lib/oci.mjs";
@@ -18,6 +19,7 @@ await createKustomizationYaml(regionKey, namespace);
 await createWsServerConfigFile(redisPassword);
 await createRedisConfigFile(redisPassword);
 await createScoreConfigFile(adbAdminPassword, adbService);
+await createCerts();
 
 async function createKustomizationYaml(regionKey, namespace) {
   const pwdOutput = (await $`pwd`).stdout.trim();
@@ -44,10 +46,6 @@ async function createKustomizationYaml(regionKey, namespace) {
     if (exitCode !== 0) {
       exitWithError(`Error creating kustomization.yaml: ${stderr}`);
     }
-    const kustomizationOutput = await $`cat kustomization.yaml`;
-    console.log(kustomizationOutput.stderr);
-    const kustomizationContent = kustomizationOutput.stdout.trim();
-    console.log(kustomizationContent);
     console.log(`Overlay ${chalk.green("kustomization.yaml")} created.`);
   } catch (error) {
     exitWithError(error.stderr);
@@ -96,11 +94,11 @@ async function createScoreConfigFile(adbAdminPassword, adbService) {
   const pwdOutput = (await $`pwd`).stdout.trim();
   await cd("./deploy/k8s/base/score/");
   const replaceCmdAdbPassword = `s/TEMPLATE_ADB_PASSWORD/${adbAdminPassword}/`;
-  const replaceCmdAdbService = `s/TEMPLATE_ADB_SERVICE/${adbService}/`;
+  const replaceCmdAdbService = `s/TEMPLATE_ADB_SERVICE/${adbService}_high/`;
   try {
     let { exitCode, stderr } =
       await $`sed '${replaceCmdAdbPassword}' application.properties.template \
-                                    | sed '${replaceCmdAdbService}' > application.properties`;
+            | sed '${replaceCmdAdbService}' > application.properties`;
     if (exitCode !== 0) {
       exitWithError(`Error creating application.properties: ${stderr}`);
     }
@@ -110,4 +108,21 @@ async function createScoreConfigFile(adbAdminPassword, adbService) {
   } finally {
     await cd(pwdOutput);
   }
+}
+
+async function createCerts() {
+  console.log("Generate Self signed certs...");
+
+  const certPath = "./deploy/k8s/base/ingress/.certs";
+  const prevKeyExists = await fs.pathExists(path.join(certPath, "tls.key"));
+  if (prevKeyExists) {
+    console.log(
+      `${chalk.yellow("Existing key pair ")} on ${certPath}. ${chalk.red(
+        "Key pair not generated"
+      )}.`
+    );
+  } else {
+    await createSelfSignedCert(certPath);
+  }
+  console.log();
 }

@@ -11,6 +11,7 @@ resource "oci_identity_group" "oke_ocir_group" {
 }
 
 resource "oci_identity_user" "oke_ocir_user" {
+  provider       = oci.home_region
   compartment_id = var.tenancy_ocid
   description    = "User for OKE secret to access OCIR"
   name           = "oke_ocir_user"
@@ -19,6 +20,7 @@ resource "oci_identity_user" "oke_ocir_user" {
 }
 
 resource "oci_identity_auth_token" "oke_ocir_user_auth_token" {
+  provider    = oci.home_region
   description = "User Auth Token for OKE secret to access OCIR"
   user_id     = oci_identity_user.oke_ocir_user.id
 }
@@ -34,6 +36,7 @@ resource "oci_identity_policy" "oke_ocir_user_policy_in_tenancy" {
 }
 
 resource "oci_identity_user_group_membership" "oke_ocir_user_group_membership" {
+  provider = oci.home_region
   group_id = oci_identity_group.oke_ocir_group.id
   user_id  = oci_identity_user.oke_ocir_user.id
 }
@@ -73,6 +76,7 @@ resource "oci_identity_policy" "devops_policy_in_compartment" {
     "allow dynamic-group ${local.dynamic_group_name} to manage all-artifacts in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to manage compute-container-instances in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to manage compute-containers in compartment id ${var.compartment_ocid}",
+    "allow dynamic-group ${local.dynamic_group_name} to manage autonomous-database in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to manage adm-vulnerability-audits in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to read secret-family in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to use dhcp-options in compartment id ${var.compartment_ocid}",
@@ -83,10 +87,4 @@ resource "oci_identity_policy" "devops_policy_in_compartment" {
     "allow dynamic-group ${local.dynamic_group_name} to use adm-knowledge-bases in compartment id ${var.compartment_ocid}",
     "allow dynamic-group ${local.dynamic_group_name} to use cabundles in compartment id ${var.compartment_ocid}"
   ]
-}
-
-resource "oci_identity_auth_token" "user_auth_token" {
-  provider    = oci.home_region
-  user_id     = data.oci_identity_users.users.users[0].id
-  description = "user_auth_token_for_devops_${random_string.deploy_id.result}"
 }
