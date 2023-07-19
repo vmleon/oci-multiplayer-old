@@ -88,9 +88,3 @@ resource "oci_identity_policy" "devops_policy_in_compartment" {
     "allow dynamic-group ${local.dynamic_group_name} to use cabundles in compartment id ${var.compartment_ocid}"
   ]
 }
-
-resource "oci_identity_auth_token" "user_auth_token" {
-  provider    = oci.home_region
-  user_id     = data.oci_identity_users.users.users[0].id
-  description = "user_auth_token_for_devops_${random_string.deploy_id.result}"
-}
