@@ -20,6 +20,7 @@ resource "oci_identity_user" "oke_ocir_user" {
 }
 
 resource "oci_identity_auth_token" "oke_ocir_user_auth_token" {
+  provider    = oci.home_region
   description = "User Auth Token for OKE secret to access OCIR"
   user_id     = oci_identity_user.oke_ocir_user.id
 }
@@ -35,6 +36,7 @@ resource "oci_identity_policy" "oke_ocir_user_policy_in_tenancy" {
 }
 
 resource "oci_identity_user_group_membership" "oke_ocir_user_group_membership" {
+  provider = oci.home_region
   group_id = oci_identity_group.oke_ocir_group.id
   user_id  = oci_identity_user.oke_ocir_user.id
 }
