@@ -11,6 +11,7 @@ resource "oci_identity_group" "oke_ocir_group" {
 }
 
 resource "oci_identity_user" "oke_ocir_user" {
+  provider       = oci.home_region
   compartment_id = var.tenancy_ocid
   description    = "User for OKE secret to access OCIR"
   name           = "oke_ocir_user"
