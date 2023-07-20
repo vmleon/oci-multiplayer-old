@@ -4,12 +4,15 @@ import * as dotenv from "dotenv";
 import short from "short-uuid";
 import pino from "pino";
 import { deleteCurrentScore, postCurrentScore } from "./score.js";
+import pkg from "./package.json" assert { type: "json" };
 
 dotenv.config({ path: "./config/.env" });
 
 const isProduction = process.env.NODE_ENV === "production";
 const logger = pino({ level: isProduction ? "warn" : "debug" });
 
+const version = pkg.version;
+logger.info(`Server version ${version}`);
 const serverId = short.generate();
 logger.info(`Server ${serverId}`);
 
@@ -71,9 +74,10 @@ export async function start(
 
     socket.emit("server.info", {
       id: serverId,
+      version: version,
       gameDuration: GAME_DURATION_IN_SECONDS,
       worldSizeX: WORLD_SIZE_X,
-      worldSizeZ: WORLD_SIZE_Z
+      worldSizeZ: WORLD_SIZE_Z,
     });
 
     const trashFromCache = await readCacheEntries(mapTrash);
@@ -185,7 +189,7 @@ export async function start(
   function createObject(type) {
     const x = Math.round((Math.random() - 0.5) * (WORLD_SIZE_X - 1));
     const y = 0;
-    const z = Math.round((Math.random() - 0.5) * (WORLD_SIZE_Z -1));
+    const z = Math.round((Math.random() - 0.5) * (WORLD_SIZE_Z - 1));
     const size = (
       Math.random() * (ITEM_MAX_SIZE - ITEM_MIN_SIZE) +
       ITEM_MIN_SIZE
