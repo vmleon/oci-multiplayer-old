@@ -2,9 +2,17 @@
 
 ## Introduction
 
-XXX
+This is the second Terraform deployment.
 
-Estimated Lab Time: XX minutes
+In this lab, you are going to deploy OCI DevOps components that includes:
+- DevOps Project that groups all the other components.
+- DevOps Connection to GitHub
+- DevOps Build Pipeline
+- DevOps Deployment Pipeline
+- DevOps Environment pointing to the Kubernetes Cluster
+- DevOps logs
+
+Estimated Lab Time: 15 minutes
 
 ### Prerequisites
 
@@ -21,14 +29,17 @@ Estimated Lab Time: XX minutes
 
     > This `tfvars.mjs` will create a file called `terraform.tfvars` with the values needed by Terraform to create all the DevOps infrastructure.
 
-2. During the execution of the script, you will have to answer a question.
-  
-  ![xxx](images/xxx.png)
+2. During the execution of the script, you will have to answer a question. The _GitHub URL_. You just type/paste the URL of your forked GitHub repository.
 
-3. The _GitHub URL_. You just type/paste the URL of your forked GitHub repository.
-  
-  ![xxx](images/xxx.png)
+  ![tfvars GitHub URL](images/tfvars-devops-github-url.png)
 
+1. To get the URL go to your GitHub page and copy the URL at the Browser bar.
+
+  ![GitHub URL copy](images/github-url-copy.png)
+
+1. After you inserted the URL, the script will finish. Printing that the `terraform.tfvars` file has been created.
+
+  ![tfvars success](images/tfvars-devops-success.png)
 
 ## Task 2: Apply DevOps infrastructure
 
@@ -40,19 +51,23 @@ Estimated Lab Time: XX minutes
 
 2. Run the `init` command for terraform.
     
+  ![Terraform init](images/tfvars-devops-tf-init.png)
+
     ```bash
     <copy>terraform init</copy>
     ```
 
-3. Then, run the `apply` command for Terraform to create resources on Oracle Cloud.
+  ![Terraform init success](images/tfvars-devops-tf-init-success.png)
+
+1. Then, run the `apply` command for Terraform to create resources on Oracle Cloud.
     
     ```bash
     <copy>terraform apply -auto-approve</copy>
     ```
 
-4. The `apply` process might take up to 10 minutes. You will use this time to understand a bit more about the infrastructure that you are creating.
+  ![Terraform apply](images/tfvars-devops-tf-apply.png)
 
-  ![xxx](./images/xxx-xxx-xxx.png)
+1. The `apply` process might take up to 10 minutes. You will use this time to understand a bit more about the infrastructure that you are creating.
 
 5. The DevOps infrastructure includes:
     - DevOps project
@@ -81,7 +96,7 @@ Estimated Lab Time: XX minutes
 
 2. Make sure the terraform apply process printed the output with no error.
     
-  ![xxx](./images/xxx-xxx-xxx.png)
+  ![Terraform apply success](./images/tfvars-devops-tf-apply-success.png)
 
 3. Come back to the parent directory.
 
@@ -93,7 +108,7 @@ Estimated Lab Time: XX minutes
 
 You may now [proceed to the next lab](#next).
 
-## Acknowledgments
+## Acknowledgements
 
 * **Author** - Victor Martin, Tech Product Strategy Director (EMEA)
 * **Contributors** - Wojciech Pluta - DevRel, Eli Schilling - DevRel

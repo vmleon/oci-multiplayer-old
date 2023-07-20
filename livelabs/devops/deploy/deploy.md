@@ -11,61 +11,51 @@ Estimated Lab Time: XX minutes
 * An Oracle Free Tier, Paid or LiveLabs Cloud Account
 * Active Oracle Cloud Account with available credits to use for Data Science service.
 
-## Task 1: Get familiar with OCI DevOps
+## Task 1: Run Deploy Pipeline
 
-1. Go back to the OCI DevOps Project.
+1. Make sure you are back to OCI DevOps Project.
   
-  ![xxx](images/xxx.png)
-
-2. Scroll down until you will find the **Latest environments**, that contain the Kubernetes Cluster where OCI DevOps is going to deploy the application.
-
-  ![xxx](images/xxx.png)
-
-3. Click on the environment and take a look at the reference.
-
-  ![xxx](images/xxx.png)
-
-## Task 2: Run Deploy Pipeline
-
-2. Go back to the DevOps Project. You can use the breadcrumbs menu like in the picture or use the back bottom on your browser.
-
-  ![xxx](images/xxx.png)
+  ![DevOps Project](images/devops-project.png)
 
 3. Scroll down until you see the **Latest deployment pipelines**. Click on the Deployment Pipeline you created with Terraform.
 
-  ![xxx](images/xxx.png)
+  ![Deployment pipelines](images/deployment-pipelines.png)
 
 4. Take a look, there is one stage: **Deploy with Kustomize**. This stage will deploy with Kustomize to the Kubernetes Cluster.
 
-  ![xxx](images/xxx.png)
+  ![Deployment pipeline stage](images/deployment-stage.png)
 
 5. Click **Run pipeline**.
 
-  ![xxx](images/xxx.png)
+  ![Deployment pipeline run](images/deployment-run-button.png)
 
 6. This Pipeline has no Parameters, but keep them in mind to customize your deployment pipeline in the future.
 
-  ![xxx](images/xxx.png)
+  ![Deployment Params](images/deployment-params.png)
 
 7. Click **Start manual run** to kick off the pipeline.
 
-  ![xxx](images/xxx.png)
+  ![Deployment Start Manual Run](images/deployment-start-manual-run.png)
 
 8. Wait until the deployment pipeline is finished. It might take up to 7 minutes.
 
-  ![xxx](images/xxx.png)
+  ![Deployment Running](images/deployment-running.png)
 
-9. Finally, confirm the success and explore the console log. You can minimize some of the other panels.
+1. Finally, confirm the success and explore the console log. You can minimize some of the other panels.
 
-  ![xxx](images/xxx.png)
+  ![Deployment Success minimize](images/deployment-success-minimize.png)
 
-10. At the end of the logs, you will see a curl command. Copy and paste it on the terminal.
+10. At the end of the logs, you will see a curl command.
 
-  ![xxx](images/xxx.png)
+  ![xxx](images/deployment-run-curl.png)
+
+1.  Copy and paste the URL into the browser.
+
+  ![URL browser](images/url-browser.png)
 
 You may now [proceed to the next lab](#next).
 
-## Acknowledgments
+## Acknowledgements
 
 * **Author** - Victor Martin, Tech Product Strategy Director (EMEA)
 * **Contributors** - Wojciech Pluta - DevRel, Eli Schilling - DevRel

@@ -2,9 +2,16 @@
 
 ## Introduction
 
-XXX
+This is the first, out of two, Terraform deployments. We have split the terraform deployment so you can make changes on OCI DevOps deployment without having to deploy all the foundational infrastructure every time.
 
-Estimated Lab Time: XX minutes
+In this lab, you are going to deploy that foundational infrastructure that includes:
+- Kubernetes Cluster: the environment where the application is going to be deployed.
+- OCI Vault: to store the secrets like passwords and tokens.
+- Identity and Access Management policies and dynamic groups control what services use what resources in Oracle Cloud.
+- Oracle Autonomous Database to be used by the application.
+- Oracle Notification Service to receive emails every time  OCI DevOps finishes an operation.
+
+Estimated Lab Time: 20 minutes
 
 ### Prerequisites
 
@@ -22,22 +29,18 @@ Estimated Lab Time: XX minutes
     > This `tfvars.mjs` will create a file called `terraform.tfvars` with the values needed by Terraform to create all the foundational infrastructure.
 
 2. During the execution of the script, you will have to answer a few questions.
-  
-  ![xxx](images/envcomp.png)
 
 3. The first one is the _DevOps Compartment Name_. You just type _**ENTER**_ to select the root compartment. If you are familiar with OCI compartments, then feel free to pick an existing compartment name.
-  
-  ![xxx](images/envcomp.png)
 
-4. The second one is the _GitHub Token_. You just paste the GitHub access token you copied from the previous task.
-  
-  ![xxx](images/env.png)
+  ![tfvars env compartment](images/tfvars-env-compartment.png)
 
-5. The third one is the _Oracle Notification Service (ONS) email_. You just type your email address. This email will get configured as the point of contact for DevOps events.
-  
-  ![xxx](images/envemail.png)
+1. The second one is the _Oracle Notification Service (ONS) email_. You just type your email address. This email will get configured as the point of contact for DevOps events.
 
-  ![xxx](images/tfvars.png)
+  ![tfvars env ons](images/tfvars-env-ons.png)
+
+1. The third one is the _GitHub Token_. You just paste the GitHub access token you copied from the previous task.
+  
+  ![tfvars env GitHub token](images/tfvars-env-github-token.png)
 
 ## Task 2: Apply foundational infrastructure
 
@@ -47,24 +50,31 @@ Estimated Lab Time: XX minutes
     <copy>cd deploy/devops/tf-env</copy>
     ```
   
-  ![xxx](images/tfenv.png)
+  ![Change directory to tf-env](images/cd-tf-env.png)
 
 
-2. Run the `init` command for terraform.
+1. Run the `init` command for terraform.
     
-    ```bash
+    ```
     <copy>terraform init</copy>
     ```
 
-3. Then, run the `apply` command for Terraform to create resources on Oracle Cloud.
+  ![Terraform init command](images/terraform-init-command.png)
+
+1. After a few seconds, you will get the success message.
+
+  ![Terraform init success](images/terraform-init-success.png)
+
+2. Then, run the `apply` command for Terraform to create resources on Oracle Cloud.
     
     ```bash
     <copy>terraform apply -auto-approve</copy>
     ```
 
-4. The `apply` process might take up to 20 minutes. You will use this time to understand a bit more about the infrastructure that you are creating.
+  ![Terraform apply command](images/terraform-apply-command.png)
 
-  ![xxx](./images/xxx-xxx-xxx.png)
+3. The `apply` process might take up to 20 minutes. You will use this time to understand a bit more about the infrastructure that you are creating.
+
 
 5. The foundation infrastructure includes:
     - Oracle Kubernetes Cluster
@@ -100,7 +110,7 @@ Estimated Lab Time: XX minutes
 
 2. Make sure the terraform apply process printed the output with no error.
     
-  ![xxx](./images/xxx-xxx-xxx.png)
+  ![Terraform apply success](./images/terraform-apply-success.png)
 
 3. Come back to the parent directory.
 
@@ -112,7 +122,7 @@ Estimated Lab Time: XX minutes
 
 You may now [proceed to the next lab](#next).
 
-## Acknowledgments
+## Acknowledgements
 
 * **Author** - Victor Martin, Tech Product Strategy Director (EMEA)
 * **Contributors** - Wojciech Pluta - DevRel, Eli Schilling - DevRel

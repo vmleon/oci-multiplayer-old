@@ -4,9 +4,9 @@
 
 Welcome to Save The Wildlife, an Automated CI/CD Release Pipeline for Gaming
 
-![Save The Wildlife Banner](./images/banner.jpg)
+![Save The Wildlife Banner](./images/banner.png)
 
-During this workshop, you will learn how to build, and deploy an application with several components. You will use Terraform to automate the infrastructure components in Oracle Cloud and OCI DevOps service to build and deploy the application into an OCI Kubernetes Cluster.
+During this workshop, you will learn how to build, and deploy an application with several components using OCI DevOps. You will use Terraform to automate the infrastructure components in Oracle Cloud and OCI DevOps service to build and deploy the application into an OCI Kubernetes Cluster.
 
 In this workshop, you will learn how to:
 - Create a Kubernetes Cluster
@@ -28,7 +28,7 @@ This solution is designed to work with several OCI services, allowing you to qui
 
 You may now [proceed to the next lab](#next).
 
-## Acknowledgments
+## Acknowledgements
 
 * **Author** - Victor Martin, Tech Product Strategy Director (EMEA)
 * **Contributors** - Wojciech Pluta - DevRel, Eli Schilling - DevRel
