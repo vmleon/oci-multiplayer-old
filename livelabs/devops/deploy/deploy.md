@@ -2,9 +2,9 @@
 
 ## Introduction
 
-XXX
+In this lab, you are going to deploy the artifacts (container images) into the Kubernetes Cluster. As part of this lab, you will run the Deployment pipeline that will do all the work for you automatically. The deployment pipeline will access secrets from OCI Vault and create all the config files. Finally, it will deploy with Kustomize running `kubectl`.
 
-Estimated Lab Time: XX minutes
+Estimated Lab Time: 15 minutes
 
 ### Prerequisites
 
