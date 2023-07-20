@@ -10,7 +10,7 @@ resource "random_password" "adb_admin_password" {
   min_special      = 2
   min_lower        = 3
   min_upper        = 3
-  override_special = "-_@"
+  override_special = "-_"
 }
 
 resource "random_password" "redis_password" {
