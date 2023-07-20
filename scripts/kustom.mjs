@@ -1,7 +1,7 @@
 import { createSelfSignedCert } from "./lib/tls.mjs";
 import { getVersionGradle } from "./lib/gradle.mjs";
 import { getNpmVersion } from "./lib/npm.mjs";
-import { getNamespace, downloadAdbWallet } from "./lib/oci.mjs";
+import { getNamespace } from "./lib/oci.mjs";
 import { exitWithError } from "./lib/utils.mjs";
 
 const shell = process.env.SHELL | "/bin/zsh";
