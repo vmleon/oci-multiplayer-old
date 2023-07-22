@@ -44,8 +44,8 @@
       "type": "dbcs"
     },
     {
-      "title": "Lab 6: New Feature and Rollback",
-      "description": "Develop and deploy a new feature, rollback the latest change",
+      "title": "Lab 6: Release New Feature",
+      "description": "Develop and deploy a new feature",
       "filename": "../../devops/rollback/rollback.md",
       "type": "dbcs"
     },

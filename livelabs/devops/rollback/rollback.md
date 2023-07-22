@@ -1,10 +1,10 @@
-# Lab 6: New Feature and Rollback
+# Lab 6: Release New Feature
 
 ## Introduction
 
-XXX
+In this lab, you are going to change the code to one of the components and release the application again. The release will be done by running the Build pipeline and Deployment pipeline.
 
-Estimated Lab Time: XX minutes
+Estimated Lab Time: 15 minutes
 
 ### Prerequisites
 
@@ -13,79 +13,71 @@ Estimated Lab Time: XX minutes
 
 ## Task 1: Bump the version of a service
 
-1. You are going to change the code of one of the application services. You are going to use Cloud Editor, a code editor included in Oracle Cloud.
+1. You are going to change the version of the server, representing the addition of one new feature. Go to your GitHub forked repository.
 
-  ![xxx](./images/xxx.png)
+  ![GitHub Forked repo](./images/github-forked-repo.png)
 
-1. Open the file `server/package.json` and change `1.0.0` to `1.0.1` on line 3.
+1. Click on the `server` folder on the code panel.
 
-  ![xxx](./images/xxx.png)
+  ![Github server folder](./images/github-server-folder.png)
 
-3. Open the file `server/index.js` and change `hello` to `hola` on line 72.
+1. Click on the `package.json` file.
 
-  ![xxx](./images/xxx.png)
+  ![Github server package open](./images/github-server-package-open.png)
 
-4. Run the git add
+1. Click the **Edit this file** button.
 
-    ```bash
-    <copy>git add server/</copy>
-    ```
+  ![Github server package edit](./images/github-server-package-edit.png)
 
-  ![xxx](./images/xxx.png)
+2. Edit the `version` and click **Commit changes...** button.
 
-5. Run the git commit
-
-    ```bash
-    <copy>git commit -m "bump ws server to 1.0.1"</copy>
-    ```
-
-  ![xxx](./images/xxx.png)
-
-6. Run the git push
-
-    ```bash
-    <copy>git push origin main</copy>
-    ```
-
-  ![xxx](./images/xxx.png)
-
-7. At this point, the service is changed and the version is bumped.
-
-  ![xxx](./images/xxx.png)
+  ![github server package edit version](./images/github-server-package-edit-version.png)
 
 ## Task 2: Build and Deploy
 
 1. Go to OCI DevOps Build Pipeline.
 
-  ![xxx](./images/xxx.png)
+  ![DevOps Build Pipeline button](./images/devops-build-pipeline-button.png)
 
-2. Run Build Pipeline
+2. Click **Start manual run**
 
-  ![xxx](./images/xxx.png)
+  ![DevOps Build Pipeline Start ](./images/devops-build-pipeline-start.png)
+
+1. Click **Start manual run** to confirm on the parameters screen.
+
+  ![DevOps Build Pipeline Start ](./images/devops-build-pipeline-start-run.png)
 
 3. After a successful build execution of the pipeline
 
-  ![xxx](./images/xxx.png)
+  ![DevOps Build Pipeline Success](./images/devops-build-pipeline-success.png)
 
-4. Go to the Deployment pipeline and run it.
+1. Go back to the DevOps project.
 
-  ![xxx](./images/xxx.png)
+  ![Go back to DevOps Project](./images/back-to-project.png)
+
+1. Go to the Deployment pipeline.
+
+  ![Deployment Pipeline Button](./images/deployment-pipeline-button.png)
+
+1. Click **Run Pipeline**.
+
+  ![Deployment Pipeline Run](./images/deployment-pipeline-run.png)
+
+1. Confirm the **Start manual run**.
+
+  ![Deployment Pipeline Run confirm](./images/deployment-pipeline-run-confirm.png)
 
 5. Get the curl command and execute it.
 
-  ![xxx](./images/xxx.png)
+  ![Deployment Pipeline Success](./images/deployment-pipeline-success.png)
 
-6. The `message` will be `hola` and the `version` will be `1.0.1`
-
-  ![xxx](./images/xxx.png)
-
-7. XXX
+6. The Server version would be the one you bumped.
 
   ![xxx](./images/xxx.png)
 
-## Task 3: Rollback
+## Task 3: Rollback (Optional)
 
-1. From Cloud Shell, run the revert of the last commit, undoing the latest change.
+1. From a terminal configured with GitHub run the revert of the last commit, just to simulate a rollback.
 
     ```bash
     <copy>git revert --no-edit main~1</copy>
@@ -103,32 +95,43 @@ Estimated Lab Time: XX minutes
 
 1. Go to OCI DevOps Build Pipeline.
 
-  ![xxx](./images/xxx.png)
+  ![DevOps Build Pipeline button](./images/devops-build-pipeline-button.png)
 
-2. Run Build Pipeline
+2. Click **Start manual run**
 
-  ![xxx](./images/xxx.png)
+  ![DevOps Build Pipeline Start ](./images/devops-build-pipeline-start.png)
+
+1. Click **Start manual run** to confirm on the parameters screen.
+
+  ![DevOps Build Pipeline Start ](./images/devops-build-pipeline-start-run.png)
 
 3. After a successful build execution of the pipeline
 
-  ![xxx](./images/xxx.png)
+  ![DevOps Build Pipeline Success](./images/devops-build-pipeline-success.png)
 
-4. Go to the Deployment pipeline and run it.
+1. Go back to the DevOps project.
 
-  ![xxx](./images/xxx.png)
+  ![Go back to DevOps Project](./images/back-to-project.png)
+
+1. Go to the Deployment pipeline.
+
+  ![Deployment Pipeline Button](./images/deployment-pipeline-button.png)
+
+1. Click **Run Pipeline**.
+
+  ![Deployment Pipeline Run](./images/deployment-pipeline-run.png)
+
+1. Confirm the **Start manual run**.
+
+  ![Deployment Pipeline Run confirm](./images/deployment-pipeline-run-confirm.png)
 
 5. Get the curl command and execute it.
 
-  ![xxx](./images/xxx.png)
+  ![Deployment Pipeline Success](./images/deployment-pipeline-success.png)
 
-6. The `message` will be `hello` and the `version` will be `1.0.0`
-
-  ![xxx](./images/xxx.png)
-
-7. XXX
+6. The Server version would be the one you bumped.
 
   ![xxx](./images/xxx.png)
-
 
 You may now [proceed to the next lab](#next).
 
