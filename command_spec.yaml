@@ -32,7 +32,7 @@ steps:
     timeoutInSeconds: 300
     command: |
       cd /workspace/oci-multiplayer
-      adb_wallet_password=$(openssl rand -base64 12)
+      adb_wallet_password="$(openssl rand -base64 12)_$RANDOM"
       oci db autonomous-database generate-wallet --autonomous-database-id ${adb_id} --file "/workspace/oci-multiplayer/deploy/k8s/base/score/wallet.zip" --password "$adb_wallet_password"
   - type: Command
     name: "Custom Kustomize with versions"
