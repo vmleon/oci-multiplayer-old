@@ -129,7 +129,7 @@ Estimated Lab Time: 15 minutes
 
   ![Deployment Pipeline Success](./images/deployment-pipeline-success.png)
 
-6. The Server version would be the one you bumped.
+6. The Server version would be the one you rollbacked to.
 
   ![xxx](./images/xxx.png)
 

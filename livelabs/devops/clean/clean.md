@@ -2,9 +2,9 @@
 
 ## Introduction
 
-XXX
+In this optional lab, you are going to clean the resources created during the workshop.
 
-Estimated Lab Time: XX minutes
+Estimated Lab Time: 5 minutes
 
 ### Prerequisites
 
@@ -15,35 +15,35 @@ Estimated Lab Time: XX minutes
 
 1. Go to **Menu** > **Developer Services** > **Kubernetes Clusters (OKE)**
 
-  ![xxx](images/xxx.png)
+  ![OKE Menu Button](images/oke-menu-button.png)
 
-2. The Kubernetes Cluster will be on the list, the name starting with `DevOps`.
+2. The Kubernetes Cluster will be on the list, the name starting with `DevOps`. Click on the Kubernetes Cluster name.
 
-  ![xxx](images/xxx.png)
-
-3. Click on the Kubernetes Cluster name.
-
-  ![xxx](images/xxx.png)
+  ![xxx](images/oke-list.png)
 
 4. At the top, click on **Access Cluster**.
 
-  ![xxx](images/xxx.png)
+  ![OKE Access Cluster Button](images/oke-access-button.png)
 
 5. If you have the Cloud Shell still open, jump to step 2. If not, click on **Launch Cloud Shell**.
 
-  ![xxx](images/xxx.png)
+  ![Open Cloud Shell](images/access-open-cloud-shell.png)
 
 1. Copy the command from step 2. And paste it on the Cloud Shell. Run the command.
 
-  ![xxx](images/xxx.png)
+  ![Copy Command](images/access-copy-command.png)
 
-7. Check it is configured. Run the following command and see the services.
+1. Paste it on Cloud Shell and run it.
+
+  ![Paste Command](images/access-paste-command.png)
+
+1. Check it is configured. Run the following command and see the services.
 
     ```bash
     <copy>kubectl get pods</copy>
     ```
 
-  ![xxx](images/xxx.png)
+  ![Kubectl Get Pods](images/kubectl-get-pods.png)
 
 8. After that, delete the ingress controller, hence the load balancer.
 
@@ -51,11 +51,11 @@ Estimated Lab Time: XX minutes
     <copy>kubectl delete ns ingress-nginx</copy>
     ```
 
-  ![xxx](images/xxx.png)
+    > NOTE: This might take up to 2 minutes.
 
 9. It will take a couple of minutes.
 
-  ![xxx](images/xxx.png)
+  ![Delete Ingress](images/delete-ingress.png)
 
 ## Task 2: Delete infrastructure
 
@@ -67,41 +67,36 @@ Estimated Lab Time: XX minutes
 
 2. It should look like this:
 
-  ![xxx](./images/xxx.png)
+  ![TF DevOps pwd](./images/tf-devops-pwd.png)
 
 2. If you are not in `tf-devops` folder, change the current directory until you get there.
 
-  ![xxx](./images/xxx.png)
-
-1. Run the following command to destroy the OCI DevOps infrastructure.
+3. Run the following command to destroy the OCI DevOps infrastructure.
 
     ```bash
     <copy>terraform destroy -auto-approve</copy>
     ```
 
-  ![xxx](./images/xxx.png)
 
 4. When the Terraform `destroy` finishes successfully.
 
-  ![xxx](./images/xxx.png)
+  ![DevOps Destroy](./images/tf-devops-destroy.png)
 
-5. Change the directory to the `tf-env`
+1. Change the directory to the `tf-env`
 
     ```bash
     <copy>cd ../tf-env</copy>
     ```
 
-6. Run the following command to destroy the rest of the infrastructure.
+2. Run the following command to destroy the rest of the infrastructure.
 
     ```bash
     <copy>terraform destroy -auto-approve</copy>
     ```
 
-  ![xxx](./images/xxx.png)
-
 7. When the Terraform `destroy` finishes successfully, you have finished cleaning up.
 
-  ![xxx](./images/xxx.png)
+  ![Env Destroy](./images/tf-env-destroy.png)
 
 ## Acknowledgments
 
