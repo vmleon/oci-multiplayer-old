@@ -1,18 +1,22 @@
-# Lab 3: DevOps Infrastructure
+# DevOps Infrastructure
 
 ## Introduction
 
+OCI DevOps uses other OCI services like container instances to run code, dependencies on networking components and OCI Logs that will let you know what happened on the execution of the building and deploying pipelines.
+
+Estimated Lab Time: 15 minutes
+
+### Objectives
+
 This is the second Terraform deployment.
 
-In this lab, you are going to deploy OCI DevOps components that includes:
+In this lab, you are going to deploy OCI DevOps components that include:
 - DevOps Project that groups all the other components.
 - DevOps Connection to GitHub
 - DevOps Build Pipeline
 - DevOps Deployment Pipeline
 - DevOps Environment pointing to the Kubernetes Cluster
 - DevOps logs
-
-Estimated Lab Time: 15 minutes
 
 ### Prerequisites
 

@@ -2,9 +2,11 @@
 
 ## Overview
 
-Welcome to Save The Wildlife, an Automated CI/CD Release Pipeline for Gaming
+Welcome to Save The Wildlife, an Automated Continuous Integration and Continuous Deployment Release Pipeline for microservice applications.
 
 ![Save The Wildlife Banner](./images/banner.png)
+
+### Objectives
 
 During this workshop, you will learn how to build, and deploy an application with several components using OCI DevOps. You will use Terraform to automate the infrastructure components in Oracle Cloud and OCI DevOps service to build and deploy the application into an OCI Kubernetes Cluster.
 

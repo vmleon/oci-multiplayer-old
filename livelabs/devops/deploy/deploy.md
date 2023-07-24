@@ -1,10 +1,14 @@
-# Lab 5: Deployment Pipeline
+# Deployment Pipeline
 
 ## Introduction
 
-In this lab, you are going to deploy the artifacts (container images) into the Kubernetes Cluster. As part of this lab, you will run the Deployment pipeline that will do all the work for you automatically. The deployment pipeline will access secrets from OCI Vault and create all the config files. Finally, it will deploy with Kustomize running `kubectl`.
+OCI DevOps has Deployment pipelines responsible for taking the artifacts built on previous steps and deploying them on the infrastructure: virtual machines, container instances, Kubernetes clusters or Serverless functions.
 
 Estimated Lab Time: 15 minutes
+
+### Objectives
+
+In this lab, you are going to deploy the artifacts (container images) into the Kubernetes Cluster. As part of this lab, you will run the Deployment pipeline that will do all the work for you automatically. The deployment pipeline will access secrets from OCI Vault and create all the config files. Finally, it will deploy with Kustomize running `kubectl`.
 
 ### Prerequisites
 

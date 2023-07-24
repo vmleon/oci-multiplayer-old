@@ -1,9 +1,14 @@
-# Lab 1: GitHub Fork
+# GitHub Fork
 
 ## Introduction
-During this lab, you are going to clone a GitHub repository to have your own copy. The rest of the workshop will be working based on your fork.
+
+The source code of the microservice application lives on GitHub. This is a more complex scenario, the easy way would be to have the code as well on OCI DevOps, but this extra integration can be interesting for those of you that still have the code on other source code control systems.
 
 Estimated Lab Time: 15 minutes
+
+### Objectives
+
+During this lab, you are going to clone a GitHub repository to have your own copy. The rest of the workshop will be working based on your fork.
 
 ### Prerequisites
 

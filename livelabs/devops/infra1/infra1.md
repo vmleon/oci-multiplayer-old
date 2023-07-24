@@ -1,8 +1,12 @@
-# Lab 2: Foundation Infrastructure
+# Foundation Infrastructure
 
 ## Introduction
 
 This is the first, out of two, Terraform deployments. We have split the terraform deployment so you can make changes on OCI DevOps deployment without having to deploy all the foundational infrastructure every time.
+
+Estimated Lab Time: 20 minutes
+
+### Objectives
 
 In this lab, you are going to deploy that foundational infrastructure that includes:
 - Kubernetes Cluster: the environment where the application is going to be deployed.
@@ -10,8 +14,6 @@ In this lab, you are going to deploy that foundational infrastructure that inclu
 - Identity and Access Management policies and dynamic groups control what services use what resources in Oracle Cloud.
 - Oracle Autonomous Database to be used by the application.
 - Oracle Notification Service to receive emails every time  OCI DevOps finishes an operation.
-
-Estimated Lab Time: 20 minutes
 
 ### Prerequisites
 

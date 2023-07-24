@@ -1,10 +1,14 @@
-# Lab 4: Build Pipeline
+# Build Pipeline
 
 ## Introduction
 
-In this lab, you are going to build the artifacts from the source code using OCI DevOps build pipeline. As part of the process, you are going to use stages to build and deliver the artifacts built. The outcome will be to have the container images with the application components on Oracle Cloud Image Registry.
+OCI DevOps has Build pipelines where you can configure the steps to build the different components that compose your application.
 
 Estimated Lab Time: 20 minutes
+
+### Objectives
+
+In this lab, you are going to build the artifacts from the source code using OCI DevOps build pipeline. As part of the process, you are going to use stages to build and deliver the artifacts built. The outcome will be to have the container images with the application components on Oracle Cloud Image Registry.
 
 ### Prerequisites
 

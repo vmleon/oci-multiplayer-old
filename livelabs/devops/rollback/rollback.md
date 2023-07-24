@@ -1,10 +1,14 @@
-# Lab 6: Release New Feature
+# Release New Feature
 
 ## Introduction
 
-In this lab, you are going to change the code to one of the components and release the application again. The release will be done by running the Build pipeline and Deployment pipeline.
+As part of a normal software development lifecycle, you will have to create new features and deploy those new features. OCI DevOps helps you to do that.
 
 Estimated Lab Time: 15 minutes
+
+### Objectives
+
+In this lab, you are going to change the code to one of the components and release the application again. The release will be done by running the Build pipeline and Deployment pipeline.
 
 ### Prerequisites
 
@@ -19,19 +23,19 @@ Estimated Lab Time: 15 minutes
 
 1. Click on the `server` folder on the code panel.
 
-  ![Github server folder](./images/github-server-folder.png)
+  ![GitHub server folder](./images/github-server-folder.png)
 
 1. Click on the `package.json` file.
 
-  ![Github server package open](./images/github-server-package-open.png)
+  ![GitHub server package open](./images/github-server-package-open.png)
 
 1. Click the **Edit this file** button.
 
-  ![Github server package edit](./images/github-server-package-edit.png)
+  ![GitHub server package edit](./images/github-server-package-edit.png)
 
 2. Edit the `version` and click **Commit changes...** button.
 
-  ![github server package edit version](./images/github-server-package-edit-version.png)
+  ![GitHub server package edit version](./images/github-server-package-edit-version.png)
 
 ## Task 2: Build and Deploy
 

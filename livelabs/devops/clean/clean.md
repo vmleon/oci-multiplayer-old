@@ -1,10 +1,14 @@
-# Lab 7: Clean Up (Optional)
+# Clean Up (Optional)
 
 ## Introduction
 
-In this optional lab, you are going to clean the resources created during the workshop.
+It is always a good practice to clean up after you learned about OCI DevOps. With Terraform and Kubernetes the process is very simple.
 
-Estimated Lab Time: 5 minutes
+Estimated Lab Time: 10 minutes
+
+### Objectives
+
+In this optional lab, you are going to clean the resources created during the workshop.
 
 ### Prerequisites
 
