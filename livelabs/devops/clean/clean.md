@@ -25,23 +25,23 @@ In this optional lab, you are going to clean the resources created during the wo
 
   ![xxx](images/oke-list.png)
 
-4. At the top, click on **Access Cluster**.
+3. At the top, click on **Access Cluster**.
 
   ![OKE Access Cluster Button](images/oke-access-button.png)
 
-5. If you have the Cloud Shell still open, jump to step 2. If not, click on **Launch Cloud Shell**.
+4. If you have the Cloud Shell still open, jump to step 2. If not, click on **Launch Cloud Shell**.
 
   ![Open Cloud Shell](images/access-open-cloud-shell.png)
 
-1. Copy the command from step 2. And paste it on the Cloud Shell. Run the command.
+5. Copy the command from step 2. And paste it on the Cloud Shell. Run the command.
 
   ![Copy Command](images/access-copy-command.png)
 
-1. Paste it on Cloud Shell and run it.
+6. Paste it on Cloud Shell and run it.
 
   ![Paste Command](images/access-paste-command.png)
 
-1. Check it is configured. Run the following command and see the services.
+7. Check it is configured. Run the following command and see the services.
 
     ```bash
     <copy>kubectl get pods</copy>
@@ -73,32 +73,32 @@ In this optional lab, you are going to clean the resources created during the wo
 
   ![TF DevOps pwd](./images/tf-devops-pwd.png)
 
-2. If you are not in `tf-devops` folder, change the current directory until you get there.
+3. If you are not in `tf-devops` folder, change the current directory until you get there.
 
-3. Run the following command to destroy the OCI DevOps infrastructure.
+4. Run the following command to destroy the OCI DevOps infrastructure.
 
     ```bash
     <copy>terraform destroy -auto-approve</copy>
     ```
 
 
-4. When the Terraform `destroy` finishes successfully.
+5. When the Terraform `destroy` finishes successfully.
 
   ![DevOps Destroy](./images/tf-devops-destroy.png)
 
-1. Change the directory to the `tf-env`
+6. Change the directory to the `tf-env`
 
     ```bash
     <copy>cd ../tf-env</copy>
     ```
 
-2. Run the following command to destroy the rest of the infrastructure.
+7. Run the following command to destroy the rest of the infrastructure.
 
     ```bash
     <copy>terraform destroy -auto-approve</copy>
     ```
 
-7. When the Terraform `destroy` finishes successfully, you have finished cleaning up.
+8. When the Terraform `destroy` finishes successfully, you have finished cleaning up.
 
   ![Env Destroy](./images/tf-env-destroy.png)
 

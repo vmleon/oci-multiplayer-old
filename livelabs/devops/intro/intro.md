@@ -1,6 +1,6 @@
 # Introduction
 
-## Overview
+## About This Workshop
 
 Welcome to Save The Wildlife, an Automated Continuous Integration and Continuous Deployment Release Pipeline for microservice applications.
 

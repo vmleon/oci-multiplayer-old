@@ -36,11 +36,11 @@ In this lab, you are going to deploy that foundational infrastructure that inclu
 
   ![tfvars env compartment](images/tfvars-env-compartment.png)
 
-1. The second one is the _Oracle Notification Service (ONS) email_. You just type your email address. This email will get configured as the point of contact for DevOps events.
+4. The second one is the _Oracle Notification Service (ONS) email_. You just type your email address. This email will get configured as the point of contact for DevOps events.
 
   ![tfvars env ons](images/tfvars-env-ons.png)
 
-1. The third one is the _GitHub Token_. You just paste the GitHub access token you copied from the previous task.
+5. The third one is the _GitHub Token_. You just paste the GitHub access token you copied from the previous task.
   
   ![tfvars env GitHub token](images/tfvars-env-github-token.png)
 
@@ -55,7 +55,7 @@ In this lab, you are going to deploy that foundational infrastructure that inclu
   ![Change directory to tf-env](images/cd-tf-env.png)
 
 
-1. Run the `init` command for terraform.
+2. Run the `init` command for terraform.
     
     ```
     <copy>terraform init</copy>
@@ -63,11 +63,11 @@ In this lab, you are going to deploy that foundational infrastructure that inclu
 
   ![Terraform init command](images/terraform-init-command.png)
 
-1. After a few seconds, you will get the success message.
+3. After a few seconds, you will get the success message.
 
   ![Terraform init success](images/terraform-init-success.png)
 
-2. Then, run the `apply` command for Terraform to create resources on Oracle Cloud.
+4. Then, run the `apply` command for Terraform to create resources on Oracle Cloud.
     
     ```bash
     <copy>terraform apply -auto-approve</copy>
@@ -75,36 +75,36 @@ In this lab, you are going to deploy that foundational infrastructure that inclu
 
   ![Terraform apply command](images/terraform-apply-command.png)
 
-3. The `apply` process might take up to 20 minutes. You will use this time to understand a bit more about the infrastructure that you are creating.
+5. The `apply` process might take up to 20 minutes. You will use this time to understand a bit more about the infrastructure that you are creating.
 
 
-5. The foundation infrastructure includes:
+6. The foundation infrastructure includes:
     - Oracle Kubernetes Cluster
     - Oracle Notification Service (ONS) topic
     - Oracle Vault, Master Key and secrets
     - Policies and Dynamic Groups
 
-6. Let's explore them one by one.
+7. Let's explore them one by one.
 
-7. Oracle Kubernetes Cluster is a cluster of Kubernetes with, initially, 1 pool of nodes with 2 nodes. That will be an initial setup, but you can change the variables to spin bigger clusters to fit your needs. As part of the infrastructure, all network required is also created like subnets for endpoints, node pools and load balancer.
+8. Oracle Kubernetes Cluster is a cluster of Kubernetes with, initially, 1 pool of nodes with 2 nodes. That will be an initial setup, but you can change the variables to spin bigger clusters to fit your needs. As part of the infrastructure, all network required is also created like subnets for endpoints, node pools and load balancer.
 
-8. Oracle Notification Service, also called, ONS is a service that delivers notifications to other services or email addresses, depending on the subscription you configure. In your case, you are using your email address so OCI DevOps can send you emails when builds and deployments fail, or many other cases.
+9. Oracle Notification Service, also called, ONS is a service that delivers notifications to other services or email addresses, depending on the subscription you configure. In your case, you are using your email address so OCI DevOps can send you emails when builds and deployments fail, or many other cases.
 
-9. OCI Vault is a service to store encrypted information like passwords and tokens. You create a Vault, then a Master Key that is used to encrypt secrets. OCI DevOps can read (if properly configured) some secrets. That is the way we keep secrets out of the hands of operators and allow only the services you configure to have access to secrets.
+10. OCI Vault is a service to store encrypted information like passwords and tokens. You create a Vault, then a Master Key that is used to encrypt secrets. OCI DevOps can read (if properly configured) some secrets. That is the way we keep secrets out of the hands of operators and allow only the services you configure to have access to secrets.
 
-10. Policies and Dynamic Groups. Policies are the rules for allowing groups of entities (usually services) and groups of users to read, use, manage, etc other resources in Oracle Cloud. It starts by not trusting anything and you allow group by group to do specific tasks to build a better security posture. Because some resources are dynamically created, like compute instances that can come and go, you can create a dynamic group where you set some matching rules that if apply, then the resource belongs to the group and is affected by the policies that affect the group of resources.
+11. Policies and Dynamic Groups. Policies are the rules for allowing groups of entities (usually services) and groups of users to read, use, manage, etc other resources in Oracle Cloud. It starts by not trusting anything and you allow group by group to do specific tasks to build a better security posture. Because some resources are dynamically created, like compute instances that can come and go, you can create a dynamic group where you set some matching rules that if apply, then the resource belongs to the group and is affected by the policies that affect the group of resources.
 
-11. After a few minutes, you can explore some of the resources that have been created.
+12. After a few minutes, you can explore some of the resources that have been created.
 
-12. For example, you can go to **Menu** > **Identity & Security** > **Vault**.
+13. For example, you can go to **Menu** > **Identity & Security** > **Vault**.
 
-13. You will find a list of vaults, and at this point, you might see one recently created. If it is not there yet, it is because is still being created.
+14. You will find a list of vaults, and at this point, you might see one recently created. If it is not there yet, it is because is still being created.
 
-14. In the meantime, you can also take a look at the ONS topic. Go to Menu > Developer Services and under Application Integration > Notifications.
+15. In the meantime, you can also take a look at the ONS topic. Go to Menu > Developer Services and under Application Integration > Notifications.
 
-15. You will find a list of topics, the latest is the one created for DevOps. Once again, if it is on `creating` state you need to wait a bit more.
+16. You will find a list of topics, the latest is the one created for DevOps. Once again, if it is on `creating` state you need to wait a bit more.
 
-16. If you click on it (when fully created), you will see a Subscriptions panel at the bottom with one subscription saying "Pending". At this point, you might have received an email that if you confirm, then it will be fully configured. No need to do it for the completion of the content, but a good thing to get done if you want to receive email notifications.
+17. If you click on it (when fully created), you will see a Subscriptions panel at the bottom with one subscription saying "Pending". At this point, you might have received an email that if you confirm, then it will be fully configured. No need to do it for the completion of the content, but a good thing to get done if you want to receive email notifications.
 
 ## Task 3: Terraform output
 

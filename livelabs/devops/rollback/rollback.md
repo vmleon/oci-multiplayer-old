@@ -21,19 +21,19 @@ In this lab, you are going to change the code to one of the components and relea
 
   ![GitHub Forked repo](./images/github-forked-repo.png)
 
-1. Click on the `server` folder on the code panel.
+2. Click on the `server` folder on the code panel.
 
   ![GitHub server folder](./images/github-server-folder.png)
 
-1. Click on the `package.json` file.
+3. Click on the `package.json` file.
 
   ![GitHub server package open](./images/github-server-package-open.png)
 
-1. Click the **Edit this file** button.
+4. Click the **Edit this file** button.
 
   ![GitHub server package edit](./images/github-server-package-edit.png)
 
-2. Edit the `version` and click **Commit changes...** button.
+5. Edit the `version` and click **Commit changes...** button.
 
   ![GitHub server package edit version](./images/github-server-package-edit-version.png)
 
@@ -47,35 +47,35 @@ In this lab, you are going to change the code to one of the components and relea
 
   ![DevOps Build Pipeline Start ](./images/devops-build-pipeline-start.png)
 
-1. Click **Start manual run** to confirm on the parameters screen.
+3. Click **Start manual run** to confirm on the parameters screen.
 
   ![DevOps Build Pipeline Start ](./images/devops-build-pipeline-start-run.png)
 
-3. After a successful build execution of the pipeline
+4. After a successful build execution of the pipeline
 
   ![DevOps Build Pipeline Success](./images/devops-build-pipeline-success.png)
 
-1. Go back to the DevOps project.
+5. Go back to the DevOps project.
 
   ![Go back to DevOps Project](./images/back-to-project.png)
 
-1. Go to the Deployment pipeline.
+6. Go to the Deployment pipeline.
 
   ![Deployment Pipeline Button](./images/deployment-pipeline-button.png)
 
-1. Click **Run Pipeline**.
+7. Click **Run Pipeline**.
 
   ![Deployment Pipeline Run](./images/deployment-pipeline-run.png)
 
-1. Confirm the **Start manual run**.
+8. Confirm the **Start manual run**.
 
   ![Deployment Pipeline Run confirm](./images/deployment-pipeline-run-confirm.png)
 
-5. Get the curl command and execute it.
+9. Get the curl command and execute it.
 
   ![Deployment Pipeline Success](./images/deployment-pipeline-success.png)
 
-6. The Server version would be the one you bumped.
+10. The Server version would be the one you bumped.
 
   ![xxx](./images/xxx.png)
 
@@ -97,43 +97,43 @@ In this lab, you are going to change the code to one of the components and relea
 
   ![xxx](./images/xxx.png)
 
-1. Go to OCI DevOps Build Pipeline.
+3. Go to OCI DevOps Build Pipeline.
 
   ![DevOps Build Pipeline button](./images/devops-build-pipeline-button.png)
 
-2. Click **Start manual run**
+4. Click **Start manual run**
 
   ![DevOps Build Pipeline Start ](./images/devops-build-pipeline-start.png)
 
-1. Click **Start manual run** to confirm on the parameters screen.
+5. Click **Start manual run** to confirm on the parameters screen.
 
   ![DevOps Build Pipeline Start ](./images/devops-build-pipeline-start-run.png)
 
-3. After a successful build execution of the pipeline
+6. After a successful build execution of the pipeline
 
   ![DevOps Build Pipeline Success](./images/devops-build-pipeline-success.png)
 
-1. Go back to the DevOps project.
+7. Go back to the DevOps project.
 
   ![Go back to DevOps Project](./images/back-to-project.png)
 
-1. Go to the Deployment pipeline.
+8. Go to the Deployment pipeline.
 
   ![Deployment Pipeline Button](./images/deployment-pipeline-button.png)
 
-1. Click **Run Pipeline**.
+9. Click **Run Pipeline**.
 
   ![Deployment Pipeline Run](./images/deployment-pipeline-run.png)
 
-1. Confirm the **Start manual run**.
+10. Confirm the **Start manual run**.
 
   ![Deployment Pipeline Run confirm](./images/deployment-pipeline-run-confirm.png)
 
-5. Get the curl command and execute it.
+11. Get the curl command and execute it.
 
   ![Deployment Pipeline Success](./images/deployment-pipeline-success.png)
 
-6. The Server version would be the one you rollbacked to.
+12. The Server version would be the one you rollbacked to.
 
   ![xxx](./images/xxx.png)
 

@@ -37,11 +37,11 @@ In this lab, you are going to deploy OCI DevOps components that include:
 
   ![tfvars GitHub URL](images/tfvars-devops-github-url.png)
 
-1. To get the URL go to your GitHub page and copy the URL at the Browser bar.
+3. To get the URL go to your GitHub page and copy the URL at the Browser bar.
 
   ![GitHub URL copy](images/github-url-copy.png)
 
-1. After you inserted the URL, the script will finish. Printing that the `terraform.tfvars` file has been created.
+4. After you inserted the URL, the script will finish. Printing that the `terraform.tfvars` file has been created.
 
   ![tfvars success](images/tfvars-devops-success.png)
 
@@ -63,7 +63,7 @@ In this lab, you are going to deploy OCI DevOps components that include:
 
   ![Terraform init success](images/tfvars-devops-tf-init-success.png)
 
-1. Then, run the `apply` command for Terraform to create resources on Oracle Cloud.
+3. Then, run the `apply` command for Terraform to create resources on Oracle Cloud.
     
     ```bash
     <copy>terraform apply -auto-approve</copy>
@@ -71,7 +71,7 @@ In this lab, you are going to deploy OCI DevOps components that include:
 
   ![Terraform apply](images/tfvars-devops-tf-apply.png)
 
-1. The `apply` process might take up to 10 minutes. You will use this time to understand a bit more about the infrastructure that you are creating.
+4. The `apply` process might take up to 10 minutes. You will use this time to understand a bit more about the infrastructure that you are creating.
 
 5. The DevOps infrastructure includes:
     - DevOps project

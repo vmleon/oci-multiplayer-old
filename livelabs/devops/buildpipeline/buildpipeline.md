@@ -21,13 +21,13 @@ In this lab, you are going to build the artifacts from the source code using OCI
   
   ![DevOps Menu](images/devops-menu.png)
 
-1. Click on **Projects**
+2. Click on **Projects**
 
   > NOTE: Make sure you select the compartment, or that the root compartment is selected.
   
   ![DevOps Project List](images/devops-project-list.png)
 
-1. You will see our OCI DevOps Project, click on it.
+3. You will see our OCI DevOps Project, click on it.
 
   ![DevOps Project Click](images/devops-project-click.png)
 
@@ -49,39 +49,39 @@ In this lab, you are going to build the artifacts from the source code using OCI
 
 ## Task 2: Run Build Pipeline
 
-3. Scroll down until you see the **Latest Build pipelines**. Click on the Build Pipeline you created with Terraform.
+1. Scroll down until you see the **Latest Build pipelines**. Click on the Build Pipeline you created with Terraform.
 
   ![Build click build pipeline](images/devops-build-click-buildpipeline.png)
 
-4. Take a look, there are two stages: **Build Services** and **Deliver Artifacts**. The first stage will build the Node and Java Applications. The second stage will deliver the container images with the applications on Oracle Cloud Image Registry.
+2. Take a look, there are two stages: **Build Services** and **Deliver Artifacts**. The first stage will build the Node and Java Applications. The second stage will deliver the container images with the applications on Oracle Cloud Image Registry.
 
   ![Build Stages](images/build-stages.png)
 
-5. Click **Start manual run**.
+3. Click **Start manual run**.
 
   ![Build Start manual Run](images/build-stages-start-manual-run.png)
 
-6. This Build Pipeline has some Parameters, keep them in mind to customize your build pipeline in the future. For the moment, nothing to do here.
+4. This Build Pipeline has some Parameters, keep them in mind to customize your build pipeline in the future. For the moment, nothing to do here.
 
   ![Build params](images/build-params.png)
 
-1. Click **Start manual run** to kick off the pipeline.
+5. Click **Start manual run** to kick off the pipeline.
 
   ![Build Run button](images/build-run-button.png)
 
-8. Wait until the build pipeline is finished. It might take up to 15 minutes.
+6. Wait until the build pipeline is finished. It might take up to 15 minutes.
 
   ![Build running](images/build-running.png)
 
-1. You can minimize some of the other panels.
+7. You can minimize some of the other panels.
 
   ![Build Success minimize](images/build-success-minimize.png)
 
-1. Finally, confirm the success and explore the console log.
+8. Finally, confirm the success and explore the console log.
 
   ![Build Success](images/build-success.png)
 
-1.  When done, come back to the OCI DevOps Project.
+9.  When done, come back to the OCI DevOps Project.
 
   ![Build back to Project](images/build-back.png)
 
