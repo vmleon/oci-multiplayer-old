@@ -33,9 +33,13 @@ In this lab, you are going to change the code to one of the components and relea
 
   ![GitHub server package edit](./images/github-server-package-edit.png)
 
-5. Edit the `version` and click **Commit changes...** button.
+5. Edit the `version` to `0.0.10` and click **Commit changes...** button.
 
   ![GitHub server package edit version](./images/github-server-package-edit-version.png)
+
+6. Click **Commit changes** on the popup window.
+
+  ![GitHub Confirm commit](./images/github-commit-form.png)
 
 ## Task 2: Build and Deploy
 
@@ -77,7 +81,7 @@ In this lab, you are going to change the code to one of the components and relea
 
 10. The Server version would be the one you bumped.
 
-  ![xxx](./images/xxx.png)
+  ![New Version](./images/new-version.png)
 
 ## Task 3: Rollback (Optional)
 
@@ -87,15 +91,11 @@ In this lab, you are going to change the code to one of the components and relea
     <copy>git revert --no-edit main~1</copy>
     ```
 
-  ![xxx](./images/xxx.png)
-
 2. Run the git push
 
     ```bash
     <copy>git push origin main</copy>
     ```
-
-  ![xxx](./images/xxx.png)
 
 3. Go to OCI DevOps Build Pipeline.
 
@@ -134,8 +134,6 @@ In this lab, you are going to change the code to one of the components and relea
   ![Deployment Pipeline Success](./images/deployment-pipeline-success.png)
 
 12. The Server version would be the one you rollbacked to.
-
-  ![xxx](./images/xxx.png)
 
 You may now [proceed to the next lab](#next).
 
