@@ -49,13 +49,21 @@ In this lab, you are going to deploy the artifacts (container images) into the K
 
   ![Deployment Success minimize](images/deployment-success-minimize.png)
 
-9. At the end of the logs, you will see a curl command.
+9. At the end of the logs, you will see a message: `EXEC: http://PUBLIC_IP/`. Copy the `http://PUBLIC_IP` part.
 
   ![Deployment run cURL](images/deployment-run-curl.png)
 
 10.  Copy and paste the URL into the browser.
 
   ![URL browser](images/url-browser.png)
+
+11. Add your name, click **Play**.
+
+  ![Game Your Name](./images/game-your-name.png)
+
+12.  Click **Create New Game**.
+
+  ![Game Top Score](./images/game-top-score.png)
 
 You may now [proceed to the next lab](#next).
 

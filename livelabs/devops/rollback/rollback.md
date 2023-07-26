@@ -43,19 +43,19 @@ In this lab, you are going to change the code to one of the components and relea
 
 ## Task 2: Build and Deploy
 
-1. Go to OCI DevOps Build Pipeline.
+1. Go to OCI DevOps Build Pipeline and click on the Build Pipeline as you did in the previous lab.
 
   ![DevOps Build Pipeline button](./images/devops-build-pipeline-button.png)
 
-2. Click **Start manual run**
+2. Click **Start manual run**.
 
   ![DevOps Build Pipeline Start ](./images/devops-build-pipeline-start.png)
 
-3. Click **Start manual run** to confirm on the parameters screen.
+3. Click **Start manual run** to confirm on the parameters screen. It might take up to 15 minutes.
 
   ![DevOps Build Pipeline Start ](./images/devops-build-pipeline-start-run.png)
 
-4. After a successful build execution of the pipeline
+4. After a successful build execution of the pipeline.
 
   ![DevOps Build Pipeline Success](./images/devops-build-pipeline-success.png)
 
@@ -71,15 +71,15 @@ In this lab, you are going to change the code to one of the components and relea
 
   ![Deployment Pipeline Run](./images/deployment-pipeline-run.png)
 
-8. Confirm the **Start manual run**.
+8. Confirm the **Start manual run**. It might take up to 7 minutes.
 
   ![Deployment Pipeline Run confirm](./images/deployment-pipeline-run-confirm.png)
 
-9. Get the curl command and execute it.
+9. At the end of the logs, you will see a message: `EXEC: http://PUBLIC_IP/`. Copy the `http://PUBLIC_IP` part on the browser.
 
   ![Deployment Pipeline Success](./images/deployment-pipeline-success.png)
 
-10. The Server version would be the one you bumped.
+10. When in the game, the Server version would be the one you bumped.
 
   ![New Version](./images/new-version.png)
 
