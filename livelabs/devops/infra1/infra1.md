@@ -76,7 +76,7 @@ In this lab, you are going to deploy that foundational infrastructure that inclu
 5. The `apply` process might take up to 20 minutes. You will use this time to understand a bit more about the infrastructure that you are creating.
 
 
-    > NOTE while Terraform deploy the foundation infrastructure. 
+    > NOTE, while Terraform deploys the foundation infrastructure. 
     > <br>
     > <br>
     >  

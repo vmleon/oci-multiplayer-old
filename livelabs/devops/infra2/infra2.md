@@ -25,7 +25,7 @@ In this lab, you are going to deploy OCI DevOps components that include:
 
 ## Task 1: Set up Terraform configuration file
 
-1. From the **Cloud Shell**, run this command.
+1. From the **Cloud Shell**, you should be on the directory `oci-multiplayer`, run this command.
     
     ```bash
     <copy>npx zx scripts/tfvars.mjs devops</copy>
@@ -54,16 +54,16 @@ In this lab, you are going to deploy OCI DevOps components that include:
     ```
 
 2. Run the `init` command for terraform.
-    
-  ![Terraform init](images/tfvars-devops-tf-init.png)
 
     ```bash
     <copy>terraform init</copy>
     ```
+    
+  ![Terraform init](images/tfvars-devops-tf-init.png)
 
   ![Terraform init success](images/tfvars-devops-tf-init-success.png)
 
-3. Then, run the `apply` command for Terraform to create resources on Oracle Cloud.
+3. Then, run the `apply` command for Terraform to create resources on Oracle Cloud. The `apply` process might take up to 5 minutes.
     
     ```bash
     <copy>terraform apply -auto-approve</copy>
@@ -71,28 +71,43 @@ In this lab, you are going to deploy OCI DevOps components that include:
 
   ![Terraform apply](images/tfvars-devops-tf-apply.png)
 
-4. The `apply` process might take up to 10 minutes. You will use this time to understand a bit more about the infrastructure that you are creating.
-
-5. The DevOps infrastructure includes:
-    - DevOps project
-    - DevOps GitHub repository mirroring
-    - DevOps Build Pipeline and its stages
-    - DevOps Deployment Pipeline and its stages
-    - Networking requirements.
-
-6. Let's explore them one by one.
-
-7. DevOps project is the main entity that groups up all the resources associated with the same application/project.
-
-8. DevOps GitHub repository mirroring is an entity that configures the mirroring of the GitHub repository, basically, a connection with your forked repository that allows synchronization of code between GitHub and OCI DevOps.
-
+    > NOTE, while Terraform deploys the DevOps infrastructure. 
+    > <br>
+    > <br>
+    >  
+    > You will use this time to understand a bit more about the infrastructure that you are creating.
+    > <br>
+    > <br>
+    > The DevOps infrastructure includes:
+    >     - DevOps project
+    >     - DevOps GitHub repository mirroring
+    >     - DevOps Build Pipeline and its stages
+    >     - DevOps Deployment Pipeline and its stages
+    >     - Networking requirements.
+    > <br>
+    > <br>
+    > Let's explore them one by one.
+    > <br>
+    > <br>
+    > DevOps project is the main entity that groups up all the resources associated with the same application/project.
+    > <br>
+    > <br>
+    > DevOps GitHub repository mirroring is an entity that configures the mirroring of the GitHub repository, basically, a connection with your forked repository that allows synchronization of code between GitHub and OCI DevOps.
+    > <br>
+    > <br>
     > OCI DevOps has its own git repository for your code with high level of security and the best integration possible in case you don't want to use other 3rd party source code version control.
-
-9. DevOps Build Pipeline and its stages will build your source code, run your tests, and generate artifacts like files, and container images.
-
-10. DevOps Deployment Pipeline and its stages are where all the artifacts get deployed on an environment. In your case, a Kubernetes Cluster but it could be anything from virtual machines to container instances.
-
-11. Also, Terraform will create all the networking fabric needed to run the build and deployment pipelines.
+    > <br>
+    > <br>
+    > DevOps Build Pipeline and its stages will build your source code, run your tests, and generate artifacts like files, and container images.
+    > <br>
+    > <br>
+    > DevOps Deployment Pipeline and its stages are where all the artifacts get deployed on In your case, a Kubernetes Cluster but it could be anything from virtual machines to container instances.
+    > <br>
+    > <br>
+    > Also, Terraform will create all the networking fabric needed to run the build and deployment pipelines.
+    > <br>
+    > <br>
+    > 
 
 ## Task 3: Terraform output
 

@@ -23,7 +23,7 @@ In this lab, you are going to build the artifacts from the source code using OCI
 
 2. Click on **Projects**
 
-  > NOTE: Make sure you select the compartment, or that the root compartment is selected.
+    > NOTE: Make sure you select the compartment, or that the root compartment is selected.
   
   ![DevOps Project List](images/devops-project-list.png)
 
@@ -35,13 +35,16 @@ In this lab, you are going to build the artifacts from the source code using OCI
 
   ![DevOps Code Repositories Menu](images/devops-project-code-repositories.png)
 
-  > NOTE: OCI DevOps can host your code without the need of GitHub or any other git service. This is the preferred way, for security and integration, it is the easiest way. In this workshop, we take the approach of GitHub so you can see a more complex scenario with a minutely synchronized mirroring between OCI DevOps Code Repository and Github.
+    > NOTE: OCI DevOps can host your code without the need of GitHub or any other git service. This is the preferred and the easiest way, for security and integration.
+    > <br>
+    > <br>
+    > In this workshop, we take the approach of GitHub so you can see a more complex scenario with a minutely synchronized mirroring between OCI DevOps Code Repository and Github.
 
-5. Click on the mirrored repository to take a look at the code.
+1. Click on the mirrored repository to take a look at the code.
 
   ![DevOps Code Repositories Click](images/devops-project-code-repositories-click.png)
 
-  > NOTE: Take into account that the initial code mirroring takes a few minutes. The system will tell you if the process is on-going.
+    > NOTE: Take into account that the initial code mirroring takes a few minutes. The system will tell you if the process is on-going.
 
 6. Go back to the Main page of OCI DevOps Project, Click on the name of your DevOps Project on the breadcrumbs.
 
@@ -49,7 +52,7 @@ In this lab, you are going to build the artifacts from the source code using OCI
 
 ## Task 2: Run Build Pipeline
 
-1. Scroll down until you see the **Latest Build pipelines**. Click on the Build Pipeline you created with Terraform.
+1. Scroll down until you see the **Latest Build pipelines** section. Click on the Build Pipeline you created with Terraform.
 
   ![Build click build pipeline](images/devops-build-click-buildpipeline.png)
 
