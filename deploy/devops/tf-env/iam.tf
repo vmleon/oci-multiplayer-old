@@ -14,9 +14,9 @@ resource "oci_identity_user" "oke_ocir_user" {
   provider       = oci.home_region
   compartment_id = var.tenancy_ocid
   description    = "User for OKE secret to access OCIR"
-  name           = "oke_ocir_user"
+  name           = "oke_ocir_user_${random_string.deploy_id.result}"
 
-  email = "oke_ocir_user@example.com"
+  email = "oke_ocir_user_${random_string.deploy_id.result}@example.com"
 }
 
 resource "oci_identity_auth_token" "oke_ocir_user_auth_token" {
