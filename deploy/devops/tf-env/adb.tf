@@ -1,5 +1,5 @@
 locals {
-  adb_name = "stwldevopsadb_${random_string.deploy_id.result}"
+  adb_name = "stwldevopsadb${random_string.deploy_id.result}"
 }
 
 resource "oci_database_autonomous_database" "adb" {
