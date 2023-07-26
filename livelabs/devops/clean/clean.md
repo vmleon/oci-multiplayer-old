@@ -23,7 +23,7 @@ In this optional lab, you are going to clean the resources created during the wo
 
 2. The Kubernetes Cluster will be on the list, the name starting with `DevOps`. Click on the Kubernetes Cluster name.
 
-  ![xxx](images/oke-list.png)
+  ![OKE list](images/oke-list.png)
 
 3. At the top, click on **Access Cluster**.
 

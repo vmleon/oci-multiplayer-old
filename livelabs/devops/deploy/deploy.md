@@ -51,7 +51,7 @@ In this lab, you are going to deploy the artifacts (container images) into the K
 
 9. At the end of the logs, you will see a curl command.
 
-  ![xxx](images/deployment-run-curl.png)
+  ![Deployment run cURL](images/deployment-run-curl.png)
 
 10.  Copy and paste the URL into the browser.
 

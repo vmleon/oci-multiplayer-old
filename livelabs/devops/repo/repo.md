@@ -21,7 +21,7 @@ During this lab, you are going to clone a GitHub repository to have your own cop
   
   ![GitHub base repo](images/github-base-repo.png)
 
-1. Click on **Fork**.
+2. Click on **Fork**.
   
   ![GitHub fork Button](images/github-fork-button.png)
 
@@ -45,27 +45,32 @@ During this lab, you are going to clone a GitHub repository to have your own cop
   
   ![GitHub profile settings](images/github-profile-settings.png)
 
-1. Scroll to the end, and click **Developer settings**.
+3. Scroll to the end, and click **Developer settings**.
   
   ![GitHub profile developer settings](images/github-profile-developer-settings.png)
 
-1. Expand **Personal access tokens** and click on **Fine-grained tokens**.
+4. Expand **Personal access tokens** and click on **Fine-grained tokens**.
   
   ![GitHub profile personal access token](images/github-profile-personal-access-tokens.png)
 
-1. Click **Generate new token**.
+5. Click **Generate new token**.
   
   ![GitHub profile pat generate](images/github-profile-pat-generate-button.png)
 
-1. Fill in the form: **Token name**, **Expiration**, **Description**, **Resource owner**
+6. Fill in the form: **Token name**, **Expiration**, **Description**, **Resource owner**
   
+  For the name and description you can use any name, we suggest:
+
+    ```
+    <copy>oci-multiplayer-token</copy>
+    ```
   ![GitHub PAT form](images/github-pat-form.png)
 
-1. Check **Only select repositories**.
+7. Check **Only select repositories**. And select the repository `oci-multiplayer`.
   
   ![GitHub PAT form repo access](images/github-pat-form-repo-access.png)
 
-8.  On permissions, set **Contents** to **Read-only**. (to be confirmed that this is enough)
+8.  On permissions, set **Contents** to **Read-only**. under **Repository permissions**.
   
   ![GitHub PAT form permissions](images/github-pat-form-permissions.png)
 
@@ -73,33 +78,37 @@ During this lab, you are going to clone a GitHub repository to have your own cop
   
   ![GitHub PAT form overview](images/github-pat-form-overview.png)
 
-1.  It will ask for your GitHub Account password to confirm.
+10.  It will ask for your GitHub Account password to confirm.
   
   ![GitHub PAT Password](images/github-pat-form-confirm-password.png)
 
-1.  Copy the generated token in a safe place. You will need it later. Make sure to copy your personal access token now as you will not be able to see this again.
+11.  Copy the generated token in a safe place. You will need it later. Make sure to copy your personal access token now as you will not be able to see this again.
   
   ![GitHub PAT Copy](images/github-pat-copy.png)
 
 ## Task 3: Clone the new repository
 
-1. Clone the forked repository. Click Code and select HTTPS.
-    
+1. Go back to the repository by clicking the GitHub menu and the name of the repository.
+
+  ![GitHub Back to repo](images/github-back-to-repo.png)
+
+2. Clone the forked repository. Click Code and select HTTPS.
+
   ![GitHub Clone Button](images/github-clone-button.png)
 
-1. Log in on Oracle Cloud and open Cloud Shell.
+2. Log in on Oracle Cloud and open Cloud Shell.
   
   ![Cloud Shell button](images/oci-cloud-shell-button.png)
 
-1. Git Clone the repository. Type `git clone ` and then paste the URL copied from GitHub.
-
-  ![xxx](images/git-clone-command.png)
+3. Git Clone the repository. Type `git clone ` and then paste the URL copied from GitHub.
 
     ```bash
-    <copy>git clone https://github.com/YOUR_USER_HANDLER/oci-multiplayer.git</copy>
+    <copy>git clone YOUR_FORK_URL</copy>
     ```
 
-1. Change the directory to the cloned repository:
+  ![Git clone command](images/git-clone-command.png)
+
+1. Change the directory to the cloned repository.
     
     ```bash
     <copy>cd oci-multiplayer</copy>
