@@ -1,5 +1,5 @@
 locals {
-  adb_name = "stwldevopsadb"
+  adb_name = "stwldevopsadb_${random_string.deploy_id.result}"
 }
 
 resource "oci_database_autonomous_database" "adb" {
@@ -14,14 +14,3 @@ resource "oci_database_autonomous_database" "adb" {
   is_auto_scaling_enabled  = true
   license_model            = "BRING_YOUR_OWN_LICENSE"
 }
-
-# resource "oci_database_autonomous_database_wallet" "adb_wallet" {
-#   autonomous_database_id = oci_database_autonomous_database.adb.id
-#   password               = random_password.adb_wallet_password.result
-#   base64_encode_content  = "true"
-# }
-
-# resource "local_file" "adb_wallet_file" {
-#   content_base64 = oci_database_autonomous_database_wallet.adb_wallet.content
-#   filename       = "${path.module}/generated/${var.autonomous_database_db_name}_wallet.zip"
-# }
