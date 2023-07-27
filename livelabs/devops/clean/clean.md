@@ -29,11 +29,11 @@ In this optional lab, you are going to clean the resources created during the wo
 
   ![OKE Access Cluster Button](images/oke-access-button.png)
 
-4. If you have the Cloud Shell still open, jump to step 2. If not, click on **Launch Cloud Shell**.
+4. On the **Access Your Cluster** window, if you have the Cloud Shell still open, jump to number 2. If not, click on **Launch Cloud Shell** and wait for Cloud Shell to be active.
 
   ![Open Cloud Shell](images/access-open-cloud-shell.png)
 
-5. Copy the command from step 2. And paste it on the Cloud Shell. Run the command.
+5. Click the button to copy the command from number 2 of the **Access Your Cluster** window. And paste it on the Cloud Shell. Run the command.
 
   ![Copy Command](images/access-copy-command.png)
 
@@ -41,7 +41,7 @@ In this optional lab, you are going to clean the resources created during the wo
 
   ![Paste Command](images/access-paste-command.png)
 
-7. Check it is configured. Run the following command and see the services.
+7. Run the following command to see the microservices composing the application and check that `kubectl` is configured to access your Kubernetes Cluster.
 
     ```bash
     <copy>kubectl get pods</copy>
@@ -49,13 +49,11 @@ In this optional lab, you are going to clean the resources created during the wo
 
   ![Kubectl Get Pods](images/kubectl-get-pods.png)
 
-8. After that, delete the ingress controller, hence the load balancer.
+8. After that, delete the ingress controller, hence the load balancer by running the following command.
 
     ```bash
     <copy>kubectl delete ns ingress-nginx</copy>
     ```
-
-    > NOTE: This might take up to 2 minutes.
 
 9. It will take a couple of minutes.
 
@@ -69,7 +67,7 @@ In this optional lab, you are going to clean the resources created during the wo
     <copy>pwd</copy>
     ```
 
-2. It should look like this:
+2. The result should look like this `oci-multiplayer/deploy/devops/tf-devops`:
 
   ![TF DevOps pwd](./images/tf-devops-pwd.png)
 
@@ -82,7 +80,7 @@ In this optional lab, you are going to clean the resources created during the wo
     ```
 
 
-5. When the Terraform `destroy` finishes successfully.
+5. When the Terraform `destroy` finishes successfully. It might take up to 3 minutes.
 
   ![DevOps Destroy](./images/tf-devops-destroy.png)
 
@@ -101,6 +99,8 @@ In this optional lab, you are going to clean the resources created during the wo
 8. When the Terraform `destroy` finishes successfully, you have finished cleaning up.
 
   ![Env Destroy](./images/tf-env-destroy.png)
+
+9. Congratulations you have cleaned the infrastructure and learned how to build and deploy your microservice application.
 
 ## Acknowledgments
 
