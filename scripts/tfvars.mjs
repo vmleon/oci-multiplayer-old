@@ -201,7 +201,7 @@ async function vmTFvars() {
 
   const escapedSlash = "\\" + "/";
   const replacedSshPathParam = sshPathParam.replaceAll("/", escapedSlash);
-  const replaceSSHContentCommand = `s/SSH_PUBLIC_KEY_PATH/${replacedSshPathParam}/`;
+  const replaceSSHContentCommand = `s/SSH_PUBLIC_KEY_PATH/${replacedSshPathParam}.pub/`;
 
   try {
     let { exitCode, stderr } =
