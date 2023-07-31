@@ -22,12 +22,12 @@ data "oci_identity_availability_domains" "ads" {
 }
 
 data "oci_core_images" "ol8_images" {
-    compartment_id = var.compartment_ocid
-    shape = var.instance_shape
-    operating_system = "Oracle Linux"
-    operating_system_version = 8
-    sort_by = "TIMECREATED"
-    sort_order = "DESC"
+  compartment_id           = var.compartment_ocid
+  shape                    = var.instance_shape
+  operating_system         = "Oracle Linux"
+  operating_system_version = 8
+  sort_by                  = "TIMECREATED"
+  sort_order               = "DESC"
 }
 
 data "oci_identity_availability_domain" "ad" {
@@ -43,7 +43,7 @@ resource "oci_core_instance" "compute_web" {
   shape               = var.instance_shape
 
   metadata = {
-    ssh_authorized_keys = var.ssh_public_key
+    ssh_authorized_keys = file(var.ssh_public_key_path)
   }
 
   shape_config {
@@ -77,7 +77,7 @@ resource "oci_core_instance" "compute_server" {
   shape               = var.instance_shape
 
   metadata = {
-    ssh_authorized_keys = var.ssh_public_key
+    ssh_authorized_keys = file(var.ssh_public_key_path)
   }
 
   shape_config {

@@ -1,5 +1,6 @@
 #!/usr/bin/env zx
 
+import { createSSHKeyPair } from "./lib/crypto.mjs";
 import {
   getNamespace,
   getRegions,
@@ -25,9 +26,15 @@ if (action === "devops") {
   process.exit(0);
 }
 
+if (action === "vm") {
+  await vmTFvars();
+  process.exit(0);
+}
+
 console.log("Usage:");
 console.log("\tnpx zx scripts/tfvars.mjs env");
 console.log("\tnpx zx scripts/tfvars.mjs devops");
+console.log("\tnpx zx scripts/tfvars.mjs vm");
 
 process.exit(0);
 
@@ -164,6 +171,51 @@ async function devopsTFvars() {
     }
     console.log(
       `${chalk.green("deploy/devops/tf-devops/terraform.tfvars")} created.`
+    );
+  } catch (error) {
+    exitWithError(error.stderr);
+  }
+}
+
+async function vmTFvars() {
+  const tenancyId = await getTenancyId();
+
+  const regions = await getRegions();
+  const regionName = await setVariableFromEnvOrPrompt(
+    "OCI_REGION",
+    "OCI Region name",
+    async () => printRegionNames(regions)
+  );
+
+  const compartmentName = await setVariableFromEnvOrPrompt(
+    "VM_COMPARTMENT_NAME",
+    "VM Deployment Compartment Name (root)"
+  );
+
+  const compartmentId = await searchCompartmentIdByName(
+    compartmentName || "root"
+  );
+
+  const sshPathParam = path.join(os.homedir(), ".ssh", "stwl");
+  await createSSHKeyPair(sshPathParam);
+
+  const escapedSlash = "\\" + "/";
+  const replacedSshPathParam = sshPathParam.replaceAll("/", escapedSlash);
+  const replaceSSHContentCommand = `s/SSH_PUBLIC_KEY_PATH/${replacedSshPathParam}/`;
+
+  try {
+    let { exitCode, stderr } =
+      await $`sed 's/REGION_NAME/${regionName}/' deploy/vm/terraform/terraform.tfvars.template \
+                 | sed 's/TENANCY_OCID/${tenancyId}/' \
+                 | sed 's/COMPARTMENT_OCID/${compartmentId}/' \
+                 | sed '${replaceSSHContentCommand}' > deploy/vm/terraform/terraform.tfvars`;
+    if (exitCode !== 0) {
+      exitWithError(
+        `Error creating deploy/vm/terraform/terraform.tfvars: ${stderr}`
+      );
+    }
+    console.log(
+      `${chalk.green("deploy/vm/terraform/terraform.tfvars")} created.`
     );
   } catch (error) {
     exitWithError(error.stderr);

@@ -3,13 +3,13 @@ variable "tenancy_ocid" {
 }
 
 variable "region" {
-  type    = string
+  type = string
 }
 
 variable "compartment_ocid" {
   type = string
 }
 
-variable "ssh_public_key" {
+variable "ssh_public_key_path" {
   type = string
 }
