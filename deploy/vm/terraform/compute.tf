@@ -43,7 +43,7 @@ resource "oci_core_instance" "compute_web" {
   shape               = var.instance_shape
 
   metadata = {
-    ssh_authorized_keys = file(var.ssh_public_key_path)
+    ssh_authorized_keys = chomp(file(var.ssh_public_key_path))
   }
 
   shape_config {
@@ -77,7 +77,7 @@ resource "oci_core_instance" "compute_server" {
   shape               = var.instance_shape
 
   metadata = {
-    ssh_authorized_keys = file(var.ssh_public_key_path)
+    ssh_authorized_keys = chomp(file(var.ssh_public_key_path))
   }
 
   shape_config {

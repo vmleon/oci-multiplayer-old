@@ -16,6 +16,9 @@ In this workshop, you will learn how to:
 - Create a DevOps Project, a build pipeline and a deployment pipeline
 - Move to the next version and practice a rollback
 
+Watch the video below for a quick walk-through of the workshop.
+[DevOps Multiplayer Content](videohub:xxx)
+
 ### Prerequisites
 
 You must have an OCI account. [Click here](https://www.oracle.com/cloud/free/?source=:ow:o:s:nav::DevoGetStarted&intcmp=:ow:o:s:nav::DevoGetStarted) to create a new cloud account.
@@ -35,3 +38,4 @@ You may now [proceed to the next lab](#next).
 * **Author** - Victor Martin, Tech Product Strategy Director (EMEA)
 * **Contributors** - Wojciech Pluta - DevRel, Eli Schilling - DevRel
 * **Last Updated By/Date** - July 1st, 2023
+ 

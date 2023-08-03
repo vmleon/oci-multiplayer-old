@@ -171,3 +171,41 @@ export async function getUserId() {
   }
   return userFound.id;
 }
+
+export async function getContainerInstanceShapes(compartmentId) {
+  if (!compartmentId) {
+    exitWithError("No container ID provided");
+  }
+  try {
+    const { stdout, exitCode, stderr } =
+      await $`oci container-instances container-instance \
+        list-shapes --compartment-id ${compartmentId}`;
+    if (exitCode !== 0) {
+      exitWithError(stderr);
+    }
+    if (!stdout.length) {
+      exitWithError("User name not found");
+    }
+    const data = JSON.parse(stdout.trim()).data;
+    return data.items;
+  } catch (error) {
+    exitWithError(error.stderr);
+  }
+}
+
+// TODO all methods should have try catch (just like the above)
+export async function getContainerInstances(compartmentId) {
+  if (!compartmentId) {
+    exitWithError("No container ID provided");
+  }
+  const { stdout, exitCode, stderr } =
+    await $`oci container-instances container-instance list --compartment-id ${compartmentId}`;
+  if (exitCode !== 0) {
+    exitWithError(stderr);
+  }
+  if (!stdout.length) {
+    exitWithError("User name not found");
+  }
+  const data = JSON.parse(stdout.trim()).data;
+  return data.items;
+}

@@ -52,6 +52,7 @@ console.log("\tnpx zx scripts/release.mjs score");
 async function releaseNpm(service) {
   await cd(service);
   const currentVersion = await getVersion();
+  console.log(`Releasing ${service}:${currentVersion}`);
   if (service === "web") {
     await buildWeb();
   }
@@ -69,6 +70,7 @@ async function releaseGradle(service) {
   await cleanGradle();
   await buildJarGradle();
   const currentVersion = await getVersionGradle();
+  console.log(`Releasing ${service}:${currentVersion}`);
   const image_name = `${project}/${service}`;
   await build_image(`localhost/${image_name}`, currentVersion);
   const local_image = `localhost/${image_name}:${currentVersion}`;

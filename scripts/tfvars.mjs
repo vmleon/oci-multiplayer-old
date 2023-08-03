@@ -31,10 +31,16 @@ if (action === "vm") {
   process.exit(0);
 }
 
+if (action === "ci") {
+  await ciTFvars();
+  process.exit(0);
+}
+
 console.log("Usage:");
 console.log("\tnpx zx scripts/tfvars.mjs env");
 console.log("\tnpx zx scripts/tfvars.mjs devops");
 console.log("\tnpx zx scripts/tfvars.mjs vm");
+console.log("\tnpx zx scripts/tfvars.mjs ci");
 
 process.exit(0);
 
@@ -201,7 +207,9 @@ async function vmTFvars() {
 
   const escapedSlash = "\\" + "/";
   const replacedSshPathParam = sshPathParam.replaceAll("/", escapedSlash);
-  const replaceSSHContentCommand = `s/SSH_PUBLIC_KEY_PATH/${replacedSshPathParam}.pub/`;
+  const replaceSSHContentCommand = `s/PATH_TO_PUBLIC_KEY/${replacedSshPathParam}.pub/`;
+
+  console.log(replaceSSHContentCommand);
 
   try {
     let { exitCode, stderr } =
@@ -217,6 +225,58 @@ async function vmTFvars() {
     console.log(
       `${chalk.green("deploy/vm/terraform/terraform.tfvars")} created.`
     );
+  } catch (error) {
+    exitWithError(error.stderr);
+  }
+}
+
+async function ciTFvars() {
+  const tenancyId = await getTenancyId();
+
+  const regions = await getRegions();
+  const regionName = await setVariableFromEnvOrPrompt(
+    "OCI_REGION",
+    "OCI Region name",
+    async () => printRegionNames(regions)
+  );
+
+  const compartmentName = await setVariableFromEnvOrPrompt(
+    "VM_COMPARTMENT_NAME",
+    "CI Deployment Compartment Name (root)"
+  );
+
+  const compartmentId = await searchCompartmentIdByName(
+    compartmentName || "root"
+  );
+
+  await cd("deploy/vm/terraform");
+  const { stdout } = await $`terraform output -json`;
+  const terraformOutput = JSON.parse(stdout);
+  const values = {};
+  for (const [key, content] of Object.entries(terraformOutput)) {
+    values[key] = content.value;
+  }
+  const { subnetId } = values;
+  await cd("../../..");
+
+  const ciPrivateIPAddress = await setVariableFromEnvOrPrompt(
+    "CI_PRIVATE_IP",
+    "Container Instance Private IP Address"
+  );
+
+  try {
+    let { exitCode, stderr } =
+      await $`sed 's/REGION_NAME/${regionName}/' deploy/vm/tf-ci/terraform.tfvars.template \
+                 | sed 's/TENANCY_OCID/${tenancyId}/' \
+                 | sed 's/COMPARTMENT_OCID/${compartmentId}/' \
+                 | sed 's/PUBLIC_SUBNET_OCID/${subnetId}/' \
+                 | sed 's/CI_PRIVATE_IP/${ciPrivateIPAddress}/'> deploy/vm/tf-ci/terraform.tfvars`;
+    if (exitCode !== 0) {
+      exitWithError(
+        `Error creating deploy/vm/tf-ci/terraform.tfvars: ${stderr}`
+      );
+    }
+    console.log(`${chalk.green("deploy/vm/tf-ci/terraform.tfvars")} created.`);
   } catch (error) {
     exitWithError(error.stderr);
   }

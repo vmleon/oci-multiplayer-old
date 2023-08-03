@@ -73,15 +73,15 @@ async function createCerts() {
 async function loginContainerRegistry() {
   console.log("Login to container registry login...");
 
-  const containerRegistryUser = await setVariableFromEnvOrPrompt(
-    "OCI_OCIR_USER",
-    "OCI Username (usually an email)"
-  );
-
-  const containerRegistryToken = await setVariableFromEnvOrPrompt(
-    "OCI_OCIR_TOKEN",
-    "OCI Auth Token for OCI Registry"
-  );
+  await cd("deploy/vm/terraform");
+  const { stdout } = await $`terraform output -json`;
+  const terraformOutput = JSON.parse(stdout);
+  const values = {};
+  for (const [key, content] of Object.entries(terraformOutput)) {
+    values[key] = content.value;
+  }
+  const { user_name: userName, user_auth_token: userAuthToken } = values;
+  await cd("../../..");
 
   const regions = await getRegions();
   const regionNameValue = await setVariableFromEnvOrPrompt(
@@ -99,14 +99,14 @@ async function loginContainerRegistry() {
     regionKey,
     regionName,
     containerRegistryURL,
-    containerRegistryUser,
-    containerRegistryToken,
+    containerRegistryUser: userName,
+    containerRegistryToken: userAuthToken,
   };
 
   await containerLogin(
     namespace,
-    containerRegistryUser,
-    containerRegistryToken,
+    userName,
+    userAuthToken,
     containerRegistryURL
   );
   console.log();
