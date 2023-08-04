@@ -209,8 +209,6 @@ async function vmTFvars() {
   const replacedSshPathParam = sshPathParam.replaceAll("/", escapedSlash);
   const replaceSSHContentCommand = `s/PATH_TO_PUBLIC_KEY/${replacedSshPathParam}.pub/`;
 
-  console.log(replaceSSHContentCommand);
-
   try {
     let { exitCode, stderr } =
       await $`sed 's/REGION_NAME/${regionName}/' deploy/vm/terraform/terraform.tfvars.template \
