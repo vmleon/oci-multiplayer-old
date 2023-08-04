@@ -43,7 +43,7 @@
 - name: Pull coherence
   command: podman pull ghcr.io/oracle/coherence-ce:23.03
 - name: does coherence exist
-  command: podman ps -a | grep coherence
+  command: podman ps --all -f "name=coherence"
   register: coherence_exist
 - name: rm coherence if exist
   command: podman rm --force coherence
