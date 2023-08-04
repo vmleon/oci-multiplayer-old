@@ -45,7 +45,7 @@ In this lab, you will complete the process of deploying the first form of the Th
     <copy>npx zx scripts/tfvars.mjs vm</copy>
     ```
 
-6. During the execution of the script, you will have to answer a few questions. The first one is the _VM Deployment Compartment Name_. You just type _**ENTER**_ to select the root compartment. If you are familiar with OCI compartments, then feel free to pick an existing compartment name.
+6. During the execution of the script, you will have to answer a question. The _VM Deployment Compartment Name_. You just type _**ENTER**_ to select the root compartment. If you are familiar with OCI compartments, then feel free to pick an existing compartment name.
 
   ![xxx](images/xxx.png)
 
@@ -70,9 +70,13 @@ In this lab, you will complete the process of deploying the first form of the Th
 
     ![Ansible configuration](images/script-03.png)
 
-5. And there you have it! Copy the _`lb_public_ip`_ value, open a new browser tab, and check it out.
+5. Copy the _`lb_public_ip`_ value
 
     ![Script complete](images/script-04.png)
+
+6. Open a new browser tab, and check it out.
+
+    ![xxx](images/xxx.png)
 
 You may now [proceed to the next lab](#next).
 

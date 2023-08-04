@@ -55,13 +55,27 @@ Estimated Lab Time: 15 minutes
 
   ![xxx](/images/xxx.png) 
 
-6. In the Web UI, you can navigate to **`Developer Services`** -> **`Container Instances`** to watch the progress of the deployment. Observe when the two containers move to an Active state.
+6. In the Web UI, you can navigate to **`Developer Services`** -> **`Container Instances`** to watch the progress of the deployment.
 
-    ![CI Related Containers](images/ContainerInstance-containers.png)
+  ![xxx](/images/xxx.png) 
 
-7. Locate the private IP address for your container instance.
+7. You will see the list of container instances. The one you created will be in `creating` state, or maybe already in `Active` state.
 
-    ![CI Private IP](images/ContainerInstance-privateIp.png)
+  ![xxx](/images/xxx.png) 
+
+8. Click on the `oci-Multiplayer` container instance.
+
+  ![xxx](/images/xxx.png) 
+
+9. Inside the container instance, on the left-side menu, you can click `Containers` and, you will see the two containers.
+
+  ![xxx](/images/xxx.png)
+
+  ![CI Related Containers](images/ContainerInstance-containers.png)
+
+10.  Locate the private IP address for your container instance.
+
+  ![CI Private IP](images/ContainerInstance-privateIp.png)
 
 ## Task 2: Create a Load Balancer
 
@@ -100,22 +114,23 @@ In this second and final task, you will add the Container Instance private IP ad
     ```
 
 
-7. Change the directory back to the root of the project with the following command:
+7. Copy the `lb_public_ip`. It is the Load Balancer public IP address.
 
-    ```
-    <copy>cd ../../..</copy>
-    ```
+  ![xxx](images/xxx.png)
 
-8. XXX
+8. Paste it on a browser and try the Container Instance deployment.
+
+  ![xxx](images/xxx.png)
 
 ## Task 3: Clean up VMs and Container Instances.
 
-1. Chance directory to `deploy/vm/tf-ci`.
-
+1. Make sure you are still on the directory `deploy/vm/tf-ci`.
 
     ```
-    <copy>cd deploy/vm/tf-ci</copy>
+    <copy>pwd</copy>
     ```
+
+  ![xxx](images/xxx.png)
 
 2. Run Terraform destroy to delete the resources.
 
@@ -123,13 +138,17 @@ In this second and final task, you will add the Container Instance private IP ad
     <copy>terraform destroy -auto-approve</copy>
     ```
 
+  ![xxx](/images/xxx.png) 
+
+  ![xxx](/images/xxx.png) 
+
 3. Change the directory back to the root of the project with the following command:
 
     ```
     <copy>cd ../../..</copy>
     ```
 
-8. 8.  Run the `ci.mjs` command that will give you information about how to delete your container instance.
+4. Run the `ci.mjs` command that will give you information about how to delete your container instance.
 
     ```
     <copy>npx zx scripts/ci.mjs</copy>
@@ -137,19 +156,19 @@ In this second and final task, you will add the Container Instance private IP ad
 
   ![xxx](/images/xxx.png) 
 
-9. Copy and paste on the console the second yellow command to delete the container instance.
+5. Copy and paste on the console the second yellow command to delete the container instance.
 
   ![xxx](/images/xxx.png) 
 
-10. On the list of container instances, you will see the id of your container instance. Replace `CONTAINER_INSTANCE_OCID` with the id and run the command.
+6. On the list of container instances, you will see the id of your container instance. Replace `CONTAINER_INSTANCE_OCID` with the id and run the command.
 
   ![xxx](/images/xxx.png) 
 
-11. Confirm that you are sure you want to delete this resource by typing `y`.
+7. Confirm that you are sure you want to delete this resource by typing `y`.
 
   ![xxx](/images/xxx.png) 
 
-12. Clean also the infrastructure from Lab 1 by running this command:
+8. Clean also the infrastructure from Lab 1 by running this command:
 
     ```
     <copy>./scripts/stop_VM.sh</copy>
@@ -157,7 +176,7 @@ In this second and final task, you will add the Container Instance private IP ad
 
   ![xxx](/images/xxx.png) 
 
-13. When Terraform completes the `destroy` you will get this green message.
+9. When Terraform completes the `destroy` you will get this green message.
 
   ![xxx](/images/xxx.png) 
 
