@@ -4,7 +4,7 @@
 
 Terraform is an Open Source tool to deploy resources in the cloud using code. This method is typically referred to as Infrastructure as Code (IaC). Terraform configuration is declarative; you simply define what you want in the Oracle Cloud and it ensures the resources are created to your specifications.
 
-Ansible is an Open Source tool that provides both configuration management and infrastructure as code. For this workshop, we leverage the configuration management functionality. Once Terraform deploys the infrastructure, Ansible will establish a remote SSH connection to the servers and apply the requisite configuration (app install, file downloads, configuration settings, etc.)
+Ansible is an Open Source tool that provides automation in software deployment. For this workshop, we leverage the configuration management functionality. Once Terraform deploys the infrastructure, Ansible will establish a remote SSH connection to the servers and apply the requisite configuration (app install, file downloads, configuration settings, etc.)
 
 Estimated Lab Time: 15 minutes
 
@@ -23,7 +23,7 @@ In this lab, you will complete the process of deploying the first form of the Th
 
     ![Cloud Shell](images/cloud-shell-button.png)
 
-2. As soon as the Cloud Shell is loaded, you can retrieve the workshop assets for this lab.
+2. As soon as the Cloud Shell is loaded, you can clone the workshop assets for this workshop.
 
     ```
     <copy>git clone https://github.com/vmleon/oci-multiplayer</copy>
@@ -39,7 +39,7 @@ In this lab, you will complete the process of deploying the first form of the Th
     <copy>cd oci-multiplayer</copy>
     ```
 
-5. Terraform uses a file called `tfvars` that contains variables used to communicate with the Oracle Cloud. You are going to generate that file by running the following command:
+5. Terraform uses a file called `terraform.tfvars` that contains variables used to communicate with the Oracle Cloud. You are going to generate that file by running the following command:
 
     ```
     <copy>npx zx scripts/tfvars.mjs vm</copy>

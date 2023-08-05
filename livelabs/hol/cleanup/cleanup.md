@@ -2,37 +2,94 @@
 
 ## Destroy Infrastructure
 
-XXX
+In this lab, you are going to destroy all the resources you have created on Oracle Cloud to make sure your tenancy is clean from everything done during this workshop.
 
-![Fn Logo](images/oke.png)
+![xxx](images/xxx.png)
 
-XXX
-
-Estimated Lab Time: 15 minutes
+Estimated Lab Time: 10 minutes
 
 ### Prerequisites
 
 * An Oracle Free Tier, Paid or LiveLabs Cloud Account
 
+## Task 1: Kubernetes deployment.
 
-## Task 1: XXX
+13. Run the delete command to clean up Kubernetes.
 
-1. XXX
+    ```bash
+    <copy>kubectl delete -k deploy/k8s/overlays/prod</copy>
+    ```
 
-2. XXX
+  ![xxx](images/xxx.png)
 
-3. XXX
+## Task 2: VMs and Container Instances.
 
-## Task 2: XXX
+1. Make sure you are still on the directory `deploy/vm/tf-ci`.
 
-1. XXX
+    ```
+    <copy>cd ~/oci-multiplayer/deploy/vm/tf-ci</copy>
+    ```
 
-2. XXX
+  ![xxx](images/xxx.png)
 
-3. XXX
+2. Run Terraform destroy to delete the resources.
+
+    ```
+    <copy>terraform destroy -auto-approve</copy>
+    ```
+
+  ![xxx](/images/xxx.png) 
+
+  ![xxx](/images/xxx.png) 
+
+3. Change the directory back to the root of the project with the following command:
+
+    ```
+    <copy>cd ~/oci-multiplayer</copy>
+    ```
+
+4. Run the `ci.mjs` command that will give you information about how to delete your container instance.
+
+    ```
+    <copy>npx zx scripts/ci.mjs</copy>
+    ```
+
+  ![xxx](/images/xxx.png) 
+
+5. Copy and paste on the console the second yellow command to delete the container instance.
+
+  ![xxx](/images/xxx.png) 
+
+6. On the list of container instances, you will see the id of your container instance. Replace `CONTAINER_INSTANCE_OCID` with the id and run the command.
+
+  ![xxx](/images/xxx.png) 
+
+7. Confirm that you are sure you want to delete this resource by typing `y`.
+
+  ![xxx](/images/xxx.png) 
+
+8. Clean also the infrastructure from Lab 1 by running this command:
+
+    ```
+    <copy>./scripts/stop_VM.sh</copy>
+    ```
+
+  ![xxx](/images/xxx.png) 
+
+9. When Terraform completes the `destroy` you will get this green message.
+
+  ![xxx](/images/xxx.png) 
+
+## Task 3: Autonomous Database and Kubernetes Cluster
+
+1. Delete OKE
+
+2. Delete ADB
+
+3. Delete VCN
 
 ## Acknowledgements
 
 * **Author** - Victor Martin - Technology Product Strategy Director - EMEA
 * **Author** - Wojciech (Vojtech) Pluta - Developer Relations - Immersive Technology Lead
-* **Last Updated By/Date** - March, 2023
+* **Last Updated By/Date** - August, 2023

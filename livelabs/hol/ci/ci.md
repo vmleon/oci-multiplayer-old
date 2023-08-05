@@ -27,13 +27,29 @@ Estimated Lab Time: 15 minutes
 
   ![xxx](/images/xxx.png) 
 
+2. The script will ask for the following information. At _`Autonomous Database Compartment Name`_ you just type _**ENTER**_ to select the root compartment. If you are familiar with OCI compartments, then feel free to pick an existing compartment name.
+
+  ![xxx](/images/xxx.png)
+
+3. At _`Autonomous Database name`_ you just type `multiplayer`.
+
+    ```
+    <copy>multiplayer</copy>
+    ```
+
+  ![xxx](/images/xxx.png)
+
+1. At _`Autonomous Database password`_ you can use the _`Suggested Password`_ in yellow. It is a password generated on the fly by `openssl` for you.
+
+  ![xxx](/images/xxx.png)
+
 2. Create and publish the **`server`** container image.
 
     ```
     <copy>npx zx scripts/release.mjs server</copy>
     ```
 
-  ![xxx](/images/xxx.png) 
+  ![xxx](/images/xxx.png)
 
 3. Create and publish the **`web`** container image.
 
@@ -73,10 +89,6 @@ Estimated Lab Time: 15 minutes
 
   ![CI Related Containers](images/ContainerInstance-containers.png)
 
-10.  Locate the private IP address for your container instance.
-
-  ![CI Private IP](images/ContainerInstance-privateIp.png)
-
 ## Task 2: Create a Load Balancer
 
 In this second and final task, you will add the Container Instance private IP address to the backend set of a new load balancer. This process will be done with Terraform so you can easily clean it up.
@@ -91,23 +103,23 @@ In this second and final task, you will add the Container Instance private IP ad
 
   ![xxx](images/xxx.png)
 
-3. The second one will be the Private IP address from Task 1.
+3. The second one will be the Private IP address. Locate the private IP address for your container instance on the OCI web console.
 
-  ![xxx](images/xxx.png)
+  ![CI Private IP](images/ContainerInstance-privateIp.png)
 
-4. Change the directory to `deploy/vm/tf-ci` with the following command:
+1. Change the directory to `deploy/vm/tf-ci` with the following command:
 
     ```
     <copy>cd deploy/vm/tf-ci</copy>
     ```
 
-5. Run Terraform Init to set up the Terraform environment.
+2. Run Terraform Init to set up the Terraform environment.
 
     ```
     <copy>terraform init</copy>
     ```
 
-6. Run Terraform apply to start creating the resources.
+3. Run Terraform apply to start creating the resources.
 
     ```
     <copy>terraform apply -auto-approve</copy>
@@ -121,64 +133,6 @@ In this second and final task, you will add the Container Instance private IP ad
 8. Paste it on a browser and try the Container Instance deployment.
 
   ![xxx](images/xxx.png)
-
-## Task 3: Clean up VMs and Container Instances.
-
-1. Make sure you are still on the directory `deploy/vm/tf-ci`.
-
-    ```
-    <copy>pwd</copy>
-    ```
-
-  ![xxx](images/xxx.png)
-
-2. Run Terraform destroy to delete the resources.
-
-    ```
-    <copy>terraform destroy -auto-approve</copy>
-    ```
-
-  ![xxx](/images/xxx.png) 
-
-  ![xxx](/images/xxx.png) 
-
-3. Change the directory back to the root of the project with the following command:
-
-    ```
-    <copy>cd ../../..</copy>
-    ```
-
-4. Run the `ci.mjs` command that will give you information about how to delete your container instance.
-
-    ```
-    <copy>npx zx scripts/ci.mjs</copy>
-    ```
-
-  ![xxx](/images/xxx.png) 
-
-5. Copy and paste on the console the second yellow command to delete the container instance.
-
-  ![xxx](/images/xxx.png) 
-
-6. On the list of container instances, you will see the id of your container instance. Replace `CONTAINER_INSTANCE_OCID` with the id and run the command.
-
-  ![xxx](/images/xxx.png) 
-
-7. Confirm that you are sure you want to delete this resource by typing `y`.
-
-  ![xxx](/images/xxx.png) 
-
-8. Clean also the infrastructure from Lab 1 by running this command:
-
-    ```
-    <copy>./scripts/stop_VM.sh</copy>
-    ```
-
-  ![xxx](/images/xxx.png) 
-
-9. When Terraform completes the `destroy` you will get this green message.
-
-  ![xxx](/images/xxx.png) 
 
 You may now [proceed to the next lab](#next).
 
