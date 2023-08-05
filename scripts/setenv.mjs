@@ -132,6 +132,9 @@ async function adbDetails() {
     "Autonomous Database name"
   );
 
+  const suggestedPassword = await generateRandomString();
+  console.log(`Suggested Password: ${chalk.yellow(suggestedPassword)}`);
+
   const adbPassword = await setVariableFromEnvOrPrompt(
     "ADB_PASSWORD",
     "Autonomous Database password"

@@ -53,13 +53,13 @@ export async function printRegionNames(regions) {
 
 export async function generateRandomString() {
   try {
-    const output = (await $`openssl rand -base64 ${22}`).stdout.trim();
+    const output = (await $`openssl rand -base64 32`).stdout.trim();
     if (output.length) {
       const cleanPassword = output
         .replaceAll("/", "")
         .replaceAll("\\", "")
         .replaceAll("=", "");
-      return cleanPassword;
+      return cleanPassword.slice(1, 13);
     } else {
       exitWithError("random string generation failed");
     }
