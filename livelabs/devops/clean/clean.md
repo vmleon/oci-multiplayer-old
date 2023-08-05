@@ -61,46 +61,40 @@ In this optional lab, you are going to clean the resources created during the wo
 
 ## Task 2: Delete infrastructure
 
-1. From the Cloud Shell, make sure you are in `tf-devops` folder.
+1. From the Cloud Shell, make sure you are in `oci-multiplayer/deploy/devops/tf-devops` folder.
 
     ```bash
-    <copy>pwd</copy>
+    <copy>cd ~/oci-multiplayer/deploy/devops/tf-devops</copy>
     ```
 
-2. The result should look like this `oci-multiplayer/deploy/devops/tf-devops`:
-
-  ![TF DevOps pwd](./images/tf-devops-pwd.png)
-
-3. If you are not in `tf-devops` folder, change the current directory until you get there.
-
-4. Run the following command to destroy the OCI DevOps infrastructure.
+2. Run the following command to destroy the OCI DevOps infrastructure.
 
     ```bash
     <copy>terraform destroy -auto-approve</copy>
     ```
 
 
-5. When the Terraform `destroy` finishes successfully. It might take up to 3 minutes.
+3. When the Terraform `destroy` finishes successfully. It might take up to 3 minutes.
 
   ![DevOps Destroy](./images/tf-devops-destroy.png)
 
-6. Change the directory to the `tf-env`
+4. Change the directory to the `tf-env`
 
     ```bash
     <copy>cd ../tf-env</copy>
     ```
 
-7. Run the following command to destroy the rest of the infrastructure.
+5. Run the following command to destroy the rest of the infrastructure.
 
     ```bash
     <copy>terraform destroy -auto-approve</copy>
     ```
 
-8. When the Terraform `destroy` finishes successfully, you have finished cleaning up.
+6. When the Terraform `destroy` finishes successfully, you have finished cleaning up.
 
   ![Env Destroy](./images/tf-env-destroy.png)
 
-9. Congratulations you have cleaned the infrastructure and learned how to build and deploy your microservice application.
+7. Congratulations you have cleaned the infrastructure and learned how to build and deploy your microservice application.
 
 ## Acknowledgments
 
