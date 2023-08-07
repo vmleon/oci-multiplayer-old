@@ -4,23 +4,33 @@
 
 In this lab, you are going to destroy all the resources you have created on Oracle Cloud to make sure your tenancy is clean from everything done during this workshop.
 
-![xxx](images/xxx.png)
-
 Estimated Lab Time: 10 minutes
 
 ### Prerequisites
 
 * An Oracle Free Tier, Paid or LiveLabs Cloud Account
 
-## Task 1: Kubernetes deployment.
+## Task 1: Kubernetes
 
-13. Run the delete command to clean up Kubernetes.
+1. Run on Cloud Shell the delete command to clean up Kubernetes. This might take a coupe of minutes.
 
     ```bash
     <copy>kubectl delete -k deploy/k8s/overlays/prod</copy>
     ```
 
-  ![xxx](images/xxx.png)
+  ![kubectl delete](images/kubectl-delete.png)
+
+2. Go to **`Developer Services`** -> **`Kubernetes Cluster (OKE)`**.
+
+  ![OKE Menu](./images/menu-oke.png)
+
+3. Click on the dots at the row of your Kubernetes Cluster, on the right. On the submenu, click **Delete**.
+
+  ![oke delete button](./images/oke-delete-button.png)
+
+4. Confirm the deletion by typing the name of the cluster, in bold at the top. Click **Delete**.
+
+  ![oke delete button](./images/oke-delete-button.png)
 
 ## Task 2: VMs and Container Instances.
 
@@ -30,17 +40,15 @@ Estimated Lab Time: 10 minutes
     <copy>cd ~/oci-multiplayer/deploy/vm/tf-ci</copy>
     ```
 
-  ![xxx](images/xxx.png)
-
 2. Run Terraform destroy to delete the resources.
 
     ```
     <copy>terraform destroy -auto-approve</copy>
     ```
 
-  ![xxx](/images/xxx.png) 
+  ![tf ci destroy](./images/tf-ci-destroy.png) 
 
-  ![xxx](/images/xxx.png) 
+  ![tf ci destroy completed](./images/tf-ci-destroy-completed.png) 
 
 3. Change the directory back to the root of the project with the following command:
 
@@ -54,19 +62,19 @@ Estimated Lab Time: 10 minutes
     <copy>npx zx scripts/ci.mjs</copy>
     ```
 
-  ![xxx](/images/xxx.png) 
+  ![ci](./images/ci.png) 
 
 5. Copy and paste on the console the second yellow command to delete the container instance.
 
-  ![xxx](/images/xxx.png) 
+  ![ci copy](./images/ci-copy.png)
 
 6. On the list of container instances, you will see the id of your container instance. Replace `CONTAINER_INSTANCE_OCID` with the id and run the command.
 
-  ![xxx](/images/xxx.png) 
+  ![ci paste](./images/ci-paste.png) 
 
 7. Confirm that you are sure you want to delete this resource by typing `y`.
 
-  ![xxx](/images/xxx.png) 
+  ![ci yes](./images/ci-yes.png) 
 
 8. Clean also the infrastructure from Lab 1 by running this command:
 
@@ -74,19 +82,50 @@ Estimated Lab Time: 10 minutes
     <copy>./scripts/stop_VM.sh</copy>
     ```
 
-  ![xxx](/images/xxx.png) 
+  ![tf destroy](./images/tf-destroy.png)
 
-9. When Terraform completes the `destroy` you will get this green message.
+1. When Terraform completes the `destroy` you will get this green message.
 
-  ![xxx](/images/xxx.png) 
+  ![tf destroy completed](./images/tf-destroy-completed.png)  
 
-## Task 3: Autonomous Database and Kubernetes Cluster
+## Task 3: Autonomous Database and Networking
 
-1. Delete OKE
+1. Navigate to **`Oracle Databases`** -> **`Autonomous Transaction Processing`**.
 
-2. Delete ADB
+  ![menu adb](./images/menu-adb.png)
 
-3. Delete VCN
+2. Click on the dots at the row of your Autonomous Database, on the right. On the submenu, click **Terminate**.
+
+  ![adb delete button](./images/adb-delete-button.png)
+
+3. Confirm the termination by typing the name of the Autonomous Database, `multiplayer`. Click **Terminate Autonomous Database**.
+
+  ![adb delete confirm](./images/adb-delete-confirm.png)
+
+4. Navigate to **`Oracle Databases`** -> **`Autonomous Transaction Processing`**.
+
+  ![menu vcn](./images/menu-vcn.png)
+
+5. Click on the VCN listed that starts with `oke-vcn-quick...`.
+
+  ![vcn list click](./images/vcn-list-click.png)
+
+6. Click on **Delete**.
+
+  ![vcn delete button](./images/vcn-delete-button.png)
+
+7. Click on **Scan**.
+
+  ![vcn delete scan](./images/vcn-delete-scan.png)
+
+8.  Wait for the scanning to finish. When the Delete All button is active, click it.
+
+  ![vcn scan delete all](./images/vcn-scan-delete-all.png)
+
+9.  After a few seconds, all resources in the VCN will be deleted.
+
+10.  Congratulations, you have completed the clean-up of this workshop.
+
 
 ## Acknowledgements
 
