@@ -148,4 +148,4 @@ You may now [proceed to the next lab](#next).
 * **Author** - Victor Martin - Technology Product Strategy Director - EMEA
 * **Author** - Wojciech (Vojtech) Pluta - Developer Relations - Immersive Technology Lead
 * **Author** - Eli Schilling - Developer Advocate - Cloud Native and DevOps
-* **Last Updated By/Date** - March, 2023
+* **Last Updated By/Date** - August, 2023

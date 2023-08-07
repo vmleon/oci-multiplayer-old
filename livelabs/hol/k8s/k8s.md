@@ -15,33 +15,37 @@ In this lab, you will complete the process of deploying the application on a Kub
 
 1. Minimize Cloud Shell and navigate to **`Developer Services`** -> **`Kubernetes Cluster (OKE)`**.
 
-  ![xxx](./images/xxx.png)
+  ![menu oke](./images/menu-oke.png)
 
-2. Click **Create cluster**, select [Quick create], then click **Submit**.
+2. Click **Create cluster**.
 
-  ![xxx](./images/xxx.png)
+  ![create cluster click](./images/create-cluster-click.png)
 
-3. Provide a name for the cluster, under _Node Type_ choose **Managed**, leaving all other settings as default.
+1. Select _**Quick create**_, then click **Submit**.
 
-  ![xxx](./images/xxx.png)
+  ![create cluster submit](./images/create-cluster-submit.png)
 
-4. Click **Next**, review the details of your cluster, and click **Create cluster**.
+1. Provide a name for the cluster, under _Node Type_ choose **Managed**, leave all other settings as default and click _**Next**_.
 
-  ![xxx](./images/xxx.png)
+  ![oke create cluster quick](./images/oke-create-cluster-quick.png)
+
+4. Review the details of your cluster, and click **Create cluster**.
+
+  ![oke create cluster confirm](./images/oke-create-cluster-confirm.png)
 
 5. It will take just a couple of minutes to create the requisite resources. You can proceed to the next task while this is happening.
 
-  ![xxx](./images/xxx.png)
+  ![oke create cluster close](./images/oke-create-cluster-close.png)
 
 ## Task 2: Create Autonomous Database (ATP)
 
 1. Navigate to **`Oracle Databases`** -> **`Autonomous Transaction Processing`**.
 
-  ![xxx](./images/xxx.png)
+  ![menu adb](./images/menu-adb.png)
 
 2. Click **Create Autonomous Database**
 
-  ![xxx](./images/xxx.png)
+  ![adb create adb](./images/adb-create-adb.png)
 
 1. Provide `multiplayer` as both the display name and the database name.
 
@@ -49,75 +53,89 @@ In this lab, you will complete the process of deploying the application on a Kub
     <copy>multiplayer</copy>
     ```
 
-  ![xxx](./images/xxx.png)
+  ![adb create multiplayer](./images/adb-create-multiplayer.png)
 
-4. Scroll down and provide a database password for the Admin user. Recover the password you generated before by running this command. Copy and paste it twice on the form.
+4. Scroll down and provide a database password for the Admin user. Recover the password you generated before by running this command in Cloud Shell. Copy and paste it twice on the form.
 
     ```bash
     <copy>cat ~/oci-multiplayer/.env.json | jq .adbPassword</copy>
     ```
 
-  ![xxx](./images/xxx.png)
+  ![adb create password](./images/adb-create-password.png)
 
 5. Click **Create Autonomous Database**.
 
-  ![xxx](./images/xxx.png)
+  ![adb create click](./images/adb-create-click.png)
 
 6. It will take about a minute to create the DB. You may proceed to the next task.
 
-  ![xxx](./images/xxx.png)
+  ![adb create creating](./images/adb-create-creating.png)
 
 ## Task 3: Create and deploy the application
 
 1. Navigate to **`Developer Services`** -> **`Kubernetes Cluster (OKE)`**.
 
-  ![xxx](./images/xxx.png)
+  ![menu oke](./images/menu-oke.png)
 
 2. Wait until the cluster is `Active`.
 
-  ![xxx](./images/xxx.png)
+  ![oke list](./images/oke-list.png)
 
 3. Click on the cluster link to access your brand-new Kubernetes Cluster.
 
-  ![xxx](./images/xxx.png)
+  ![oke list click](./images/oke-list-click.png)
 
 4. Click **Access Cluster** then copy the command found under item 2 displayed on the screen.
 
-  ![Cluster Access](images/cluster-access.png)
+  ![oke access cluster button](images/oke-access-cluster-button.png)
 
-5. Return to Cloud Shell, paste the above command and execute. This will enable you to communicate with the OKE API endpoint for your cluster.
+5. Copy the command on the popup window and return to Cloud Shell.
 
-6. Ensure you are in the root directory.
+  ![oke-access-cluster-copy](./images/oke-access-cluster-copy.png)
+
+6. Paste the above command and execute. This will enable you to communicate with the OKE API endpoint for your cluster.
+
+  ![oke-access-cluster-paste](./images/oke-access-cluster-paste.png)
+
+7. Ensure you are in the root directory.
 
     ```
     <copy>cd ~/oci-multiplayer</copy>
     ```
 
-7. Release all application components.
+8. Release all application components. It will take a few minutes.
 
     ```
     <copy>npx zx scripts/release.mjs -a</copy>
     ```
 
-8. Update the deployment manifest with the latest versions.
+  ![release all](./images/release-all.png)
+
+9. Update the deployment manifest with the latest versions.
 
     ```
     <copy>npx zx scripts/deploy.mjs</copy>
     ```
 
-9. Deploy all application components to OKE.
+  ![deploy script](./images/deploy-script.png)
+
+10. Deploy all application components to OKE.
 
     ```
     <copy>kubectl apply -k deploy/k8s/overlays/prod</copy>
     ```
 
-10. Verify the pods were deployed (it might take a minute or so for all pods to come online).
+  ![kubectl apply](./images/kubectl-apply.png)
+
+11. Verify the pods were deployed (it might take a minute or so for all pods to come online).
 
     ```
     <copy>kubectl get pods</copy>
     ```
 
-  ![Get Pods](images/get_pods.png)
+  ![kubectl get pods](images/kubectl-get-pods.png)
+
+    > NOTE: Make sure all the pods are `Running` and `1/1` Ready.
 
 11. Obtain the external service IP for the application you just deployed.
 
@@ -125,11 +143,11 @@ In this lab, you will complete the process of deploying the application on a Kub
     <copy>kubectl -n ingress-nginx get svc</copy>
     ```
 
-  ![Get Ingress Service](images/ext_svc_ip.png)
+  ![kubectl load balancer](images/kubectl-load-balancer.png)
 
-12. Paste the IP address from step 12 in a new browser tab and check it out!
+12. Paste the IP address from the previous step in a new browser tab and check it out!
 
-  ![xxx](./images/xxx.png)
+  ![game](./images/game.png)
 
 Optionally, if you want to clean up the workshop resources on Oracle Cloud; you may now [proceed to the next lab](#next).
 
