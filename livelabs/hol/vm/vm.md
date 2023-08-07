@@ -23,15 +23,13 @@ In this lab, you will complete the process of deploying the first form of the Th
 
     ![Cloud Shell](images/cloud-shell-button.png)
 
-2. As soon as the Cloud Shell is loaded, you can clone the workshop assets for this workshop.
+2. As soon as the Cloud Shell is loaded, you can clone the workshop assets for this workshop. Run the command:
 
     ```
     <copy>git clone https://github.com/vmleon/oci-multiplayer</copy>
     ```
 
-3. The result will look like this:
-
-    ![Git Clone](images/git-clone.png)
+  ![Git Clone](images/git-clone.png)
 
 4. Change directory with `cd` to `oci-multiplayer` directory:
 
@@ -47,7 +45,7 @@ In this lab, you will complete the process of deploying the first form of the Th
 
 6. During the execution of the script, you will have to answer a question. The _VM Deployment Compartment Name_. You just type _**ENTER**_ to select the root compartment. If you are familiar with OCI compartments, then feel free to pick an existing compartment name.
 
-  ![xxx](images/xxx.png)
+  ![TFvars vm command](images/tfvars-vm-command.png)
 
 ## Task 2: Initiate Deployment
 
@@ -72,11 +70,11 @@ In this lab, you will complete the process of deploying the first form of the Th
 
 5. Copy the _`lb_public_ip`_ value
 
-    ![Script complete](images/script-04.png)
+    ![Start vm Output](images/start_vm_output.png)
 
 6. Open a new browser tab, and check it out.
 
-    ![xxx](images/xxx.png)
+    ![Game landing](images/game-landing.png)
 
 You may now [proceed to the next lab](#next).
 

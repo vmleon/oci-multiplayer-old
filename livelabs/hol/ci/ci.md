@@ -25,11 +25,11 @@ Estimated Lab Time: 15 minutes
     <copy>npx zx scripts/setenv.mjs</copy>
     ```
 
-  ![xxx](/images/xxx.png) 
+  ![setenv-command](./images/setenv-command.png) 
 
 2. The script will ask for the following information. At _`Autonomous Database Compartment Name`_ you just type _**ENTER**_ to select the root compartment. If you are familiar with OCI compartments, then feel free to pick an existing compartment name.
 
-  ![xxx](/images/xxx.png)
+  ![Setenv compartment](./images/setenv-compartment.png)
 
 3. At _`Autonomous Database name`_ you just type `multiplayer`.
 
@@ -37,11 +37,13 @@ Estimated Lab Time: 15 minutes
     <copy>multiplayer</copy>
     ```
 
-  ![xxx](/images/xxx.png)
+  ![Setenv ADB name](./images/setenv-adb-name.png)
 
 1. At _`Autonomous Database password`_ you can use the _`Suggested Password`_ in yellow. It is a password generated on the fly by `openssl` for you.
 
-  ![xxx](/images/xxx.png)
+    > NOTE: your password will be different to the one on the picture.
+
+  ![Setenv ADB password](./images/setenv-adb-password.png)
 
 2. Create and publish the **`server`** container image.
 
@@ -49,7 +51,7 @@ Estimated Lab Time: 15 minutes
     <copy>npx zx scripts/release.mjs server</copy>
     ```
 
-  ![xxx](/images/xxx.png)
+  ![release server](./images/release-server.png)
 
 3. Create and publish the **`web`** container image.
 
@@ -57,7 +59,7 @@ Estimated Lab Time: 15 minutes
     <copy>npx zx scripts/release.mjs web</copy>
     ```
 
-  ![xxx](/images/xxx.png) 
+  ![release web](./images/release-web.png) 
 
 4. Run the `ci.mjs` command that will give you information about how to create your container instance.
 
@@ -65,29 +67,27 @@ Estimated Lab Time: 15 minutes
     <copy>npx zx scripts/ci.mjs</copy>
     ```
 
-  ![xxx](/images/xxx.png) 
+  ![ci command](./images/ci-command.png) 
 
 5. Copy the yellow command, paste it on Cloud Shell, and run it.
 
-  ![xxx](/images/xxx.png) 
+  ![ci create command](./images/ci-create-command.png) 
 
 6. In the Web UI, you can navigate to **`Developer Services`** -> **`Container Instances`** to watch the progress of the deployment.
 
-  ![xxx](/images/xxx.png) 
+  ![menu ci](./images/menu-ci.png) 
 
 7. You will see the list of container instances. The one you created will be in `creating` state, or maybe already in `Active` state.
 
-  ![xxx](/images/xxx.png) 
+  ![ci list](./images/ci-list.png) 
 
 8. Click on the `oci-Multiplayer` container instance.
 
-  ![xxx](/images/xxx.png) 
+  ![ci list click](./images/ci-list-click.png) 
 
 9. Inside the container instance, on the left-side menu, you can click `Containers` and, you will see the two containers.
 
-  ![xxx](/images/xxx.png)
-
-  ![CI Related Containers](images/ContainerInstance-containers.png)
+  ![ci container list](images/ci-container-list.png)
 
 ## Task 2: Create a Load Balancer
 
@@ -101,38 +101,45 @@ In this second and final task, you will add the Container Instance private IP ad
 
 2. During the execution of the script, you will have to answer a few questions. The first one is the _CI Deployment Compartment Name_. You just type _**ENTER**_ to select the root compartment. If you are familiar with OCI compartments, then feel free to pick an existing compartment name.
 
-  ![xxx](images/xxx.png)
+  ![tf ci compartment](images/tf-ci-compartment.png)
 
 3. The second one will be the Private IP address. Locate the private IP address for your container instance on the OCI web console.
 
-  ![CI Private IP](images/ContainerInstance-privateIp.png)
+  ![tf ci private IP](images/tf-ci-private-ip.png)
 
-1. Change the directory to `deploy/vm/tf-ci` with the following command:
+4. The command will create the `tfvars` file, you can deploy a load balancer in front of your two containers with Terraform.
+
+  ![tf ci completed](./images/tf-ci-completed.png)
+
+5. Change the directory to `deploy/vm/tf-ci` with the following command:
 
     ```
     <copy>cd deploy/vm/tf-ci</copy>
     ```
 
-2. Run Terraform Init to set up the Terraform environment.
+6. Run Terraform Init to set up the Terraform environment.
 
     ```
     <copy>terraform init</copy>
     ```
 
-3. Run Terraform apply to start creating the resources.
+  ![tf init](./images/tf-init.png)
+
+7. Run Terraform apply to start creating the resources.
 
     ```
     <copy>terraform apply -auto-approve</copy>
     ```
 
+  ![tf-apply-1](./images/tf-apply-1.png)
 
-7. Copy the `lb_public_ip`. It is the Load Balancer public IP address.
+8. Copy the `lb_public_ip`. It is the Load Balancer public IP address.
 
-  ![xxx](images/xxx.png)
+  ![tf-output](images/tf-output.png)
 
-8. Paste it on a browser and try the Container Instance deployment.
+9. Paste it on a browser and try the Container Instance deployment.
 
-  ![xxx](images/xxx.png)
+  ![game](images/game.png)
 
 You may now [proceed to the next lab](#next).
 
