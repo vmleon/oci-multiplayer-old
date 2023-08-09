@@ -19,8 +19,8 @@ output "deploy_id" {
   value = random_string.deploy_id.result
 }
 
-output "compartment" {
-  value = data.oci_identity_compartment.compartment.name
+output "compartment_id" {
+  value = data.oci_identity_compartment.compartment.id
 }
 
 output "user_ocid" {

@@ -119,7 +119,7 @@ async function devopsTFvars() {
   }
 
   const {
-    compartment,
+    compartment_id: compartmentId,
     deploy_id,
     devops_ons_topic_ocid: devopsOnsTopicId,
     github_access_token_secret_ocid: githubAccessTokenSecretId,
@@ -135,8 +135,6 @@ async function devopsTFvars() {
   await cd("../../..");
 
   console.log(`Environment deployment id: ${deploy_id}`);
-
-  const compartmentId = await searchCompartmentIdByName(compartment || "root");
 
   const githubURLParam = await setVariableFromEnvOrPrompt(
     "GITHUB_URL",
